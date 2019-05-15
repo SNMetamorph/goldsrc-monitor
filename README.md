@@ -1,4 +1,4 @@
-# goldsrc-monitor
+# GoldSrc Monitor
 There is small and simple instrument for researching or debugging  games, based on GoldSrc engine.<br>
 [Gamebanana Page](https://gamebanana.com/gamefiles/8977)
 
