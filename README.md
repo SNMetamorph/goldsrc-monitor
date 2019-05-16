@@ -12,10 +12,11 @@ git submodule update --init --recursive
 # Compiling
 > Note: for compiling, you should set "HLSDK" environment variable to actual HLSDK path
 
-1) Clone PolyHook 2.0 repository.
+1) Clone [PolyHook 2.0](https://github.com/stevemk14ebr/PolyHook_2_0) repository.
 2) Build PolyHook as static library.
-3) Place resulting PolyHook_2.lib and capstone.lib to `msvc/build` directory.
-4) Build entire solution using Visual Studio.
+3) Clone this repository, following the instructions given above. 
+4) Place resulting PolyHook_2.lib and capstone.lib to `msvc/build` directory.
+5) Build solution using Visual Studio.
 
 # About 
 This project uses [PolyHook 2.0](https://github.com/stevemk14ebr/PolyHook_2_0) library - Copyright (c) 2019, Stephen Eckels - MIT license
