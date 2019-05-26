@@ -8,15 +8,16 @@
 #include <stdint.h>
 #include <cstdio>
 
-extern void apply_hooks();
+extern void add_hooks();
+extern void remove_hooks();
 int (*pfnGetBuildNumber)();
 HMODULE g_hEngineModule;
 HMODULE g_hClientModule;
 HMODULE g_hServerModule;
 
 playermove_t	*g_pPlayerMove;
-cl_enginefunc_t *g_pClientEngFuncs;
 enginefuncs_t	*g_pEngineFuncs;
+cl_enginefunc_t *g_pClientEngFuncs;
 
 void find_cl_engfuncs(uint8_t *module_addr, size_t module_size)
 {
@@ -124,7 +125,7 @@ void init_hacks()
 	find_cl_engfuncs(engine_dll.base_addr, engine_dll.image_size);
 	find_sv_engfuncs(engine_dll.base_addr, engine_dll.image_size);
 
-	apply_hooks();
+	add_hooks();
 	init_stuff(engine_dll);
 	show_intro_message();
 }
@@ -136,12 +137,13 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 		try {
 			init_hacks();
 		}
-		catch (CException ex)
+		catch (CException &ex)
 		{
 			snprintf(
 				ex.message_buffer,
 				sizeof(ex.message_buffer),
-				"ERROR [%s:%d]: %s\nTry to run this tool already, or restart the game",
+				"ERROR [%s:%d]: %s\nReport about error to the project page.\n"
+				"Link: github.com/SNMetamorph/goldsrc-monitor/issues/1",
 				ex.getFileName(),
 				ex.getLineNumber(),
 				ex.getDescription()
@@ -150,9 +152,10 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 			return FALSE;
 		}
 	}
-	/*
 	else if (nReason == DLL_PROCESS_DETACH)
-		MessageBox(NULL, "Library unjected.", "", MB_OK);
-	*/
+	{
+		remove_hooks();
+	}
+
 	return TRUE;
 }

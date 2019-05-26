@@ -1,6 +1,7 @@
 #include "core.h"
 #include "util.h"
 #include "parser.h"
+#include "memory_defs.h"
 #include <stdint.h>
 
 #define STRING_COUNT		17	
@@ -8,6 +9,7 @@
 #define STRING_LENGTH		128
 #define STRING_MARGIN_RIGHT 400
 #define STRING_MARGIN_UP	15
+#define SPEEDOMETER_MARGIN	35
 
 char g_aStrings[STRING_COUNT][STRING_LENGTH];
 
@@ -19,16 +21,25 @@ cvar_t *gsm_color_b;
 cvar_t *gsm_mode;
 SCREENINFO scr_info;
 
+cvar_t *register_cvar(const char *name, const char *value, int flags)
+{
+	cvar_t *probe = g_pClientEngFuncs->pfnGetCvarPointer(name);
+	if (probe)
+		return probe;
+	return g_pClientEngFuncs->pfnRegisterVariable(name, value, flags);
+}
+
 void init_stuff(module_info_t &engine_lib)
 {
 	scr_info.iSize = sizeof(scr_info);
 	g_pClientEngFuncs->pfnGetScreenInfo(&scr_info);
 	g_pEngineFuncs->pfnAddServerCommand("gsm_timescale", &cmd_timescale);
-	sys_timescale = (cvar_t*)((uint8_t*)g_pEngineFuncs->pfnCVarGetPointer("fps_max") - 0x24);
-	gsm_color_r = g_pClientEngFuncs->pfnRegisterVariable("gsm_color_r", "0", FCVAR_CLIENTDLL);
-	gsm_color_g = g_pClientEngFuncs->pfnRegisterVariable("gsm_color_g", "220", FCVAR_CLIENTDLL);
-	gsm_color_b = g_pClientEngFuncs->pfnRegisterVariable("gsm_color_b", "220", FCVAR_CLIENTDLL);
-	gsm_mode	= g_pClientEngFuncs->pfnRegisterVariable("gsm_mode", "0", FCVAR_CLIENTDLL);
+
+	sys_timescale = (cvar_t*)((uint8_t*)g_pEngineFuncs->pfnCVarGetPointer("fps_max") - OFFSET_TIMESCALE);
+	gsm_color_r = register_cvar("gsm_color_r", "0", FCVAR_CLIENTDLL);
+	gsm_color_g = register_cvar("gsm_color_g", "220", FCVAR_CLIENTDLL);
+	gsm_color_b = register_cvar("gsm_color_b", "220", FCVAR_CLIENTDLL);
+	gsm_mode	= register_cvar("gsm_mode", "0", FCVAR_CLIENTDLL);
 }
 
 void frame_draw(float time, bool intermission, int scr_width, int scr_height)
@@ -72,7 +83,7 @@ void frame_draw(float time, bool intermission, int scr_width, int scr_height)
 		string_width = get_string_width(g_aStrings[0]);
 
 		g_pClientEngFuncs->pfnDrawString(
-			(scr_width / 2) - (string_width / 2), (scr_height / 2) + 30, g_aStrings[0],
+			(scr_width / 2) - (string_width / 2), (scr_height / 2) + SPEEDOMETER_MARGIN, g_aStrings[0],
 			(int)gsm_color_r->value, (int)gsm_color_g->value, (int)gsm_color_b->value
 		);
 	}
@@ -89,7 +100,7 @@ int get_string_width(const char *str)
 void show_intro_message()
 {
 	g_pClientEngFuncs->Con_Printf("###################################\n");
-	g_pClientEngFuncs->Con_Printf("#  GoldScr Monitor | version 1.0 | by SNMetamorph    \n");
+	g_pClientEngFuncs->Con_Printf("#  GoldScr Monitor | version 1.1 | by SNMetamorph    \n");
 	g_pClientEngFuncs->Con_Printf("#       Debugging tool for GoldSrc-based games		\n");
 	g_pClientEngFuncs->Con_Printf("#  Use with caution, VAC can be react on this stuff.  \n");
 	g_pClientEngFuncs->Con_Printf("###################################\n");

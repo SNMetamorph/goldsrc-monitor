@@ -15,17 +15,17 @@ void report_error(const char *msg)
 	getchar();
 }
 
-bool check_game_process(HANDLE &process_handle)
+void open_game_process(HANDLE &process_handle)
 {
-	// TODO: implement exceptions for suitable handling some situations 
 	int pid = find_process(PROCESS_NAME);
 	if (pid > 0)
 	{
 		process_handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
-		if (process_handle)
-			return true;
+		if (!process_handle)
+			EXCEPT("unable to open game process");
 	}
-	return false;
+	else
+		EXCEPT("unable to found game process, try to run game");
 }
 
 void inject_library(HANDLE process_handle)
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 		system("color 02");
 		cout << "####################################" << endl;
 		cout << "#" << endl;
-		cout << "#  GoldSrc Monitor | version 1.0" << endl;
+		cout << "#  GoldSrc Monitor | version 1.1" << endl;
 		cout << "#  ---------------------------------" << endl;
 		cout << "#  WARNING:  This stuff is untested" << endl;
 		cout << "#  on VAC-secured servers, therefore" << endl;
@@ -116,38 +116,31 @@ int main(int argc, char *argv[])
 		try
 		{
 			game_proc = NULL;
-			if (check_game_process(game_proc))
+			open_game_process(game_proc);
+			if (!find_process_module(game_proc, LIBRARY_NAME))
 			{
-				if (!find_process_module(game_proc, LIBRARY_NAME))
+				inject_library(game_proc);
+				Sleep(300);
+				if (find_process_module(game_proc, LIBRARY_NAME))
 				{
-					inject_library(game_proc);
-					Sleep(300);
-					if (find_process_module(game_proc, LIBRARY_NAME))
-					{
-						cout << "Library successfully injected: check game console for more info" << endl;
-						break;
-					}
-					else
-						EXCEPT("library injection performed, but nothing changed");
-				}
-				else
-				{
-					cout << "Library already injected into game process, restart game and try again" << endl;
+					cout << "Library successfully injected: check game console for more info" << endl;
 					break;
 				}
+				else
+					EXCEPT("library injection performed, but nothing changed");
 			}
 			else
-				report_error("hl.exe process not found, try to run the game");
+			{
+				cout << "Library already injected into game process, restart game and try again" << endl;
+				break;
+			}
 		}
-		catch (CException ex) {
+		catch (CException &ex) {
 			report_error(ex.getDescription());
 		}
 		CloseHandle(game_proc);
 	}
-	/*
-	cout << "Press any key to exit or close window..." << endl;
-	getchar();
-	*/
+
 	cout << "Program will be closed 3 seconds later..." << endl;
 	Sleep(3000);
 	return 0;
