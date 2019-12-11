@@ -1,5 +1,6 @@
 #include "util.h"
 #include "module_info.h"
+
 #include <cstring>
 #include <Windows.h>
 #include <Psapi.h>
@@ -8,7 +9,7 @@
 // export from dllmain.cpp
 extern int (*pfnGetBuildNumber)();
 
-int get_build_number()
+int GetBuildNumber()
 {
 	if (pfnGetBuildNumber)
 		return pfnGetBuildNumber();
@@ -16,7 +17,7 @@ int get_build_number()
 		return 0;
 }
 
-void *find_pattern_address(uint8_t *start_addr, size_t scan_len, const char *pattern, const char *mask)
+void *FindPatternAddress(uint8_t *start_addr, size_t scan_len, const char *pattern, const char *mask)
 {
 	size_t mask_len		= strlen(mask);
 	uint8_t *end_addr	= (start_addr + scan_len) - mask_len;
@@ -41,7 +42,7 @@ void *find_pattern_address(uint8_t *start_addr, size_t scan_len, const char *pat
 	return nullptr;
 }
 
-bool get_module_info(HANDLE proc_handle, HMODULE module_handle, module_info_t &module_info)
+bool GetModuleInfo(HANDLE proc_handle, HMODULE module_handle, module_info_t &module_info)
 {
 	MODULEINFO minfo;
 	if (!GetModuleInformation(proc_handle, module_handle, &minfo, sizeof(minfo)))
@@ -53,7 +54,7 @@ bool get_module_info(HANDLE proc_handle, HMODULE module_handle, module_info_t &m
 	return true;
 }
 
-void *find_memory_value(uint32_t *start_addr, size_t scan_len, uint32_t value)
+void *FindMemoryValue(uint32_t *start_addr, size_t scan_len, uint32_t value)
 {
 	uint32_t *end_addr = (start_addr + scan_len) - sizeof(value);
 	for (uint32_t *i = start_addr; i <= end_addr; ++i)
@@ -64,7 +65,7 @@ void *find_memory_value(uint32_t *start_addr, size_t scan_len, uint32_t value)
 	return nullptr;
 }
 
-void find_server_module(HMODULE &module_handle)
+void FindServerModule(HMODULE &module_handle)
 {
 	size_t names_count;
 	const char *lib_names[] =
@@ -81,7 +82,7 @@ void find_server_module(HMODULE &module_handle)
 	{
 		module_handle = GetModuleHandle(lib_names[i]);
 		if (module_handle)
-			break;
+			return;
 	}
 }
 

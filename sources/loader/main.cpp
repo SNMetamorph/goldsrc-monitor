@@ -8,16 +8,16 @@ using namespace std;
 #define PROCESS_NAME L"hl.exe"
 #define LIBRARY_NAME L"gsm-library.dll"
 
-void report_error(const char *msg)
+void ReportError(const char *msg)
 {
 	cout << "ERROR: " << msg << endl;
 	cout << "Press any key to try again..." << endl;
 	getchar();
 }
 
-void open_game_process(HANDLE &process_handle)
+void OpenGameProcess(HANDLE &process_handle)
 {
-	int pid = find_process(PROCESS_NAME);
+	int pid = FindProcessID(PROCESS_NAME);
 	if (pid > 0)
 	{
 		process_handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
@@ -28,7 +28,7 @@ void open_game_process(HANDLE &process_handle)
 		EXCEPT("unable to found game process, try to run game");
 }
 
-void inject_library(HANDLE process_handle)
+void InjectLibrary(HANDLE process_handle)
 {
 	// getting full path to library
 	wchar_t lib_path[MAX_PATH];
@@ -49,12 +49,12 @@ void inject_library(HANDLE process_handle)
 		and will work in most cases, if kernel32.dll from game process 
 		isn't differ with same library from loader
 	*/
-	func_offset	= get_function_offset(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
-	k32lib_handle = find_process_module(process_handle, L"kernel32.dll");
+	func_offset	= GetFunctionOffset(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
+	k32lib_handle = FindProcessModule(process_handle, L"kernel32.dll");
 	if (!k32lib_handle)
 		EXCEPT("module handle not found");
 
-	if (!get_module_info(process_handle, k32lib_handle, k32lib_info))
+	if (!GetModuleInfo(process_handle, k32lib_handle, k32lib_info))
 		EXCEPT("module info getting failed");
 
 	LPTHREAD_START_ROUTINE func_addr = (LPTHREAD_START_ROUTINE)(
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 {
 	while (true)
 	{
-		HANDLE game_proc;
+		HANDLE gameProc;
 
 		system("cls");
 		system("color 02");
@@ -115,13 +115,13 @@ int main(int argc, char *argv[])
 
 		try
 		{
-			game_proc = NULL;
-			open_game_process(game_proc);
-			if (!find_process_module(game_proc, LIBRARY_NAME))
+			gameProc = NULL;
+			OpenGameProcess(gameProc);
+			if (!FindProcessModule(gameProc, LIBRARY_NAME))
 			{
-				inject_library(game_proc);
+				InjectLibrary(gameProc);
 				Sleep(300);
-				if (find_process_module(game_proc, LIBRARY_NAME))
+				if (FindProcessModule(gameProc, LIBRARY_NAME))
 				{
 					cout << "Library successfully injected: check game console for more info" << endl;
 					break;
@@ -136,9 +136,9 @@ int main(int argc, char *argv[])
 			}
 		}
 		catch (CException &ex) {
-			report_error(ex.getDescription());
+			ReportError(ex.GetDescription());
 		}
-		CloseHandle(game_proc);
+		CloseHandle(gameProc);
 	}
 
 	cout << "Program will be closed 3 seconds later..." << endl;

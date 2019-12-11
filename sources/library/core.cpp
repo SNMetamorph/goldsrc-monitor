@@ -1,6 +1,5 @@
 #include "core.h"
 #include "util.h"
-#include "parser.h"
 #include "memory_defs.h"
 #include <stdint.h>
 
@@ -21,7 +20,7 @@ cvar_t *gsm_color_b;
 cvar_t *gsm_mode;
 SCREENINFO scr_info;
 
-cvar_t *register_cvar(const char *name, const char *value, int flags)
+cvar_t *RegisterCvar(const char *name, const char *value, int flags)
 {
 	cvar_t *probe = g_pClientEngFuncs->pfnGetCvarPointer(name);
 	if (probe)
@@ -29,25 +28,25 @@ cvar_t *register_cvar(const char *name, const char *value, int flags)
 	return g_pClientEngFuncs->pfnRegisterVariable(name, value, flags);
 }
 
-void init_stuff(module_info_t &engine_lib)
+void SetupCvars(module_info_t &engine_lib)
 {
 	scr_info.iSize = sizeof(scr_info);
 	g_pClientEngFuncs->pfnGetScreenInfo(&scr_info);
 	g_pEngineFuncs->pfnAddServerCommand("gsm_timescale", &cmd_timescale);
 
 	sys_timescale = (cvar_t*)((uint8_t*)g_pEngineFuncs->pfnCVarGetPointer("fps_max") - OFFSET_TIMESCALE);
-	gsm_color_r = register_cvar("gsm_color_r", "0", FCVAR_CLIENTDLL);
-	gsm_color_g = register_cvar("gsm_color_g", "220", FCVAR_CLIENTDLL);
-	gsm_color_b = register_cvar("gsm_color_b", "220", FCVAR_CLIENTDLL);
-	gsm_mode	= register_cvar("gsm_mode", "0", FCVAR_CLIENTDLL);
+	gsm_color_r = RegisterCvar("gsm_color_r", "0", FCVAR_CLIENTDLL);
+	gsm_color_g = RegisterCvar("gsm_color_g", "220", FCVAR_CLIENTDLL);
+	gsm_color_b = RegisterCvar("gsm_color_b", "220", FCVAR_CLIENTDLL);
+	gsm_mode	= RegisterCvar("gsm_mode", "0", FCVAR_CLIENTDLL);
 }
 
-void frame_draw(float time, bool intermission, int scr_width, int scr_height)
+void FrameDraw(float time, bool intermission, int scr_width, int scr_height)
 {
 	if (!g_pPlayerMove)
 		return;
 
-	if (gsm_mode->value == MODE_FULL)
+	if (gsm_mode->value == DISPLAYMODE_FULL)
 	{
 		sprintf_s(g_aStrings[0], STRING_LENGTH, "Velocity: %.2f u/s [X: %.2f, Y: %.2f, Z: %.2f]", g_pPlayerMove->velocity.Length2D(), g_pPlayerMove->velocity.x, g_pPlayerMove->velocity.y, g_pPlayerMove->velocity.z);
 		sprintf_s(g_aStrings[1], STRING_LENGTH, "Origin: [%.2f, %.2f, %.2f]", g_pPlayerMove->origin.x, g_pPlayerMove->origin.y, g_pPlayerMove->origin.z);
@@ -75,12 +74,12 @@ void frame_draw(float time, bool intermission, int scr_width, int scr_height)
 			);
 		}
 	}
-	else if (gsm_mode->value == MODE_SPEEDOMETER)
+	else if (gsm_mode->value == DISPLAYMODE_SPEEDOMETER)
 	{
 		int string_width;
 		float player_speed = g_pPlayerMove->velocity.Length2D();
 		sprintf_s(g_aStrings[0], STRING_LENGTH, "%.2f", player_speed);
-		string_width = get_string_width(g_aStrings[0]);
+		string_width = GetStringWidth(g_aStrings[0]);
 
 		g_pClientEngFuncs->pfnDrawString(
 			(scr_width / 2) - (string_width / 2), (scr_height / 2) + SPEEDOMETER_MARGIN, g_aStrings[0],
@@ -89,15 +88,15 @@ void frame_draw(float time, bool intermission, int scr_width, int scr_height)
 	}
 }
 
-int get_string_width(const char *str)
+int GetStringWidth(const char *str)
 {
-	int total_width = 0;
+	int totalWidth = 0;
 	for (char *i = (char*)str; *i; ++i)
-		total_width += scr_info.charWidths[*i];
-	return total_width;
+		totalWidth += scr_info.charWidths[*i];
+	return totalWidth;
 }
 
-void show_intro_message()
+void PrintTitleText()
 {
 	g_pClientEngFuncs->Con_Printf("###################################\n");
 	g_pClientEngFuncs->Con_Printf("#  GoldScr Monitor | version 1.1 | by SNMetamorph    \n");
@@ -110,7 +109,7 @@ void show_intro_message()
 void cmd_timescale()
 {
 	if (!g_hServerModule)
-		find_server_module(g_hServerModule);
+		FindServerModule(g_hServerModule);
 
 	if (g_hServerModule)
 	{

@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include <cstdio>
 
-extern void add_hooks();
-extern void remove_hooks();
+extern void ApplyHooks();
+extern void RemoveHooks();
 int (*pfnGetBuildNumber)();
 HMODULE g_hEngineModule;
 HMODULE g_hClientModule;
@@ -19,20 +19,20 @@ playermove_t	*g_pPlayerMove;
 enginefuncs_t	*g_pEngineFuncs;
 cl_enginefunc_t *g_pClientEngFuncs;
 
-void find_cl_engfuncs(uint8_t *module_addr, size_t module_size)
+void FindClientEngfuncs(uint8_t *module_addr, size_t module_size)
 {
 	void	*first_func_addr;
 	void	*second_func_addr;
 	uint8_t *coincidence_addr;
 
-	first_func_addr = find_pattern_address(
+	first_func_addr = FindPatternAddress(
 		module_addr, module_size,
 		SIGN_SPR_LOAD, MASK_SPR_LOAD
 	);
 	if (!first_func_addr)
-		EXCEPT("not found SPR_Load() address");
+		EXCEPT("SPR_Load() address not found");
 
-	coincidence_addr = (uint8_t*)find_memory_value(
+	coincidence_addr = (uint8_t*)FindMemoryValue(
 		(uint32_t*)module_addr,
 		module_size,
 		(uint32_t)first_func_addr
@@ -42,30 +42,30 @@ void find_cl_engfuncs(uint8_t *module_addr, size_t module_size)
 
 	uint8_t *probe_addr;
 	probe_addr = *(uint8_t**)(coincidence_addr + sizeof(uint8_t*));
-	second_func_addr = find_pattern_address(
+	second_func_addr = FindPatternAddress(
 		probe_addr, sizeof(SIGN_SPR_FRAMES) - 1, 
 		SIGN_SPR_FRAMES, MASK_SPR_FRAMES
 	);
 	if (!second_func_addr)
-		EXCEPT("not found SPR_Frames() address");
+		EXCEPT("SPR_Frames() address not found");
 
 	g_pClientEngFuncs = (cl_enginefunc_t*)coincidence_addr;
 }
 
-void find_sv_engfuncs(uint8_t *module_addr, size_t module_size)
+void FindServerEngfuncs(uint8_t *module_addr, size_t module_size)
 {
 	void	*first_func_addr;
 	void	*second_func_addr;
 	uint8_t *coincidence_addr;
 
-	first_func_addr = find_pattern_address(
+	first_func_addr = FindPatternAddress(
 		module_addr, module_size,
 		SIGN_PRECACHE_MODEL, MASK_PRECACHE_MODEL
 	);
 	if (!first_func_addr)
-		EXCEPT("not found PrecacheModel() address");
+		EXCEPT("PrecacheModel() address not found");
 
-	coincidence_addr = (uint8_t*)find_memory_value(
+	coincidence_addr = (uint8_t*)FindMemoryValue(
 		(uint32_t*)module_addr,
 		module_size,
 		(uint32_t)first_func_addr
@@ -75,7 +75,7 @@ void find_sv_engfuncs(uint8_t *module_addr, size_t module_size)
 
 	uint8_t *probe_addr;
 	probe_addr = *(uint8_t**)(coincidence_addr + sizeof(void*));
-	second_func_addr = find_pattern_address(
+	second_func_addr = FindPatternAddress(
 		probe_addr, sizeof(SIGN_PRECACHE_SOUND) - 1,
 		SIGN_PRECACHE_SOUND, MASK_PRECACHE_SOUND
 	);
@@ -85,7 +85,7 @@ void find_sv_engfuncs(uint8_t *module_addr, size_t module_size)
 	g_pEngineFuncs = (enginefuncs_t*)coincidence_addr;
 }
 
-void init_hacks()
+void ProgramInit()
 {
 	// get module handles
 	g_hEngineModule = GetModuleHandle("hw.dll");
@@ -101,33 +101,34 @@ void init_hacks()
 		g_hServerModule = GetModuleHandle("hl.dll");
 
 	// find get_build_number() address
-	module_info_t engine_dll;
-	get_module_info(GetCurrentProcess(), g_hEngineModule, engine_dll);
-	pfnGetBuildNumber = (int(*)())find_pattern_address(
-		engine_dll.base_addr,
-		engine_dll.image_size,
+	module_info_t engineDLL;
+	GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);
+	pfnGetBuildNumber = (int(*)())FindPatternAddress(
+		engineDLL.base_addr,
+		engineDLL.image_size,
 		SIGN_BUILD_NUMBER,
 		MASK_BUILD_NUMBER
 	);
+
 	if (!pfnGetBuildNumber)
 	{
-		pfnGetBuildNumber = (int(*)())find_pattern_address(
-			engine_dll.base_addr,
-			engine_dll.image_size,
+		pfnGetBuildNumber = (int(*)())FindPatternAddress(
+			engineDLL.base_addr,
+			engineDLL.image_size,
 			SIGN_BUILD_NUMBER_NEW,
 			MASK_BUILD_NUMBER_NEW
 		);
 		if (!pfnGetBuildNumber)
-			EXCEPT("not found get_build_number() address");
+			EXCEPT("get_build_number() address not found");
 	}
 
 	// find engine functions pointer arrays
-	find_cl_engfuncs(engine_dll.base_addr, engine_dll.image_size);
-	find_sv_engfuncs(engine_dll.base_addr, engine_dll.image_size);
+	FindClientEngfuncs(engineDLL.base_addr, engineDLL.image_size);
+	FindServerEngfuncs(engineDLL.base_addr, engineDLL.image_size);
 
-	add_hooks();
-	init_stuff(engine_dll);
-	show_intro_message();
+	ApplyHooks();
+	SetupCvars(engineDLL);
+	PrintTitleText();
 }
 
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
@@ -135,26 +136,26 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 	if (nReason == DLL_PROCESS_ATTACH)
 	{
 		try {
-			init_hacks();
+			ProgramInit();
 		}
 		catch (CException &ex)
 		{
 			snprintf(
-				ex.message_buffer,
-				sizeof(ex.message_buffer),
+				ex.m_szMessageBuffer,
+				sizeof(ex.m_szMessageBuffer),
 				"ERROR [%s:%d]: %s\nReport about error to the project page.\n"
 				"Link: github.com/SNMetamorph/goldsrc-monitor/issues/1",
-				ex.getFileName(),
-				ex.getLineNumber(),
-				ex.getDescription()
+				ex.GetFileName(),
+				ex.GetLineNumber(),
+				ex.GetDescription()
 			);
-			MessageBox(NULL, ex.message_buffer, "GoldSrc Monitor", MB_OK | MB_ICONWARNING);
+			MessageBox(NULL, ex.m_szMessageBuffer, "GoldSrc Monitor", MB_OK | MB_ICONWARNING);
 			return FALSE;
 		}
 	}
 	else if (nReason == DLL_PROCESS_DETACH)
 	{
-		remove_hooks();
+		RemoveHooks();
 	}
 
 	return TRUE;

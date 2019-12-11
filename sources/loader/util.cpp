@@ -4,7 +4,7 @@
 #include <Psapi.h>
 #include <stdint.h>
 
-int find_process(const wchar_t *process_name)
+int FindProcessID(const wchar_t *process_name)
 {
 	HANDLE			process_snap;
 	PROCESSENTRY32	process_entry;
@@ -28,7 +28,7 @@ int find_process(const wchar_t *process_name)
 	return NULL;
 }
 
-HMODULE find_process_module(HANDLE proc_handle, const wchar_t *target_name)
+HMODULE FindProcessModule(HANDLE proc_handle, const wchar_t *target_name)
 {
 	DWORD	buffer_size;
 	HMODULE module_stub;
@@ -57,13 +57,13 @@ HMODULE find_process_module(HANDLE proc_handle, const wchar_t *target_name)
 	return module_result;
 }
 
-size_t get_function_offset(HMODULE module_handle, const char *func_name)
+size_t GetFunctionOffset(HMODULE module_handle, const char *func_name)
 {
 	uint8_t *func_addr = (uint8_t *)GetProcAddress(module_handle, func_name);
 	return (size_t)(func_addr - (uint8_t*)module_handle);
 }
 
-bool get_module_info(HANDLE proc_handle, HMODULE module_handle, module_info_t &module_info)
+bool GetModuleInfo(HANDLE proc_handle, HMODULE module_handle, module_info_t &module_info)
 {
 	MODULEINFO minfo;
 	if (!GetModuleInformation(proc_handle, module_handle, &minfo, sizeof(minfo)))

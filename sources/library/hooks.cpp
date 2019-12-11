@@ -24,7 +24,7 @@ detour_t		*dtrRedraw;
 detour_t		*dtrPlayerMove;
 disassembler_t	*addrDisasm;
 
-void add_hooks()
+void ApplyHooks()
 {
 	// find function addresses
 	funcRedraw		= (char *)GetProcAddress(g_hClientModule, "HUD_Redraw");
@@ -47,7 +47,7 @@ void add_hooks()
 	}
 }
 
-void remove_hooks()
+void RemoveHooks()
 {
 	if (!dtrRedraw || !dtrPlayerMove || !GetModuleHandle("client.dll"))
 		return;
@@ -68,7 +68,7 @@ NOINLINE int __cdecl hookRedraw(float time, int intermission)
 	scr_info.iSize = sizeof(scr_info);
 	g_pClientEngFuncs->pfnGetScreenInfo(&scr_info);
 
-	frame_draw(time, intermission != 0, scr_info.iWidth, scr_info.iHeight);
+	FrameDraw(time, intermission != 0, scr_info.iWidth, scr_info.iHeight);
 	return 1;
 }
 

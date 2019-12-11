@@ -2,13 +2,13 @@
 #include "globals.h"
 #include "module_info.h"
 
-enum
+enum display_mode_t
 {
-	MODE_FULL,
-	MODE_SPEEDOMETER,
+	DISPLAYMODE_FULL,
+	DISPLAYMODE_SPEEDOMETER,
 };
 
-void	show_intro_message();
-int		get_string_width(const char *str);
-void	init_stuff(module_info_t &engine_lib);
-void	frame_draw(float time, bool intermission, int scr_width, int scr_height);
+void	PrintTitleText();
+int		GetStringWidth(const char *str);
+void	SetupCvars(module_info_t &engine_lib);
+void	FrameDraw(float time, bool intermission, int scr_width, int scr_height);

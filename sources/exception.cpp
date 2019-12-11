@@ -2,49 +2,50 @@
 #include <cstring>
 #include "exception.h"
 
-CException::CException(const char *_desc, const char *_func_name, const char *_file_name, int _line)
+CException::CException(
+    const char *description, 
+    const char *funcName, 
+    const char *sourceFilePath, 
+    int lineNumber
+)
 {
-	func_name = _func_name;
-	file_path = _file_name;
-	description = _desc;
-	line = _line;
+	m_szFuncName = funcName;
+	m_szFilePath = sourceFilePath;
+	m_szDescription = description;
+	m_iLineNumber = lineNumber;
+    m_szMessageBuffer[0] = '\0';
 }
 
-CException::~CException()
-{
-
-}
-
-const char *CException::getFormattedMessage()
+const char *CException::GetFormattedMessage()
 {
 	snprintf(
-		message_buffer, 
-		sizeof(message_buffer), 
+		m_szMessageBuffer, 
+		sizeof(m_szMessageBuffer), 
 		"%s() [%s:%d]: %s\n", 
-		func_name, 
-		getFileName(), 
-		line, 
-		description
+		m_szFuncName, 
+		GetFileName(), 
+		m_iLineNumber, 
+		m_szDescription
 	);
-	return message_buffer;
+	return m_szMessageBuffer;
 }
 
-const char *CException::getDescription()
+const char *CException::GetDescription() const
 {
-	return description;
+	return m_szDescription;
 }
 
-const char *CException::getFunctionName()
+const char *CException::GetFunctionName() const
 {
-	return func_name;
+	return m_szFuncName;
 }
 
-const char *CException::getFileName()
+const char *CException::GetFileName() const
 {
-	return strrchr(file_path, '\\') + 1;
+	return strrchr(m_szFilePath, '\\') + 1;
 }
 
-int CException::getLineNumber()
+int CException::GetLineNumber() const
 {
-	return line;
+	return m_iLineNumber;
 }
