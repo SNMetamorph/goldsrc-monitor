@@ -8,14 +8,14 @@ using namespace std;
 #define PROCESS_NAME L"hl.exe"
 #define LIBRARY_NAME L"gsm-library.dll"
 
-void ReportError(const char *msg)
+static void ReportError(const char *msg)
 {
 	cout << "ERROR: " << msg << endl;
 	cout << "Press any key to try again..." << endl;
 	getchar();
 }
 
-void OpenGameProcess(HANDLE &process_handle)
+static void OpenGameProcess(HANDLE &process_handle)
 {
 	int pid = FindProcessID(PROCESS_NAME);
 	if (pid > 0)
@@ -28,7 +28,7 @@ void OpenGameProcess(HANDLE &process_handle)
 		EXCEPT("unable to found game process, try to run game");
 }
 
-void InjectLibrary(HANDLE process_handle)
+static void InjectLibrary(HANDLE process_handle)
 {
 	// getting full path to library
 	wchar_t lib_path[MAX_PATH];
@@ -94,24 +94,27 @@ void InjectLibrary(HANDLE process_handle)
 		EXCEPT("unable to create remote thread");
 }
 
+static void PrintTitleText()
+{
+    system("cls");
+    system("color 02");
+    cout << 
+    "\n"
+    " GoldSrc Monitor | version 1.1\n"
+    " ------------------------------\n"
+    " WARNING: This stuff is untested on VAC-secured\n"
+    " servers, therefore there is a risk to get VAC ban\n"
+    " while using it on VAC-secured servers.\n"
+    "\n"
+    << endl;
+}
+
 int main(int argc, char *argv[])
 {
 	while (true)
 	{
 		HANDLE gameProc;
-
-		system("cls");
-		system("color 02");
-		cout << "####################################" << endl;
-		cout << "#" << endl;
-		cout << "#  GoldSrc Monitor | version 1.1" << endl;
-		cout << "#  ---------------------------------" << endl;
-		cout << "#  WARNING:  This stuff is untested" << endl;
-		cout << "#  on VAC-secured servers, therefore" << endl;
-		cout << "#  there is a risk to get VAC ban" << endl;
-		cout << "#  while using it on VAC-secured" << endl;
-		cout << "#  servers." << endl;
-		cout << endl << endl;
+        PrintTitleText();
 
 		try
 		{
@@ -135,7 +138,8 @@ int main(int argc, char *argv[])
 				break;
 			}
 		}
-		catch (CException &ex) {
+		catch (CException &ex) 
+        {
 			ReportError(ex.GetDescription());
 		}
 		CloseHandle(gameProc);
