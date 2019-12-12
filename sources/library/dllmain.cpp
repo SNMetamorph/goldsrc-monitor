@@ -10,7 +10,7 @@
 
 extern void ApplyHooks();
 extern void RemoveHooks();
-int (*pfnGetBuildNumber)();
+extern int (*pfnGetBuildNumber)();
 HMODULE g_hEngineModule;
 HMODULE g_hClientModule;
 HMODULE g_hServerModule;
@@ -80,7 +80,7 @@ void FindServerEngfuncs(uint8_t *module_addr, size_t module_size)
 		SIGN_PRECACHE_SOUND, MASK_PRECACHE_SOUND
 	);
 	if (!second_func_addr)
-		EXCEPT("not found PrecacheSound() address");
+		EXCEPT("PrecacheSound() address not found");
 
 	g_pEngineFuncs = (enginefuncs_t*)coincidence_addr;
 }
@@ -119,7 +119,7 @@ void ProgramInit()
 			MASK_BUILD_NUMBER_NEW
 		);
 		if (!pfnGetBuildNumber)
-			EXCEPT("get_build_number() address not found");
+			EXCEPT("GetBuildNumber() address not found");
 	}
 
 	// find engine functions pointer arrays

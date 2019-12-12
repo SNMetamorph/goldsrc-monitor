@@ -71,11 +71,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>gsm-$(ProjectName)</TargetName>
-    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>gsm-$(ProjectName)</TargetName>
-    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -89,7 +89,7 @@
       <PreprocessorDefinitions>PSAPI_VERSION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>PolyHook_2.lib;capstone.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -119,7 +119,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>PolyHook_2.lib;capstone.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -143,6 +143,7 @@
     <ClCompile Include="..\..\sources\exception.cpp" />
     <ClCompile Include="..\..\sources\library\core.cpp" />
     <ClCompile Include="..\..\sources\library\dllmain.cpp" />
+    <ClCompile Include="..\..\sources\library\drawing.cpp" />
     <ClCompile Include="..\..\sources\library\hooks.cpp" />
     <ClCompile Include="..\..\sources\library\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\sources\exception.h" />
     <ClInclude Include="..\..\sources\library\core.h" />
+    <ClInclude Include="..\..\sources\library\drawing.h" />
     <ClInclude Include="..\..\sources\library\globals.h" />
     <ClInclude Include="..\..\sources\library\memory_defs.h" />
     <ClInclude Include="..\..\sources\library\stdafx.h" />

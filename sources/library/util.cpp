@@ -6,9 +6,7 @@
 #include <Psapi.h>
 #include <stdint.h>
 
-// export from dllmain.cpp
-extern int (*pfnGetBuildNumber)();
-
+int (*pfnGetBuildNumber)();
 int GetBuildNumber()
 {
 	if (pfnGetBuildNumber)

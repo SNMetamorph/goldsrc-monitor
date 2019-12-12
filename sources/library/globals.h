@@ -10,3 +10,6 @@ extern HMODULE g_hServerModule;
 extern playermove_t		*g_pPlayerMove;
 extern cl_enginefunc_t	*g_pClientEngFuncs;
 extern enginefuncs_t	*g_pEngineFuncs;
+extern cvar_t           *gsm_color_r;
+extern cvar_t           *gsm_color_g;
+extern cvar_t           *gsm_color_b;

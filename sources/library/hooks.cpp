@@ -68,7 +68,9 @@ NOINLINE int __cdecl hookRedraw(float time, int intermission)
 	scr_info.iSize = sizeof(scr_info);
 	g_pClientEngFuncs->pfnGetScreenInfo(&scr_info);
 
-	FrameDraw(time, intermission != 0, scr_info.iWidth, scr_info.iHeight);
+    if (g_pPlayerMove)
+	    FrameDraw(time, intermission != 0, scr_info.iWidth, scr_info.iHeight);
+
 	return 1;
 }
 
