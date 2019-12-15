@@ -1,76 +1,76 @@
 #include "util.h"
-#include <Windows.h>
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include <stdint.h>
 
-int FindProcessID(const wchar_t *process_name)
-{
-	HANDLE			process_snap;
-	PROCESSENTRY32	process_entry;
 
-	process_entry.dwSize	= sizeof(process_entry);
-	process_snap			= CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if (process_snap == INVALID_HANDLE_VALUE) 
+int FindProcessID(const wchar_t *processName)
+{
+	HANDLE			processSnap;
+	PROCESSENTRY32	processEntry;
+
+	processEntry.dwSize	= sizeof(processEntry);
+	processSnap			= CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (processSnap == INVALID_HANDLE_VALUE) 
 		return NULL;
 	
-	if (!Process32First(process_snap, &process_entry)) {
-		CloseHandle(process_snap);
+	if (!Process32First(processSnap, &processEntry)) {
+		CloseHandle(processSnap);
 		return NULL;
 	}
 
 	do {
-		if (wcscmp(process_name, process_entry.szExeFile) == 0) 
-			return process_entry.th32ProcessID;
+		if (wcscmp(processName, processEntry.szExeFile) == 0) 
+			return processEntry.th32ProcessID;
 	} 
-	while (Process32Next(process_snap, &process_entry));
-	CloseHandle(process_snap);
+	while (Process32Next(processSnap, &processEntry));
+	CloseHandle(processSnap);
 	return NULL;
 }
 
-HMODULE FindProcessModule(HANDLE proc_handle, const wchar_t *target_name)
+HMODULE FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
 {
-	DWORD	buffer_size;
-	HMODULE module_stub;
-	HMODULE module_result = NULL;
-	wchar_t	module_path[MAX_PATH];
+	DWORD	bufferSize;
+	HMODULE moduleStub;
+	HMODULE moduleResult = NULL;
+	wchar_t	modulePath[MAX_PATH];
 
-	if (EnumProcessModules(proc_handle, &module_stub, sizeof(module_stub), &buffer_size))
+	if (EnumProcessModules(procHandle, &moduleStub, sizeof(moduleStub), &bufferSize))
 	{
-		size_t	modules_count	= buffer_size / sizeof(HMODULE);
-		HMODULE	*modules		= new HMODULE[modules_count];
-		EnumProcessModules(proc_handle, modules, buffer_size, &buffer_size);
+		size_t	modulesCount = bufferSize / sizeof(HMODULE);
+		HMODULE	*modules     = new HMODULE[modulesCount];
+		EnumProcessModules(procHandle, modules, bufferSize, &bufferSize);
 
-		for (size_t i = 0; i < modules_count; ++i)
+		for (size_t i = 0; i < modulesCount; ++i)
 		{
-			size_t chars_count = sizeof(module_path) / sizeof(module_path[0]);
-			GetModuleFileNameEx(proc_handle, modules[i], module_path, chars_count);
-			wchar_t *module_name = wcsrchr(module_path, '\\') + 1;
-			if (_wcsicmp(module_name, target_name) == 0)
+			size_t pathLength = sizeof(modulePath) / sizeof(modulePath[0]);
+			GetModuleFileNameEx(procHandle, modules[i], modulePath, pathLength);
+			wchar_t *fileName = wcsrchr(modulePath, '\\') + 1;
+			if (wcscmp(fileName, moduleName) == 0)
 			{
-				module_result = modules[i];
+				moduleResult = modules[i];
 				break;
 			}
 		}
 		delete[] modules;
 	}
-	return module_result;
+	return moduleResult;
 }
 
-size_t GetFunctionOffset(HMODULE module_handle, const char *func_name)
+size_t GetFunctionOffset(HMODULE moduleHandle, const char *funcName)
 {
-	uint8_t *func_addr = (uint8_t *)GetProcAddress(module_handle, func_name);
-	return (size_t)(func_addr - (uint8_t*)module_handle);
+	uint8_t *funcAddr = (uint8_t *)GetProcAddress(moduleHandle, funcName);
+	return (size_t)(funcAddr - (uint8_t*)moduleHandle);
 }
 
 bool GetModuleInfo(HANDLE proc_handle, HMODULE module_handle, module_info_t &module_info)
 {
-	MODULEINFO minfo;
-	if (!GetModuleInformation(proc_handle, module_handle, &minfo, sizeof(minfo)))
+	MODULEINFO moduleInfo;
+	if (!GetModuleInformation(proc_handle, module_handle, &moduleInfo, sizeof(moduleInfo)))
 		return false;
 
-	module_info.base_addr			= (uint8_t*)minfo.lpBaseOfDll;
-	module_info.image_size			= minfo.SizeOfImage;
-	module_info.entry_point_addr	= (uint8_t*)minfo.EntryPoint;
+	module_info.baseAddr			= (uint8_t*)moduleInfo.lpBaseOfDll;
+	module_info.imageSize			= moduleInfo.SizeOfImage;
+	module_info.entryPointAddr	= (uint8_t*)moduleInfo.EntryPoint;
 	return true;
 }

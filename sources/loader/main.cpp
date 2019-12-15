@@ -11,17 +11,17 @@ using namespace std;
 static void ReportError(const char *msg)
 {
 	cout << "ERROR: " << msg << endl;
-	cout << "Press any key to try again..." << endl;
-	getchar();
+	cout << "Press Enter to try again" << endl;
+	cin.get();
 }
 
-static void OpenGameProcess(HANDLE &process_handle)
+static void OpenGameProcess(HANDLE &processHandle)
 {
-	int pid = FindProcessID(PROCESS_NAME);
-	if (pid > 0)
+	int processID = FindProcessID(PROCESS_NAME);
+	if (processID > 0)
 	{
-		process_handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
-		if (!process_handle)
+		processHandle = OpenProcess(PROCESS_ALL_ACCESS, false, processID);
+		if (!processHandle)
 			EXCEPT("unable to open game process");
 	}
 	else
@@ -31,66 +31,66 @@ static void OpenGameProcess(HANDLE &process_handle)
 static void InjectLibrary(HANDLE process_handle)
 {
 	// getting full path to library
-	wchar_t lib_path[MAX_PATH];
-	GetFullPathName(LIBRARY_NAME, MAX_PATH, lib_path, NULL);
-	size_t path_size = (wcslen(lib_path) + 1) * sizeof(wchar_t);
+	wchar_t libPath[MAX_PATH];
+	GetFullPathName(LIBRARY_NAME, MAX_PATH, libPath, NULL);
+	size_t pathSize = (wcslen(libPath) + 1) * sizeof(libPath[0]);
 
 	// check for desired library exists
-	if (!PathFileExists(lib_path))
+	if (!PathFileExists(libPath))
 		EXCEPT("library file not found");
 
 	// getting address of LoadLibrary in game process
-	size_t			func_offset;
-	HMODULE			k32lib_handle;
-	module_info_t	k32lib_info;
+	size_t			funcOffset;
+	HMODULE			k32LibHandle;
+	module_info_t	k32LibInfo;
 
 	/*
 		it's simple method to get address of function from remote process, 
 		and will work in most cases, if kernel32.dll from game process 
 		isn't differ with same library from loader
 	*/
-	func_offset	= GetFunctionOffset(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
-	k32lib_handle = FindProcessModule(process_handle, L"kernel32.dll");
-	if (!k32lib_handle)
+	funcOffset   = GetFunctionOffset(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
+	k32LibHandle = FindProcessModule(process_handle, L"kernel32.dll");
+	if (!k32LibHandle)
 		EXCEPT("module handle not found");
 
-	if (!GetModuleInfo(process_handle, k32lib_handle, k32lib_info))
+	if (!GetModuleInfo(process_handle, k32LibHandle, k32LibInfo))
 		EXCEPT("module info getting failed");
 
-	LPTHREAD_START_ROUTINE func_addr = (LPTHREAD_START_ROUTINE)(
-		(size_t)k32lib_info.base_addr + func_offset
+	LPTHREAD_START_ROUTINE funcAddr = (LPTHREAD_START_ROUTINE)(
+		(size_t)k32LibInfo.baseAddr + funcOffset
 	);
 
 	// allocating memory for library path in game process
-	void *path_addr = VirtualAllocEx(
+	void *pathAddr = VirtualAllocEx(
 		process_handle, 
 		NULL, 
-		path_size,
+		pathSize,
 		MEM_RESERVE | MEM_COMMIT,
 		PAGE_READWRITE
 	);
-	if (!path_addr)
+	if (!pathAddr)
 		EXCEPT("unable to allocate memory in game process");
 
 	// writing string to game process
-	size_t written_bytes = 0;
+	size_t writtenBytes = 0;
 	WriteProcessMemory(
-		process_handle, path_addr, 
-		lib_path, path_size,
-		(SIZE_T*)&written_bytes
+		process_handle, pathAddr, 
+		libPath, pathSize,
+		(SIZE_T*)&writtenBytes
 	);
 
-	if (path_size != written_bytes)
+	if (pathSize != writtenBytes)
 		EXCEPT("writing to remote process failed");
 
 	// creating thread in game process and invoking LoadLibrary function
-	HANDLE thread_id = CreateRemoteThread(process_handle, 
+	HANDLE threadID = CreateRemoteThread(process_handle, 
 		0, 0, 
-		func_addr, path_addr, 
+		funcAddr, pathAddr, 
 		0, 0
 	);
 
-	if (!thread_id)
+	if (!threadID)
 		EXCEPT("unable to create remote thread");
 }
 
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 		CloseHandle(gameProc);
 	}
 
-	cout << "Program will be closed 3 seconds later..." << endl;
+	cout << "Program will be closed 3 seconds later" << endl;
 	Sleep(3000);
 	return 0;
 }

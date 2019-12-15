@@ -46,9 +46,9 @@ bool GetModuleInfo(HANDLE proc_handle, HMODULE module_handle, module_info_t &mod
 	if (!GetModuleInformation(proc_handle, module_handle, &minfo, sizeof(minfo)))
 		return false;
 
-	module_info.base_addr			= (uint8_t*)minfo.lpBaseOfDll;
-	module_info.image_size			= minfo.SizeOfImage;
-	module_info.entry_point_addr	= (uint8_t*)minfo.EntryPoint;
+	module_info.baseAddr			= (uint8_t*)minfo.lpBaseOfDll;
+	module_info.imageSize			= minfo.SizeOfImage;
+	module_info.entryPointAddr	= (uint8_t*)minfo.EntryPoint;
 	return true;
 }
 

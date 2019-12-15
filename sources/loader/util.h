@@ -1,6 +1,6 @@
 #pragma once
-#include <Windows.h>
 #include "module_info.h"
+#include <Windows.h>
 
 int FindProcessID(const wchar_t *process_name);
 HMODULE FindProcessModule(HANDLE proc_handle, const wchar_t *module_name);

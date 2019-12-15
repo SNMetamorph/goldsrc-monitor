@@ -104,8 +104,8 @@ void ProgramInit()
 	module_info_t engineDLL;
 	GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);
 	pfnGetBuildNumber = (int(*)())FindPatternAddress(
-		engineDLL.base_addr,
-		engineDLL.image_size,
+		engineDLL.baseAddr,
+		engineDLL.imageSize,
 		SIGN_BUILD_NUMBER,
 		MASK_BUILD_NUMBER
 	);
@@ -113,8 +113,8 @@ void ProgramInit()
 	if (!pfnGetBuildNumber)
 	{
 		pfnGetBuildNumber = (int(*)())FindPatternAddress(
-			engineDLL.base_addr,
-			engineDLL.image_size,
+			engineDLL.baseAddr,
+			engineDLL.imageSize,
 			SIGN_BUILD_NUMBER_NEW,
 			MASK_BUILD_NUMBER_NEW
 		);
@@ -123,8 +123,8 @@ void ProgramInit()
 	}
 
 	// find engine functions pointer arrays
-	FindClientEngfuncs(engineDLL.base_addr, engineDLL.image_size);
-	FindServerEngfuncs(engineDLL.base_addr, engineDLL.image_size);
+	FindClientEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
+	FindServerEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
 
 	ApplyHooks();
 	SetupCvars(engineDLL);
