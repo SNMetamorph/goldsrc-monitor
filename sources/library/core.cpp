@@ -21,7 +21,7 @@ cvar_t *RegisterCvar(const char *name, const char *value, int flags)
 	return g_pClientEngFuncs->pfnRegisterVariable(name, value, flags);
 }
 
-void SetupCvars(module_info_t &engine_lib)
+void SetupCvars(moduleinfo_t &engine_lib)
 {
 	scr_info.iSize = sizeof(scr_info);
 	g_pClientEngFuncs->pfnGetScreenInfo(&scr_info);

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-struct module_info_t
+struct moduleinfo_t
 {
 	uint8_t *baseAddr;
 	uint8_t *entryPointAddr;

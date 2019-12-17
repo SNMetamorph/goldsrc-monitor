@@ -42,7 +42,7 @@ static void InjectLibrary(HANDLE process_handle)
 	// getting address of LoadLibrary in game process
 	size_t			funcOffset;
 	HMODULE			k32LibHandle;
-	module_info_t	k32LibInfo;
+	moduleinfo_t	k32LibInfo;
 
 	/*
 		it's simple method to get address of function from remote process, 

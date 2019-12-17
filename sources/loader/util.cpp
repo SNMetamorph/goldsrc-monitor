@@ -63,7 +63,7 @@ size_t GetFunctionOffset(HMODULE moduleHandle, const char *funcName)
 	return (size_t)(funcAddr - (uint8_t*)moduleHandle);
 }
 
-bool GetModuleInfo(HANDLE proc_handle, HMODULE module_handle, module_info_t &module_info)
+bool GetModuleInfo(HANDLE proc_handle, HMODULE module_handle, moduleinfo_t &module_info)
 {
 	MODULEINFO moduleInfo;
 	if (!GetModuleInformation(proc_handle, module_handle, &moduleInfo, sizeof(moduleInfo)))
