@@ -32,6 +32,9 @@
     <ClCompile Include="..\..\sources\library\drawing.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\sources\library\buildinfo.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\sources\library\util.h">
@@ -41,9 +44,6 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sources\library\memory_defs.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\sources\module_info.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sources\library\globals.h">
@@ -56,6 +56,15 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sources\library\drawing.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\funcdata.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\buildinfo.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\moduleinfo.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

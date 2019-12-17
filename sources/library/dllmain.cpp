@@ -2,7 +2,7 @@
 #include "core.h"
 #include "util.h"
 #include "exception.h"
-#include "memory_defs.h"
+#include "buildinfo.h"
 
 #include <Windows.h>
 #include <stdint.h>
@@ -10,7 +10,6 @@
 
 extern void ApplyHooks();
 extern void RemoveHooks();
-extern int (*pfnGetBuildNumber)();
 HMODULE g_hEngineModule;
 HMODULE g_hClientModule;
 HMODULE g_hServerModule;
@@ -19,70 +18,87 @@ playermove_t	*g_pPlayerMove;
 enginefuncs_t	*g_pEngineFuncs;
 cl_enginefunc_t *g_pClientEngFuncs;
 
-void FindClientEngfuncs(uint8_t *module_addr, size_t module_size)
+void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
-	void	*first_func_addr;
-	void	*second_func_addr;
-	uint8_t *coincidence_addr;
+	void *pfnSPR_Load;
+	void *pfnSPR_Frames;
+    uint8_t *probeAddr;
+	uint8_t *coincidenceAddr;
+    uint8_t *scanStartAddr;
+    uint8_t *moduleEndAddr = moduleAddr + moduleSize;
 
-	first_func_addr = FindPatternAddress(
-		module_addr, module_size,
-		SIGN_SPR_LOAD, MASK_SPR_LOAD
-	);
-	if (!first_func_addr)
+    pfnSPR_Load = FindFunctionAddress(FUNCTYPE_SPR_LOAD, moduleAddr, moduleSize);
+	if (!pfnSPR_Load)
 		EXCEPT("SPR_Load() address not found");
 
-	coincidence_addr = (uint8_t*)FindMemoryValue(
-		(uint32_t*)module_addr,
-		module_size,
-		(uint32_t)first_func_addr
-	);
-	if (!coincidence_addr)
-		EXCEPT("not found any pointers to SPR_Load()");
+    scanStartAddr = moduleAddr;
+    while (true)
+    {
+        coincidenceAddr = (uint8_t*)FindMemoryValue(
+            scanStartAddr,
+            moduleSize,
+            (uint32_t)pfnSPR_Load
+        );
+        if (!coincidenceAddr)
+            EXCEPT("valid pointer to SPR_Load() not found");
+        else
+            scanStartAddr = coincidenceAddr + sizeof(uint32_t);
 
-	uint8_t *probe_addr;
-	probe_addr = *(uint8_t**)(coincidence_addr + sizeof(uint8_t*));
-	second_func_addr = FindPatternAddress(
-		probe_addr, sizeof(SIGN_SPR_FRAMES) - 1, 
-		SIGN_SPR_FRAMES, MASK_SPR_FRAMES
-	);
-	if (!second_func_addr)
-		EXCEPT("SPR_Frames() address not found");
-
-	g_pClientEngFuncs = (cl_enginefunc_t*)coincidence_addr;
+        probeAddr = *(uint8_t**)(coincidenceAddr + sizeof(uint32_t));
+        // check for module range to avoid segfault
+        if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
+        {
+            pfnSPR_Frames = FindFunctionAddress(FUNCTYPE_SPR_FRAMES, probeAddr);
+            if (pfnSPR_Frames)
+            {
+                g_pClientEngFuncs = (cl_enginefunc_t*)coincidenceAddr;
+                return;
+            }
+        }
+    }
 }
 
-void FindServerEngfuncs(uint8_t *module_addr, size_t module_size)
+void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
-	void	*first_func_addr;
-	void	*second_func_addr;
-	uint8_t *coincidence_addr;
+	void *pfnPrecacheModel;
+	void *pfnPrecacheSound;
+    uint8_t *probeAddr;
+	uint8_t *coincidenceAddr;
+    uint8_t *scanStartAddr;
+    uint8_t *moduleEndAddr = moduleAddr + moduleSize;
 
-	first_func_addr = FindPatternAddress(
-		module_addr, module_size,
-		SIGN_PRECACHE_MODEL, MASK_PRECACHE_MODEL
-	);
-	if (!first_func_addr)
+    pfnPrecacheModel = FindFunctionAddress(
+        FUNCTYPE_PRECACHE_MODEL, 
+        moduleAddr, 
+        moduleSize
+    );
+	if (!pfnPrecacheModel)
 		EXCEPT("PrecacheModel() address not found");
 
-	coincidence_addr = (uint8_t*)FindMemoryValue(
-		(uint32_t*)module_addr,
-		module_size,
-		(uint32_t)first_func_addr
-	);
-	if (!coincidence_addr)
-		EXCEPT("not found any pointers to PrecacheModel()");
+    scanStartAddr = moduleAddr;
+    while (true)
+    {
+        coincidenceAddr = (uint8_t*)FindMemoryValue(
+            scanStartAddr,
+            moduleSize,
+            (uint32_t)pfnPrecacheModel
+        );
+        if (!coincidenceAddr)
+            EXCEPT("valid pointer to PrecacheModel() not found");
+        else
+            scanStartAddr = coincidenceAddr + sizeof(uint32_t);
 
-	uint8_t *probe_addr;
-	probe_addr = *(uint8_t**)(coincidence_addr + sizeof(void*));
-	second_func_addr = FindPatternAddress(
-		probe_addr, sizeof(SIGN_PRECACHE_SOUND) - 1,
-		SIGN_PRECACHE_SOUND, MASK_PRECACHE_SOUND
-	);
-	if (!second_func_addr)
-		EXCEPT("PrecacheSound() address not found");
-
-	g_pEngineFuncs = (enginefuncs_t*)coincidence_addr;
+        probeAddr = *(uint8_t**)(coincidenceAddr + sizeof(uint32_t));
+        if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
+        {
+            pfnPrecacheSound = FindFunctionAddress(FUNCTYPE_PRECACHE_SOUND, probeAddr);
+            if (pfnPrecacheSound)
+            {
+                g_pEngineFuncs = (enginefuncs_t*)coincidenceAddr;
+                return;
+            }
+        }
+    }
 }
 
 void ProgramInit()
@@ -100,27 +116,11 @@ void ProgramInit()
 	if (!g_hServerModule)
 		g_hServerModule = GetModuleHandle("hl.dll");
 
-	// find get_build_number() address
-	module_info_t engineDLL;
+	// try to find GetBuildNumber() address
+	moduleinfo_t engineDLL;
 	GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);
-	pfnGetBuildNumber = (int(*)())FindPatternAddress(
-		engineDLL.baseAddr,
-		engineDLL.imageSize,
-		SIGN_BUILD_NUMBER,
-		MASK_BUILD_NUMBER
-	);
-
-	if (!pfnGetBuildNumber)
-	{
-		pfnGetBuildNumber = (int(*)())FindPatternAddress(
-			engineDLL.baseAddr,
-			engineDLL.imageSize,
-			SIGN_BUILD_NUMBER_NEW,
-			MASK_BUILD_NUMBER_NEW
-		);
-		if (!pfnGetBuildNumber)
-			EXCEPT("GetBuildNumber() address not found");
-	}
+    if (!FindBuildNumberFunc(engineDLL))
+        EXCEPT("GetBuildNumber() address not found");
 
 	// find engine functions pointer arrays
 	FindClientEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);

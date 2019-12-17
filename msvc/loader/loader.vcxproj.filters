@@ -25,10 +25,10 @@
     <ClInclude Include="..\..\sources\loader\util.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\sources\module_info.h">
+    <ClInclude Include="..\..\sources\exception.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\sources\exception.h">
+    <ClInclude Include="..\..\sources\moduleinfo.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

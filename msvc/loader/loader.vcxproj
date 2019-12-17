@@ -142,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\sources\exception.h" />
-    <ClInclude Include="..\..\sources\module_info.h" />
+    <ClInclude Include="..\..\sources\moduleinfo.h" />
     <ClInclude Include="..\..\sources\loader\util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

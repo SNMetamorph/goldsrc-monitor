@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\sources\exception.cpp" />
+    <ClCompile Include="..\..\sources\library\buildinfo.cpp" />
     <ClCompile Include="..\..\sources\library\core.cpp" />
     <ClCompile Include="..\..\sources\library\dllmain.cpp" />
     <ClCompile Include="..\..\sources\library\drawing.cpp" />
@@ -153,13 +154,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\sources\exception.h" />
+    <ClInclude Include="..\..\sources\library\buildinfo.h" />
     <ClInclude Include="..\..\sources\library\core.h" />
     <ClInclude Include="..\..\sources\library\drawing.h" />
+    <ClInclude Include="..\..\sources\library\funcdata.h" />
     <ClInclude Include="..\..\sources\library\globals.h" />
     <ClInclude Include="..\..\sources\library\memory_defs.h" />
     <ClInclude Include="..\..\sources\library\stdafx.h" />
     <ClInclude Include="..\..\sources\library\util.h" />
-    <ClInclude Include="..\..\sources\module_info.h" />
+    <ClInclude Include="..\..\sources\moduleinfo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
