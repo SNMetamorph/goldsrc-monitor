@@ -8,10 +8,10 @@ static const buildinfo_entry_t g_aBuildInfo[] =
     { 
         4554, 
         {
-            {FUNCTYPE_SPR_LOAD},
-            {FUNCTYPE_SPR_FRAMES},
-            {FUNCTYPE_PRECACHE_MODEL},
-            {FUNCTYPE_PRECACHE_SOUND}
+            {FUNCTYPE_SPR_LOAD, "xxxxxxxxx????xxxx", "\x56\x8D\x44\x24\x08\x57\x50\xFF\x15\x2A\x2A\x2A\x2A\x8B\x44\x24\x10"},
+            {FUNCTYPE_SPR_FRAMES, "xxxxxxx????xxxx", "\x8D\x44\x24\x04\x50\xFF\x15\x2A\x2A\x2A\x2A\x8B\x4C\x24\x08"},
+            {FUNCTYPE_PRECACHE_MODEL,"xxxxxxxxxxxxxxx????", "\x53\x55\x8B\x6C\x24\x0C\x33\xDB\x56\x57\x85\xED\x75\x14\x68\x48\xEF\xA9\x04"},
+            {FUNCTYPE_PRECACHE_SOUND, "xxxxxxxxxxxx????", "\x53\x8B\x5C\x24\x08\x56\x57\x85\xDB\x75\x13\x68\x38\xEC\xA9\x04"}
         }
     },
     {
