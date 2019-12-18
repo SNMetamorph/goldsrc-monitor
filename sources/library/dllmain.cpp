@@ -34,12 +34,12 @@ void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     scanStartAddr = moduleAddr;
     while (true)
     {
-        coincidenceAddr = (uint8_t*)FindMemoryValue(
+        coincidenceAddr = (uint8_t*)FindMemoryInt32(
             scanStartAddr,
             moduleSize,
             (uint32_t)pfnSPR_Load
         );
-        if (!coincidenceAddr)
+        if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
             EXCEPT("valid pointer to SPR_Load() not found");
         else
             scanStartAddr = coincidenceAddr + sizeof(uint32_t);
@@ -78,12 +78,12 @@ void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     scanStartAddr = moduleAddr;
     while (true)
     {
-        coincidenceAddr = (uint8_t*)FindMemoryValue(
+        coincidenceAddr = (uint8_t*)FindMemoryInt32(
             scanStartAddr,
             moduleSize,
             (uint32_t)pfnPrecacheModel
         );
-        if (!coincidenceAddr)
+        if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
             EXCEPT("valid pointer to PrecacheModel() not found");
         else
             scanStartAddr = coincidenceAddr + sizeof(uint32_t);
