@@ -42,6 +42,9 @@ void FrameDraw(float time, bool intermission, int screenWidth, int screenHeight)
         case DISPLAYMODE_SPEEDOMETER:
             DrawModeSpeedometer(time, screenWidth, screenHeight);
             break;
+        case DISPLAYMODE_ENTITYREPORT:
+            DrawModeEntityReport(time, screenWidth, screenHeight);
+            break;
         case DISPLAYMODE_ANGLETRACKING:
             DrawModeAngleTrack(time, screenWidth, screenHeight);
             break;
