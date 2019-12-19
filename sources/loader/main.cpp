@@ -1,5 +1,6 @@
 #include "util.h"
 #include "exception.h"
+#include "app_version.h"
 #include <iostream>
 #include <Windows.h>
 #include <shlwapi.h>
@@ -98,15 +99,15 @@ static void PrintTitleText()
 {
     system("cls");
     system("color 02");
-    cout << 
+    printf(
     "\n"
-    " GoldSrc Monitor | version 1.1\n"
+    " GoldSrc Monitor | version %d.%d\n"
     " ------------------------------\n"
     " WARNING: This stuff is untested on VAC-secured\n"
     " servers, therefore there is a risk to get VAC ban\n"
     " while using it on VAC-secured servers.\n"
-    "\n"
-    << endl;
+    "\n", APP_VERSION_MAJOR, APP_VERSION_MINOR
+    );
 }
 
 int main(int argc, char *argv[])

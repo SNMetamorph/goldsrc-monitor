@@ -2,6 +2,7 @@
 #include "util.h"
 #include "drawing.h"
 #include "memory_defs.h"
+#include "app_version.h"
 #include <stdint.h>
 
 cvar_t *gsm_color_r;
@@ -64,11 +65,15 @@ int GetStringWidth(const char *str)
 
 void PrintTitleText()
 {
-	g_pClientEngFuncs->Con_Printf("###################################\n");
-	g_pClientEngFuncs->Con_Printf("#  GoldScr Monitor | version 1.1 | by SNMetamorph    \n");
-	g_pClientEngFuncs->Con_Printf("#       Debugging tool for GoldSrc-based games		\n");
-	g_pClientEngFuncs->Con_Printf("#  Use with caution, VAC can be react on this stuff.  \n");
-	g_pClientEngFuncs->Con_Printf("###################################\n");
+    const int verMajor = APP_VERSION_MAJOR;
+    const int verMinor = APP_VERSION_MINOR;
+
+	g_pClientEngFuncs->Con_Printf(" \n");
+	g_pClientEngFuncs->Con_Printf("   GoldScr Monitor | version %d.%d | by SNMetamorph  \n", 
+        verMajor, verMinor);
+	g_pClientEngFuncs->Con_Printf("         Debugging tool for GoldSrc-based games      \n");
+	g_pClientEngFuncs->Con_Printf("   Use with caution, VAC can be react on this stuff  \n");
+	g_pClientEngFuncs->Con_Printf(" \n");
 	g_pClientEngFuncs->pfnClientCmd("play buttons/blip2.wav");
 }
 

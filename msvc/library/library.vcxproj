@@ -153,6 +153,7 @@
     <ClCompile Include="..\..\sources\library\util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\sources\app_version.h" />
     <ClInclude Include="..\..\sources\exception.h" />
     <ClInclude Include="..\..\sources\library\buildinfo.h" />
     <ClInclude Include="..\..\sources\library\core.h" />
