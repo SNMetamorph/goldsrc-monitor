@@ -53,7 +53,7 @@ void DrawModeSpeedometer(float time, int screenWidth, int screenHeight)
     float playerSpeed;
 
     playerSpeed = g_pPlayerMove->velocity.Length2D();
-    sprintf_s(g_aStrings[0], STRING_LENGTH, "%.2f", playerSpeed);
+    snprintf(g_aStrings[0], STRING_LENGTH, "%.2f", playerSpeed);
     stringWidth = GetStringWidth(g_aStrings[0]);
     stringX     = (screenWidth / 2) - (stringWidth / 2);
     stringY     = (screenHeight / 2) + SPEEDOMETER_MARGIN;
@@ -84,8 +84,8 @@ void DrawModeAngleTrack(float time, int screenWidth, int screenHeight)
 
     pitchVelocity   = (currAngles.x - lastAngles.x) / g_pPlayerMove->frametime;
     yawVelocity     = (currAngles.y - lastAngles.y) / g_pPlayerMove->frametime;
-    sprintf_s(g_aStrings[0], STRING_LENGTH, "   up : %.2f deg/s", -pitchVelocity);
-    sprintf_s(g_aStrings[1], STRING_LENGTH, "right : %.2f deg/s", -yawVelocity);
+    snprintf(g_aStrings[0], STRING_LENGTH, "   up : %.2f deg/s", -pitchVelocity);
+    snprintf(g_aStrings[1], STRING_LENGTH, "right : %.2f deg/s", -yawVelocity);
     stringWidth = GetStringWidth(g_aStrings[0]);
     stringX     = (screenWidth / 2) - (stringWidth / 2);
     stringY     = (screenHeight / 2) + SPEEDOMETER_MARGIN;
@@ -157,45 +157,49 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
 {
     int         stringCount;
     int         entityIndex;
-    int         entityHealth;
     float       entityDistance;
     vec3_t      entityOrigin;
-    vec3_t      entityVelocity;
+    vec3_t      entityAngles;
     vec3_t      cameraOrigin;
-    const char  *modelName;
+    model_t     *entityModel;
     pmtrace_t   traceData;
     cl_entity_t *traceEntity;
 
     TraceViewLine(&traceData);
     if (traceData.fraction < 1.f && traceData.ent > 0)
     {
-        traceEntity     = g_pClientEngFuncs->GetEntityByIndex(traceData.ent);
-        entityIndex     = traceEntity->index;
-        entityHealth    = traceEntity->curstate.health;
-        entityOrigin    = traceEntity->origin; 
-        entityVelocity  = traceEntity->curstate.velocity;
+        entityIndex     = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
+        traceEntity     = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+        entityOrigin    = traceEntity->curstate.origin; 
+        entityAngles    = traceEntity->curstate.angles;
         cameraOrigin    = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-        entityDistance  = (traceData.endpos - cameraOrigin).Length();
-        modelName       = traceEntity->model->name;
+        entityDistance  = (entityOrigin - cameraOrigin).Length();
+        entityModel     = traceEntity->model;
 
-        sprintf_s(g_aStrings[0], STRING_LENGTH, "Entity index: %d", entityIndex);
-        sprintf_s(g_aStrings[1], STRING_LENGTH, "Origin: [%.1f; %.1f; %.1f]", 
+        snprintf(g_aStrings[0], STRING_LENGTH, "Entity index: %d", entityIndex);
+        snprintf(g_aStrings[1], STRING_LENGTH, "Origin: [%.1f; %.1f; %.1f]", 
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
-        sprintf_s(g_aStrings[2], STRING_LENGTH, "Velocity: %.2f u/s [%.1f; %.1f; %.1f]", 
-            entityVelocity.Length2D(), 
-            entityVelocity.x, 
-            entityVelocity.y, 
-            entityVelocity.z
-        );
-        sprintf_s(g_aStrings[3], STRING_LENGTH, "Distance: %.1f units", entityDistance);
-        sprintf_s(g_aStrings[4], STRING_LENGTH, "Health: %d", entityHealth);
-        sprintf_s(g_aStrings[5], STRING_LENGTH, "Model name: %s", modelName);
+        snprintf(g_aStrings[2], STRING_LENGTH, "Angles: [%.1f; %.1f; %.1f]", 
+            entityAngles.x, entityAngles.y, entityAngles.z);
+        snprintf(g_aStrings[3], STRING_LENGTH, "Distance: %.1f units", entityDistance);
+        snprintf(g_aStrings[4], STRING_LENGTH, "Model name: %s", entityModel->name);
 
-        stringCount = 6;
+        if (entityModel->type != mod_brush)
+        {
+            snprintf(g_aStrings[5], STRING_LENGTH, "Anim. frame: %.1f", 
+                traceEntity->curstate.frame);
+            snprintf(g_aStrings[6], STRING_LENGTH, "Anim. sequence: %d", 
+                traceEntity->curstate.sequence);
+            snprintf(g_aStrings[7], STRING_LENGTH, "Bodygroup number: %d", 
+                traceEntity->curstate.body);
+            stringCount = 8;
+        }
+        else
+            stringCount = 5;
     }
     else
     {
-        sprintf_s(g_aStrings[0], STRING_LENGTH, "Entity not found");
+        strcpy(g_aStrings[0], "Entity not found");
         stringCount = 1;
     }
 
