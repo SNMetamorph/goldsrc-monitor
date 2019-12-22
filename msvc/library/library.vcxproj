@@ -160,7 +160,6 @@
     <ClInclude Include="..\..\sources\library\drawing.h" />
     <ClInclude Include="..\..\sources\library\funcdata.h" />
     <ClInclude Include="..\..\sources\library\globals.h" />
-    <ClInclude Include="..\..\sources\library\memory_defs.h" />
     <ClInclude Include="..\..\sources\library\stdafx.h" />
     <ClInclude Include="..\..\sources\library\util.h" />
     <ClInclude Include="..\..\sources\moduleinfo.h" />

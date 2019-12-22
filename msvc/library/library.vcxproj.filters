@@ -43,9 +43,6 @@
     <ClInclude Include="..\..\sources\exception.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\sources\library\memory_defs.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\sources\library\globals.h">
       <Filter>Headers</Filter>
     </ClInclude>

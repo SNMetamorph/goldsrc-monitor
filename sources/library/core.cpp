@@ -1,7 +1,6 @@
 #include "core.h"
 #include "util.h"
 #include "drawing.h"
-#include "memory_defs.h"
 #include "app_version.h"
 #include <stdint.h>
 
@@ -22,13 +21,63 @@ cvar_t *RegisterCvar(const char *name, const char *value, int flags)
 	return g_pClientEngFuncs->pfnRegisterVariable(name, value, flags);
 }
 
-void SetupCvars(moduleinfo_t &engine_lib)
+void FindTimescaleCvar(moduleinfo_t &engineLib)
+{
+    uint8_t *probeAddr;
+    uint8_t *stringAddr;
+    uint8_t *scanStartAddr;
+    uint8_t *moduleStartAddr;
+    uint8_t *moduleEndAddr;
+    const char *scanMask;
+    size_t maskLength;
+
+    moduleStartAddr = engineLib.baseAddr;
+    moduleEndAddr   = moduleStartAddr + engineLib.imageSize;
+    scanStartAddr   = moduleStartAddr;
+    scanMask        = "xxxxxxxxxxxxx";
+    maskLength      = strlen(scanMask);
+
+    stringAddr = (uint8_t*)FindPatternAddress(
+        scanStartAddr, moduleEndAddr, 
+        "sys_timescale", scanMask
+    );
+    if (!stringAddr)
+        return;
+
+    while (true)
+    {
+        probeAddr = (uint8_t*)FindMemoryInt32(
+            scanStartAddr, moduleEndAddr, (uint32_t)stringAddr
+        );
+
+        if (!probeAddr || scanStartAddr >= moduleEndAddr)
+            return;
+        else
+            scanStartAddr = probeAddr + sizeof(uint32_t);
+
+        if (probeAddr >= moduleStartAddr && probeAddr < moduleEndAddr)
+        {
+            cvar_t *probeCvar   = (cvar_t*)probeAddr;
+            uint8_t *stringAddr = (uint8_t*)probeCvar->string;
+            if (stringAddr >= moduleStartAddr && stringAddr < moduleEndAddr)
+            {
+                if (strcmp(probeCvar->string, "1.0") == 0)
+                {
+                    sys_timescale = probeCvar;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void SetupCvars(moduleinfo_t &engineLib)
 {
 	scr_info.iSize = sizeof(scr_info);
 	g_pClientEngFuncs->pfnGetScreenInfo(&scr_info);
 	g_pEngineFuncs->pfnAddServerCommand("gsm_timescale", &cmd_timescale);
 
-	sys_timescale = (cvar_t*)((uint8_t*)g_pEngineFuncs->pfnCVarGetPointer("fps_max") - OFFSET_TIMESCALE);
+    FindTimescaleCvar(engineLib);
 	gsm_color_r = RegisterCvar("gsm_color_r", "0", FCVAR_CLIENTDLL);
 	gsm_color_g = RegisterCvar("gsm_color_g", "220", FCVAR_CLIENTDLL);
 	gsm_color_b = RegisterCvar("gsm_color_b", "220", FCVAR_CLIENTDLL);
@@ -79,16 +128,22 @@ void PrintTitleText()
 
 static void cmd_timescale()
 {
-	if (!g_hServerModule)
-		FindServerModule(g_hServerModule);
+    if (!sys_timescale)
+    {
+        g_pClientEngFuncs->Con_Printf("sys_timescale cvar address not found!");
+        return;
+    }
+
+    if (!g_hServerModule)
+        FindServerModule(g_hServerModule);
 
 	if (g_hServerModule)
 	{
 		if (g_pClientEngFuncs->Cmd_Argc() > 1)
 			sys_timescale->value = (float)atof(g_pClientEngFuncs->Cmd_Argv(1));
 		else
-			g_pClientEngFuncs->pfnConsolePrint("Invalid syntax, using example: timescale 0.5\n");
+			g_pClientEngFuncs->Con_Printf("Invalid syntax, using example: timescale 0.5\n");
 	}
 	else
-		g_pClientEngFuncs->pfnConsolePrint("Server module not found! Start listen server and execute command again.\n");
+		g_pClientEngFuncs->Con_Printf("Server module not found! Start listen server and execute command again.\n");
 }
