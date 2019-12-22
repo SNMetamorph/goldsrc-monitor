@@ -8,18 +8,15 @@
 
 
 void *FindPatternAddress(
-    void *startAddr, int scanLen, const char *pattern, const char *mask)
+    void *startAddr, void *endAddr, const char *pattern, const char *mask)
 {
     bool isFailed;
     size_t maskLen;
-    uint8_t *endAddr;
+    uint8_t *totalEndAddr;
 
     maskLen = strlen(mask);
-    if (scanLen < 0)
-        scanLen = maskLen;
-
-	endAddr = (uint8_t*)startAddr + (scanLen - maskLen);
-	for (uint8_t *i = (uint8_t*)startAddr; i <= endAddr; ++i)
+    totalEndAddr = (uint8_t*)endAddr - maskLen;
+	for (uint8_t *i = (uint8_t*)startAddr; i <= totalEndAddr; ++i)
 	{
 		isFailed = false;
 		for (size_t j = 0; j < maskLen; ++j)
@@ -52,18 +49,18 @@ bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &module
 	return true;
 }
 
-void *FindMemoryInt32(void *startAddr, size_t scanLen, uint32_t scanValue)
+void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
 {
     void *valueAddr;
-    uint32_t *endAddr;
     HANDLE procHandle;
     uint32_t probeValue;
+    uint32_t *totalEndAddr;
 
-    valueAddr = nullptr;
-    procHandle = GetCurrentProcess();
-    endAddr = (uint32_t*)startAddr + (scanLen - sizeof(scanValue));
+    valueAddr       = nullptr;
+    procHandle      = GetCurrentProcess();
+    totalEndAddr    = (uint32_t*)((size_t)endAddr - sizeof(scanValue));
 
-	for (uint32_t *i = (uint32_t*)startAddr; i <= endAddr; ++i)
+	for (uint32_t *i = (uint32_t*)startAddr; i <= totalEndAddr; ++i)
 	{
         if (!ReadProcessMemory(procHandle, i, &probeValue, sizeof(*i), NULL))
             continue;

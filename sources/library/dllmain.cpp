@@ -25,9 +25,12 @@ void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     uint8_t *probeAddr;
 	uint8_t *coincidenceAddr;
     uint8_t *scanStartAddr;
-    uint8_t *moduleEndAddr = moduleAddr + moduleSize;
+    uint8_t *moduleEndAddr;
 
-    pfnSPR_Load = FindFunctionAddress(FUNCTYPE_SPR_LOAD, moduleAddr, moduleSize);
+    moduleEndAddr = moduleAddr + moduleSize;
+    pfnSPR_Load = FindFunctionAddress(
+        FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
+    );
 	if (!pfnSPR_Load)
 		EXCEPT("SPR_Load() address not found");
 
@@ -36,7 +39,7 @@ void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     {
         coincidenceAddr = (uint8_t*)FindMemoryInt32(
             scanStartAddr,
-            moduleSize,
+            moduleEndAddr,
             (uint32_t)pfnSPR_Load
         );
         if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
@@ -65,12 +68,13 @@ void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     uint8_t *probeAddr;
 	uint8_t *coincidenceAddr;
     uint8_t *scanStartAddr;
-    uint8_t *moduleEndAddr = moduleAddr + moduleSize;
+    uint8_t *moduleEndAddr;
 
+    moduleEndAddr = moduleAddr + moduleSize;
     pfnPrecacheModel = FindFunctionAddress(
         FUNCTYPE_PRECACHE_MODEL, 
         moduleAddr, 
-        moduleSize
+        moduleEndAddr
     );
 	if (!pfnPrecacheModel)
 		EXCEPT("PrecacheModel() address not found");
@@ -80,7 +84,7 @@ void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     {
         coincidenceAddr = (uint8_t*)FindMemoryInt32(
             scanStartAddr,
-            moduleSize,
+            moduleEndAddr,
             (uint32_t)pfnPrecacheModel
         );
         if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
@@ -91,7 +95,9 @@ void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
         probeAddr = *(uint8_t**)(coincidenceAddr + sizeof(uint32_t));
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
-            pfnPrecacheSound = FindFunctionAddress(FUNCTYPE_PRECACHE_SOUND, probeAddr);
+            pfnPrecacheSound = FindFunctionAddress(
+                FUNCTYPE_PRECACHE_SOUND, probeAddr
+            );
             if (pfnPrecacheSound)
             {
                 g_pEngineFuncs = (enginefuncs_t*)coincidenceAddr;

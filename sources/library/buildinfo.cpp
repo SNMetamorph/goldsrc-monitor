@@ -25,11 +25,13 @@ static const buildinfo_entry_t g_aBuildInfo[] =
     }
 };
 
-void *FindFunctionAddress(functype_t funcType, void *startAddr, int scanLen)
+void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr)
 {
     int currBuildNumber = GetBuildNumber();
     const int buildInfoLen = sizeof(g_aBuildInfo) / sizeof(g_aBuildInfo[0]);
     const int lastEntryIndex = buildInfoLen - 1;
+    const funcdata_t *funcData = 
+        &g_aBuildInfo[lastEntryIndex].functionData[funcType];
 
     for (int i = 0; i < lastEntryIndex; ++i)
     {
@@ -39,27 +41,30 @@ void *FindFunctionAddress(functype_t funcType, void *startAddr, int scanLen)
         // valid only if build info entries sorted ascending
         if (nextBuildInfo.number > currBuildNumber)
         {
-            const funcdata_t &funcData = buildInfo.functionData[funcType];
-            return FindPatternAddress(
-                startAddr, scanLen, funcData.signature, funcData.mask);
+            funcData = &buildInfo.functionData[funcType];
+            break;
         }
     }
 
-    const funcdata_t &funcData = 
-        g_aBuildInfo[lastEntryIndex].functionData[funcType];
+    if (!endAddr)
+        endAddr = (uint8_t*)startAddr + strlen(funcData->mask);
+
     return FindPatternAddress(
         startAddr, 
-        scanLen, 
-        funcData.signature, 
-        funcData.mask
+        endAddr, 
+        funcData->signature, 
+        funcData->mask
     );
 }
 
 bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
 {
+    uint8_t *moduleStartAddr = engineModule.baseAddr;
+    uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
+
     pfnGetBuildNumber = (int(*)())FindPatternAddress(
-        engineModule.baseAddr,
-        engineModule.imageSize,
+        moduleStartAddr,
+        moduleEndAddr,
     	SIGN_BUILD_NUMBER,
     	MASK_BUILD_NUMBER
     );
@@ -67,8 +72,8 @@ bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
     if (!pfnGetBuildNumber)
     {
         pfnGetBuildNumber = (int(*)())FindPatternAddress(
-            engineModule.baseAddr,
-            engineModule.imageSize,
+            moduleStartAddr,
+            moduleEndAddr,
             SIGN_BUILD_NUMBER_NEW,
             MASK_BUILD_NUMBER_NEW
         );

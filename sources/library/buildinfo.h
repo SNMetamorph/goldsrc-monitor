@@ -9,5 +9,5 @@ struct buildinfo_entry_t
 };
 
 int GetBuildNumber();
-void *FindFunctionAddress(functype_t funcType, void *startAddr, int scanLen = -1);
+void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr = nullptr);
 bool FindBuildNumberFunc(const moduleinfo_t &engineModule);
