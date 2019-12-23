@@ -130,7 +130,7 @@ static void cmd_timescale()
 {
     if (!sys_timescale)
     {
-        g_pClientEngFuncs->Con_Printf("sys_timescale cvar address not found!");
+        g_pClientEngFuncs->Con_Printf("sys_timescale address not found");
         return;
     }
 
@@ -139,11 +139,23 @@ static void cmd_timescale()
 
 	if (g_hServerModule)
 	{
-		if (g_pClientEngFuncs->Cmd_Argc() > 1)
-			sys_timescale->value = (float)atof(g_pClientEngFuncs->Cmd_Argv(1));
+        if (g_pClientEngFuncs->Cmd_Argc() > 1)
+        {
+            float argument = (float)atof(g_pClientEngFuncs->Cmd_Argv(1));
+            if (argument > 0.f)
+            {
+                sys_timescale->value = argument;
+                g_pClientEngFuncs->Con_Printf("sys_timescale value = %.1f\n", argument);
+            }
+            else
+                g_pClientEngFuncs->Con_Printf("Value should be greater than zero\n");
+        }
 		else
-			g_pClientEngFuncs->Con_Printf("Invalid syntax, using example: timescale 0.5\n");
+			g_pClientEngFuncs->Con_Printf("Command using example: gsm_timescale 0.5\n");
 	}
 	else
-		g_pClientEngFuncs->Con_Printf("Server module not found! Start listen server and execute command again.\n");
+		g_pClientEngFuncs->Con_Printf(
+            "Server module not found! Start singleplayer "
+            "or listen server and execute command again\n"
+        );
 }
