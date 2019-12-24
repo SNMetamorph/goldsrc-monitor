@@ -1,11 +1,11 @@
 #include "util.h"
 #include "moduleinfo.h"
 
+#include <stdint.h>
 #include <cstring>
+#include <vector>
 #include <Windows.h>
 #include <Psapi.h>
-#include <stdint.h>
-
 
 void *FindPatternAddress(
     void *startAddr, void *endAddr, const char *pattern, const char *mask)
@@ -35,6 +35,48 @@ void *FindPatternAddress(
 			return i;
 	}
 	return nullptr;
+}
+
+HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName)
+{
+    DWORD listSize;
+    size_t modulesCount;
+    std::vector<HMODULE> modulesList;
+
+    // retrieve modules count
+    EnumProcessModules(procHandle, NULL, 0, &listSize);
+    modulesCount = listSize / sizeof(HMODULE);
+    modulesList.resize(modulesCount);
+
+    if (!EnumProcessModules(procHandle, modulesList.data(), listSize, &listSize))
+        return NULL;
+
+    for (size_t i = 0; i < modulesCount; ++i)
+    {
+        uint8_t *moduleAddr;
+        uint32_t *nameOffsetList;
+        PIMAGE_DOS_HEADER dosHeader;
+        PIMAGE_NT_HEADERS peHeader;
+        PIMAGE_EXPORT_DIRECTORY dllExports;
+
+        moduleAddr  = (uint8_t*)modulesList[i];
+        dosHeader   = (PIMAGE_DOS_HEADER)moduleAddr;
+        peHeader    = (PIMAGE_NT_HEADERS)(moduleAddr + dosHeader->e_lfanew);
+        dllExports  = (PIMAGE_EXPORT_DIRECTORY)(moduleAddr + 
+            peHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
+
+        if (!dllExports->AddressOfNames)
+            continue;
+
+        nameOffsetList = (uint32_t*)(moduleAddr + dllExports->AddressOfNames);
+        for (size_t j = 0; j < dllExports->NumberOfNames; ++j)
+        {
+            const char *entryName = (const char *)(moduleAddr + nameOffsetList[j]);
+            if (strcmp(entryName, exportName) == 0)
+                return modulesList[i];
+        }
+    }
+    return NULL;
 }
 
 bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
@@ -73,25 +115,3 @@ void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
 	}
 	return valueAddr;
 }
-
-void FindServerModule(HMODULE &moduleHandle)
-{
-	size_t namesCount;
-	static const char *libNames[] =
-	{
-		// TODO: parsing this names from external file
-		"mp.dll",
-		"hl.dll",
-		"opfor.dll",
-		"echoes.dll",
-	};
-
-	namesCount = sizeof(libNames) / sizeof(*libNames);
-	for (size_t i = 0; i < namesCount; ++i)
-	{
-		moduleHandle = GetModuleHandle(libNames[i]);
-		if (moduleHandle)
-			return;
-	}
-}
-

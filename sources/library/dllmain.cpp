@@ -18,7 +18,16 @@ playermove_t	*g_pPlayerMove;
 enginefuncs_t	*g_pEngineFuncs;
 cl_enginefunc_t *g_pClientEngFuncs;
 
-void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
+static bool FindClientModule()
+{
+    g_hClientModule = FindModuleByExport(GetCurrentProcess(), "V_CalcRefdef");
+    if (g_hClientModule)
+        return true;
+    else
+        return false;
+}
+
+static void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
 	void *pfnSPR_Load;
 	void *pfnSPR_Frames;
@@ -61,7 +70,7 @@ void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     }
 }
 
-void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
+static void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
 	void *pfnPrecacheModel;
 	void *pfnPrecacheSound;
@@ -107,21 +116,16 @@ void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     }
 }
 
-void ProgramInit()
+static void ProgramInit()
 {
 	// get module handles
 	g_hEngineModule = GetModuleHandle("hw.dll");
 	if (!g_hEngineModule)
 		EXCEPT("failed to get engine module handle");
 
-	g_hClientModule = GetModuleHandle("client.dll");
-	if (!g_hClientModule)
+	if (!FindClientModule())
 		EXCEPT("failed to get client module handle");
-
-	g_hServerModule = GetModuleHandle("mp.dll");
-	if (!g_hServerModule)
-		g_hServerModule = GetModuleHandle("hl.dll");
-
+       
 	// try to find GetBuildNumber() address
 	moduleinfo_t engineDLL;
 	GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);

@@ -13,7 +13,7 @@ static cvar_t *sys_timescale;
 static cvar_t *gsm_mode;
 static SCREENINFO scr_info;
 
-cvar_t *RegisterCvar(const char *name, const char *value, int flags)
+static cvar_t *RegisterCvar(const char *name, const char *value, int flags)
 {
 	cvar_t *probe = g_pClientEngFuncs->pfnGetCvarPointer(name);
 	if (probe)
@@ -21,7 +21,7 @@ cvar_t *RegisterCvar(const char *name, const char *value, int flags)
 	return g_pClientEngFuncs->pfnRegisterVariable(name, value, flags);
 }
 
-void FindTimescaleCvar(moduleinfo_t &engineLib)
+static void FindTimescaleCvar(moduleinfo_t &engineLib)
 {
     uint8_t *probeAddr;
     uint8_t *stringAddr;
@@ -69,6 +69,15 @@ void FindTimescaleCvar(moduleinfo_t &engineLib)
             }
         }
     }
+}
+
+static bool FindServerModule(HMODULE &moduleHandle)
+{
+    moduleHandle = FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
+    if (moduleHandle)
+        return true;
+    else
+        return false;
 }
 
 void SetupCvars(moduleinfo_t &engineLib)
@@ -134,10 +143,7 @@ static void cmd_timescale()
         return;
     }
 
-    if (!g_hServerModule)
-        FindServerModule(g_hServerModule);
-
-	if (g_hServerModule)
+	if (g_hServerModule || FindServerModule(g_hServerModule))
 	{
         if (g_pClientEngFuncs->Cmd_Argc() > 1)
         {
