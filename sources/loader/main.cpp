@@ -29,65 +29,67 @@ static void OpenGameProcess(HANDLE &processHandle)
 		EXCEPT("unable to found game process, try to run game");
 }
 
-static void InjectLibrary(HANDLE process_handle)
+static void InjectLibrary(HANDLE procHandle)
 {
-	// getting full path to library
-	wchar_t libPath[MAX_PATH];
-	GetFullPathName(LIBRARY_NAME, MAX_PATH, libPath, NULL);
-	size_t pathSize = (wcslen(libPath) + 1) * sizeof(libPath[0]);
+    HANDLE          threadID;
+    size_t			funcOffset;
+    size_t          writtenBytes;
+    void            *pathRemoteAddr;
+    HMODULE         k32LocalHandle;
+    HMODULE			k32RemoteHandle;
+    moduleinfo_t	k32Info;
+	static wchar_t  libPath[MAX_PATH];
+    const size_t    pathSize = sizeof(libPath);
+    LPTHREAD_START_ROUTINE funcRemoteAddr;
 
-	// check for desired library exists
+	GetFullPathName(LIBRARY_NAME, MAX_PATH, libPath, NULL);
 	if (!PathFileExists(libPath))
 		EXCEPT("library file not found");
 
-	// getting address of LoadLibrary in game process
-	size_t			funcOffset;
-	HMODULE			k32LibHandle;
-	moduleinfo_t	k32LibInfo;
-
 	/*
-		it's simple method to get address of function from remote process, 
+        getting address of LoadLibrary() in game process
+        ----------------------------------------------
+		it's simple method to get address of function from remote process 
 		and will work in most cases, if kernel32.dll from game process 
 		isn't differ with same library from loader
 	*/
-	funcOffset   = GetFunctionOffset(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
-	k32LibHandle = FindProcessModule(process_handle, L"kernel32.dll");
-	if (!k32LibHandle)
-		EXCEPT("module handle not found");
+    k32LocalHandle  = GetModuleHandle(L"kernel32.dll");
+	k32RemoteHandle = FindProcessModule(procHandle, L"kernel32.dll");
 
-	if (!GetModuleInfo(process_handle, k32LibHandle, k32LibInfo))
-		EXCEPT("module info getting failed");
+	if (!k32RemoteHandle)
+		EXCEPT("kernel32.dll remote handle not found");
 
-	LPTHREAD_START_ROUTINE funcAddr = (LPTHREAD_START_ROUTINE)(
-		(size_t)k32LibInfo.baseAddr + funcOffset
-	);
+	if (!GetModuleInfo(procHandle, k32RemoteHandle, k32Info))
+		EXCEPT("GetModuleInfo() for remote kernel32.dll failed");
 
-	// allocating memory for library path in game process
-	void *pathAddr = VirtualAllocEx(
-		process_handle, 
+	// allocating memory in game process for library path
+	pathRemoteAddr = VirtualAllocEx(
+		procHandle, 
 		NULL, 
 		pathSize,
 		MEM_RESERVE | MEM_COMMIT,
 		PAGE_READWRITE
 	);
-	if (!pathAddr)
+	if (!pathRemoteAddr)
 		EXCEPT("unable to allocate memory in game process");
 
 	// writing string to game process
-	size_t writtenBytes = 0;
+	writtenBytes = 0;
 	WriteProcessMemory(
-		process_handle, pathAddr, 
+		procHandle, pathRemoteAddr, 
 		libPath, pathSize,
 		(SIZE_T*)&writtenBytes
 	);
 
 	if (pathSize != writtenBytes)
-		EXCEPT("writing to remote process failed");
+		EXCEPT("unable to write library path");
 
-	// creating thread in game process and invoking LoadLibrary function
-	HANDLE threadID = CreateRemoteThread(process_handle, 
+	// creating thread in game process and invoking LoadLibrary()
+    funcOffset      = GetFunctionOffset(k32LocalHandle, "LoadLibraryW");
+    funcRemoteAddr  = (LPTHREAD_START_ROUTINE)(k32Info.baseAddr + funcOffset);
+	threadID        = CreateRemoteThread(procHandle, 
 		0, 0, 
-		funcAddr, pathAddr, 
+		funcRemoteAddr, pathRemoteAddr, 
 		0, 0
 	);
 
@@ -114,18 +116,18 @@ int main(int argc, char *argv[])
 {
 	while (true)
 	{
-		HANDLE gameProc;
+		HANDLE gameProcess;
         PrintTitleText();
 
 		try
 		{
-			gameProc = NULL;
-			OpenGameProcess(gameProc);
-			if (!FindProcessModule(gameProc, LIBRARY_NAME))
+			gameProcess = NULL;
+			OpenGameProcess(gameProcess);
+			if (!FindProcessModule(gameProcess, LIBRARY_NAME))
 			{
-				InjectLibrary(gameProc);
+				InjectLibrary(gameProcess);
 				Sleep(300);
-				if (FindProcessModule(gameProc, LIBRARY_NAME))
+				if (FindProcessModule(gameProcess, LIBRARY_NAME))
 				{
 					cout << "Library successfully injected: check game console for more info" << endl;
 					break;
@@ -143,7 +145,7 @@ int main(int argc, char *argv[])
         {
 			ReportError(ex.GetDescription());
 		}
-		CloseHandle(gameProc);
+		CloseHandle(gameProcess);
 	}
 
 	cout << "Program will be closed 3 seconds later" << endl;
