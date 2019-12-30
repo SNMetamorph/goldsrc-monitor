@@ -19,9 +19,17 @@ static void ReportError(const char *msg)
 static void OpenGameProcess(HANDLE &processHandle)
 {
 	int processID = FindProcessID(PROCESS_NAME);
+    const DWORD accessFlags = (
+        PROCESS_VM_READ |
+        PROCESS_VM_WRITE |
+        PROCESS_VM_OPERATION |
+        PROCESS_CREATE_THREAD |
+        PROCESS_QUERY_INFORMATION
+    );
+
 	if (processID > 0)
 	{
-		processHandle = OpenProcess(PROCESS_ALL_ACCESS, false, processID);
+		processHandle = OpenProcess(accessFlags, false, processID);
 		if (!processHandle)
 			EXCEPT("unable to open game process");
 	}
