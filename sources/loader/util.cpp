@@ -41,6 +41,7 @@ HMODULE FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
     const size_t pathLength = 
         sizeof(modulePath) / sizeof(modulePath[0]);
 
+    listSize = 0;
     EnumProcessModules(procHandle, NULL, 0, &listSize);
     moduleHandle = NULL;
 	modulesCount = listSize / sizeof(HMODULE);
