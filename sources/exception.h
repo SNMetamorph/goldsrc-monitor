@@ -6,25 +6,25 @@
 class CException
 {
 public:
-	CException(
-        const char *description, 
-        const char *funcName, 
-        const char *sourceFilePath, 
+    CException(
+        const char *description,
+        const char *funcName,
+        const char *sourceFilePath,
         int lineNumber
     );
 
-	const char *GetFormattedMessage();
-	const char *GetDescription() const;
-	const char *GetFunctionName() const;
-	const char *GetFileName() const;
-	int			GetLineNumber() const;
+    const char *GetFormattedMessage();
+    const char *GetDescription() const;
+    const char *GetFunctionName() const;
+    const char *GetFileName() const;
+    int			GetLineNumber() const;
 
-	char m_szMessageBuffer[256];
+    char m_szMessageBuffer[256];
 
 private:
-	int m_iLineNumber;
-	const char *m_szDescription;
-	const char *m_szFuncName;
-	const char *m_szFilePath;
+    int m_iLineNumber;
+    const char *m_szDescription;
+    const char *m_szFuncName;
+    const char *m_szFilePath;
 };
 

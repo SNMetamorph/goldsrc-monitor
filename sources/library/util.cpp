@@ -16,25 +16,25 @@ void *FindPatternAddress(
 
     maskLen = strlen(mask);
     totalEndAddr = (uint8_t*)endAddr - maskLen;
-	for (uint8_t *i = (uint8_t*)startAddr; i <= totalEndAddr; ++i)
-	{
-		isFailed = false;
-		for (size_t j = 0; j < maskLen; ++j)
-		{
-			uint8_t maskByte    = mask[j];
-			uint8_t scanByte    = *(i + j);
-			uint8_t patternByte	= pattern[j];
+    for (uint8_t *i = (uint8_t*)startAddr; i <= totalEndAddr; ++i)
+    {
+        isFailed = false;
+        for (size_t j = 0; j < maskLen; ++j)
+        {
+            uint8_t maskByte = mask[j];
+            uint8_t scanByte = *(i + j);
+            uint8_t patternByte = pattern[j];
 
-			if (maskByte != '?' && patternByte != scanByte)
-			{
-				isFailed = true;
-				break;
-			}
-		}
-		if (!isFailed)
-			return i;
-	}
-	return nullptr;
+            if (maskByte != '?' && patternByte != scanByte)
+            {
+                isFailed = true;
+                break;
+            }
+        }
+        if (!isFailed)
+            return i;
+    }
+    return nullptr;
 }
 
 HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName)
@@ -67,7 +67,7 @@ HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName)
         moduleAddr  = (uint8_t*)modulesList[i];
         dosHeader   = (PIMAGE_DOS_HEADER)moduleAddr;
         peHeader    = (PIMAGE_NT_HEADERS)(moduleAddr + dosHeader->e_lfanew);
-        dllExports  = (PIMAGE_EXPORT_DIRECTORY)(moduleAddr + 
+        dllExports  = (PIMAGE_EXPORT_DIRECTORY)(moduleAddr +
             peHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
 
         if (!dllExports->AddressOfNames)
@@ -86,14 +86,14 @@ HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName)
 
 bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
 {
-	MODULEINFO minfo;
-	if (!GetModuleInformation(procHandle, moduleHandle, &minfo, sizeof(minfo)))
-		return false;
+    MODULEINFO minfo;
+    if (!GetModuleInformation(procHandle, moduleHandle, &minfo, sizeof(minfo)))
+        return false;
 
-	moduleInfo.baseAddr         = (uint8_t*)minfo.lpBaseOfDll;
-	moduleInfo.imageSize        = minfo.SizeOfImage;
-	moduleInfo.entryPointAddr   = (uint8_t*)minfo.EntryPoint;
-	return true;
+    moduleInfo.baseAddr = (uint8_t*)minfo.lpBaseOfDll;
+    moduleInfo.imageSize = minfo.SizeOfImage;
+    moduleInfo.entryPointAddr = (uint8_t*)minfo.EntryPoint;
+    return true;
 }
 
 void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
@@ -107,16 +107,16 @@ void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
     procHandle      = GetCurrentProcess();
     totalEndAddr    = (uint32_t*)((size_t)endAddr - sizeof(scanValue));
 
-	for (uint32_t *i = (uint32_t*)startAddr; i <= totalEndAddr; ++i)
-	{
+    for (uint32_t *i = (uint32_t*)startAddr; i <= totalEndAddr; ++i)
+    {
         if (!ReadProcessMemory(procHandle, i, &probeValue, sizeof(*i), NULL))
             continue;
-      
+
         if (probeValue == scanValue)
         {
             valueAddr = i;
             break;
         }
-	}
-	return valueAddr;
+    }
+    return valueAddr;
 }

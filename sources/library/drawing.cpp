@@ -35,11 +35,11 @@ void DrawModeFull(float time, int screenWidth, int screenHeight)
     for (int i = 0; i < stringCount; ++i)
     {
         g_pClientEngFuncs->pfnDrawString(
-            screenWidth - STRING_MARGIN_RIGHT, 
+            screenWidth - STRING_MARGIN_RIGHT,
             STRING_MARGIN_UP + (STRING_HEIGHT * i),
-            g_aStrings[i], 
-            (int)gsm_color_r->value, 
-            (int)gsm_color_g->value, 
+            g_aStrings[i],
+            (int)gsm_color_r->value,
+            (int)gsm_color_g->value,
             (int)gsm_color_b->value
         );
     }
@@ -55,15 +55,15 @@ void DrawModeSpeedometer(float time, int screenWidth, int screenHeight)
     playerSpeed = g_pPlayerMove->velocity.Length2D();
     snprintf(g_aStrings[0], STRING_LENGTH, "%.2f", playerSpeed);
     stringWidth = GetStringWidth(g_aStrings[0]);
-    stringX     = (screenWidth / 2) - (stringWidth / 2);
-    stringY     = (screenHeight / 2) + SPEEDOMETER_MARGIN;
+    stringX = (screenWidth / 2) - (stringWidth / 2);
+    stringY = (screenHeight / 2) + SPEEDOMETER_MARGIN;
 
     g_pClientEngFuncs->pfnDrawString(
-        stringX, 
-        stringY, 
+        stringX,
+        stringY,
         g_aStrings[0],
-        (int)gsm_color_r->value, 
-        (int)gsm_color_g->value, 
+        (int)gsm_color_r->value,
+        (int)gsm_color_g->value,
         (int)gsm_color_b->value
     );
 }
@@ -82,28 +82,28 @@ void DrawModeAngleTrack(float time, int screenWidth, int screenHeight)
     static float lastPitchVelocity;
     vec3_t &currAngles = g_pPlayerMove->angles;
 
-    pitchVelocity   = (currAngles.x - lastAngles.x) / g_pPlayerMove->frametime;
-    yawVelocity     = (currAngles.y - lastAngles.y) / g_pPlayerMove->frametime;
+    pitchVelocity = (currAngles.x - lastAngles.x) / g_pPlayerMove->frametime;
+    yawVelocity = (currAngles.y - lastAngles.y) / g_pPlayerMove->frametime;
     snprintf(g_aStrings[0], STRING_LENGTH, "   up : %.2f deg/s", -pitchVelocity);
     snprintf(g_aStrings[1], STRING_LENGTH, "right : %.2f deg/s", -yawVelocity);
     stringWidth = GetStringWidth(g_aStrings[0]);
-    stringX     = (screenWidth / 2) - (stringWidth / 2);
-    stringY     = (screenHeight / 2) + SPEEDOMETER_MARGIN;
+    stringX = (screenWidth / 2) - (stringWidth / 2);
+    stringY = (screenHeight / 2) + SPEEDOMETER_MARGIN;
 
     g_pClientEngFuncs->pfnDrawString(
-        stringX, 
-        stringY, 
+        stringX,
+        stringY,
         g_aStrings[0],
-        (int)gsm_color_r->value, 
-        (int)gsm_color_g->value, 
+        (int)gsm_color_r->value,
+        (int)gsm_color_g->value,
         (int)gsm_color_b->value
     );
     g_pClientEngFuncs->pfnDrawString(
-        stringX, 
-        stringY + STRING_HEIGHT, 
+        stringX,
+        stringY + STRING_HEIGHT,
         g_aStrings[1],
-        (int)gsm_color_r->value, 
-        (int)gsm_color_g->value, 
+        (int)gsm_color_r->value,
+        (int)gsm_color_g->value,
         (int)gsm_color_b->value
     );
 
@@ -138,9 +138,9 @@ static void TraceViewLine(pmtrace_t *destTraceData)
 
     g_pClientEngFuncs->GetViewAngles(viewAngles);
     g_pClientEngFuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
-    traceStart      = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-    traceEnd        = traceStart + (viewDir * traceDistance);
-    localPlayer     = g_pClientEngFuncs->GetLocalPlayer();
+    traceStart = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+    traceEnd = traceStart + (viewDir * traceDistance);
+    localPlayer = g_pClientEngFuncs->GetLocalPlayer();
 
     g_pClientEngFuncs->pEventAPI->EV_SetUpPlayerPrediction(false, true);
     g_pClientEngFuncs->pEventAPI->EV_PushPMStates();
@@ -168,29 +168,29 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
     TraceViewLine(&traceData);
     if (traceData.fraction < 1.f && traceData.ent > 0)
     {
-        entityIndex     = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
-        traceEntity     = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
-        entityOrigin    = traceEntity->curstate.origin; 
-        entityAngles    = traceEntity->curstate.angles;
-        cameraOrigin    = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-        entityDistance  = (entityOrigin - cameraOrigin).Length();
-        entityModel     = traceEntity->model;
+        entityIndex = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
+        traceEntity = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+        entityOrigin = traceEntity->curstate.origin;
+        entityAngles = traceEntity->curstate.angles;
+        cameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+        entityDistance = (entityOrigin - cameraOrigin).Length();
+        entityModel = traceEntity->model;
 
         snprintf(g_aStrings[0], STRING_LENGTH, "Entity index: %d", entityIndex);
-        snprintf(g_aStrings[1], STRING_LENGTH, "Origin: [%.1f; %.1f; %.1f]", 
+        snprintf(g_aStrings[1], STRING_LENGTH, "Origin: [%.1f; %.1f; %.1f]",
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
-        snprintf(g_aStrings[2], STRING_LENGTH, "Angles: [%.1f; %.1f; %.1f]", 
+        snprintf(g_aStrings[2], STRING_LENGTH, "Angles: [%.1f; %.1f; %.1f]",
             entityAngles.x, entityAngles.y, entityAngles.z);
         snprintf(g_aStrings[3], STRING_LENGTH, "Distance: %.1f units", entityDistance);
         snprintf(g_aStrings[4], STRING_LENGTH, "Model name: %s", entityModel->name);
 
         if (entityModel->type != mod_brush)
         {
-            snprintf(g_aStrings[5], STRING_LENGTH, "Anim. frame: %.1f", 
+            snprintf(g_aStrings[5], STRING_LENGTH, "Anim. frame: %.1f",
                 traceEntity->curstate.frame);
-            snprintf(g_aStrings[6], STRING_LENGTH, "Anim. sequence: %d", 
+            snprintf(g_aStrings[6], STRING_LENGTH, "Anim. sequence: %d",
                 traceEntity->curstate.sequence);
-            snprintf(g_aStrings[7], STRING_LENGTH, "Bodygroup number: %d", 
+            snprintf(g_aStrings[7], STRING_LENGTH, "Bodygroup number: %d",
                 traceEntity->curstate.body);
             stringCount = 8;
         }
@@ -206,11 +206,11 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
     for (int i = 0; i < stringCount; ++i)
     {
         g_pClientEngFuncs->pfnDrawString(
-            screenWidth - STRING_MARGIN_RIGHT, 
+            screenWidth - STRING_MARGIN_RIGHT,
             STRING_MARGIN_UP + (STRING_HEIGHT * i),
-            g_aStrings[i], 
-            (int)gsm_color_r->value, 
-            (int)gsm_color_g->value, 
+            g_aStrings[i],
+            (int)gsm_color_r->value,
+            (int)gsm_color_g->value,
             (int)gsm_color_b->value
         );
     }

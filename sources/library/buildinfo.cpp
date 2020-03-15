@@ -1,12 +1,11 @@
 #include "buildinfo.h"
 #include "util.h"
 
-
-int (*pfnGetBuildNumber)();
-static const buildinfo_entry_t g_aBuildInfo[] = 
+static int (*pfnGetBuildNumber)();
+static const buildinfo_entry_t g_aBuildInfo[] =
 {
-    { 
-        4554, 
+    {
+        4554,
         {
             {FUNCTYPE_SPR_LOAD, "xxxxxxxxx????xxxx", "\x56\x8D\x44\x24\x08\x57\x50\xFF\x15\x2A\x2A\x2A\x2A\x8B\x44\x24\x10"},
             {FUNCTYPE_SPR_FRAMES, "xxxxxxx????xxxx", "\x8D\x44\x24\x04\x50\xFF\x15\x2A\x2A\x2A\x2A\x8B\x4C\x24\x08"},
@@ -30,7 +29,7 @@ void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr)
     int currBuildNumber = GetBuildNumber();
     const int buildInfoLen = sizeof(g_aBuildInfo) / sizeof(g_aBuildInfo[0]);
     const int lastEntryIndex = buildInfoLen - 1;
-    const funcdata_t *funcData = 
+    const funcdata_t *funcData =
         &g_aBuildInfo[lastEntryIndex].functionData[funcType];
 
     for (int i = 0; i < lastEntryIndex; ++i)
@@ -50,25 +49,25 @@ void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr)
         endAddr = (uint8_t*)startAddr + strlen(funcData->mask);
 
     return FindPatternAddress(
-        startAddr, 
-        endAddr, 
-        funcData->signature, 
+        startAddr,
+        endAddr,
+        funcData->signature,
         funcData->mask
     );
 }
 
 bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
 {
-    uint8_t *moduleStartAddr    = engineModule.baseAddr;
-    uint8_t *moduleEndAddr      = moduleStartAddr + engineModule.imageSize;
-    const int signatureCount    = 2;
+    uint8_t *moduleStartAddr = engineModule.baseAddr;
+    uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
+    const int signatureCount = 2;
 
-    static const char *signatureArray[signatureCount] = 
+    static const char *signatureArray[signatureCount] =
     {
         "\xA1\x00\x00\x00\x00\x83\xEC\x08\x00\x33\x00\x85\xC0",
         "\x55\x8B\xEC\x83\xEC\x08\xA1\x00\x00\x00\x00\x56\x33\xF6\x85\xC0\x0F\x85\x00\x00\x00\x00\x53\x33\xDB\x8B\x04\x9D"
     };
-    static const char *maskArray[signatureCount] = 
+    static const char *maskArray[signatureCount] =
     {
         "x????xxx?x?xx",
         "xxxxxxx????xxxxxxx????xxxxxx"
@@ -86,7 +85,7 @@ bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
         if (pfnGetBuildNumber && pfnGetBuildNumber() > 0)
             return true;
     }
-    
+
     return false;
 }
 

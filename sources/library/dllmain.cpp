@@ -3,20 +3,12 @@
 #include "util.h"
 #include "exception.h"
 #include "buildinfo.h"
+#include "hooks.h"
 
 #include <Windows.h>
 #include <stdint.h>
 #include <cstdio>
 
-extern void ApplyHooks();
-extern void RemoveHooks();
-HMODULE g_hEngineModule;
-HMODULE g_hClientModule;
-HMODULE g_hServerModule;
-
-playermove_t	*g_pPlayerMove;
-enginefuncs_t	*g_pEngineFuncs;
-cl_enginefunc_t *g_pClientEngFuncs;
 
 static bool FindClientModule()
 {
@@ -27,12 +19,13 @@ static bool FindClientModule()
         return false;
 }
 
+
 static void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
-	void *pfnSPR_Load;
-	void *pfnSPR_Frames;
+    void *pfnSPR_Load;
+    void *pfnSPR_Frames;
     uint8_t *probeAddr;
-	uint8_t *coincidenceAddr;
+    uint8_t *coincidenceAddr;
     uint8_t *scanStartAddr;
     uint8_t *moduleEndAddr;
 
@@ -40,8 +33,8 @@ static void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     pfnSPR_Load = FindFunctionAddress(
         FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
     );
-	if (!pfnSPR_Load)
-		EXCEPT("SPR_Load() address not found");
+    if (!pfnSPR_Load)
+        EXCEPT("SPR_Load() address not found");
 
     scanStartAddr = moduleAddr;
     while (true)
@@ -70,23 +63,24 @@ static void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     }
 }
 
+
 static void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
-	void *pfnPrecacheModel;
-	void *pfnPrecacheSound;
+    void *pfnPrecacheModel;
+    void *pfnPrecacheSound;
     uint8_t *probeAddr;
-	uint8_t *coincidenceAddr;
+    uint8_t *coincidenceAddr;
     uint8_t *scanStartAddr;
     uint8_t *moduleEndAddr;
 
     moduleEndAddr = moduleAddr + moduleSize;
     pfnPrecacheModel = FindFunctionAddress(
-        FUNCTYPE_PRECACHE_MODEL, 
-        moduleAddr, 
+        FUNCTYPE_PRECACHE_MODEL,
+        moduleAddr,
         moduleEndAddr
     );
-	if (!pfnPrecacheModel)
-		EXCEPT("PrecacheModel() address not found");
+    if (!pfnPrecacheModel)
+        EXCEPT("PrecacheModel() address not found");
 
     scanStartAddr = moduleAddr;
     while (true)
@@ -116,57 +110,59 @@ static void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
     }
 }
 
+
 static void ProgramInit()
 {
-	// get module handles
-	g_hEngineModule = GetModuleHandle("hw.dll");
-	if (!g_hEngineModule)
-		EXCEPT("failed to get engine module handle");
+    // get module handles
+    g_hEngineModule = GetModuleHandle("hw.dll");
+    if (!g_hEngineModule)
+        EXCEPT("failed to get engine module handle");
 
-	if (!FindClientModule())
-		EXCEPT("failed to get client module handle");
-       
-	// try to find GetBuildNumber() address
-	moduleinfo_t engineDLL;
-	GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);
+    if (!FindClientModule())
+        EXCEPT("failed to get client module handle");
+
+    // try to find GetBuildNumber() address
+    moduleinfo_t engineDLL;
+    GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);
     if (!FindBuildNumberFunc(engineDLL))
         EXCEPT("GetBuildNumber() address not found");
 
-	// find engine functions pointer arrays
-	FindClientEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
-	FindServerEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
+    // find engine functions pointer arrays
+    FindClientEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
+    FindServerEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
 
-	ApplyHooks();
-	SetupCvars(engineDLL);
-	PrintTitleText();
+    ApplyHooks();
+    SetupConVars(engineDLL);
+    PrintTitleText();
 }
+
 
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
-	if (nReason == DLL_PROCESS_ATTACH)
-	{
-		try {
-			ProgramInit();
-		}
-		catch (CException &ex)
-		{
-			snprintf(
-				ex.m_szMessageBuffer,
-				sizeof(ex.m_szMessageBuffer),
-				"ERROR [%s:%d]: %s\nReport about error to the project page.\n"
-				"Link: github.com/SNMetamorph/goldsrc-monitor/issues/1",
-				ex.GetFileName(),
-				ex.GetLineNumber(),
-				ex.GetDescription()
-			);
-			MessageBox(NULL, ex.m_szMessageBuffer, "GoldSrc Monitor", MB_OK | MB_ICONWARNING);
-			return FALSE;
-		}
-	}
-	else if (nReason == DLL_PROCESS_DETACH)
-	{
-		RemoveHooks();
-	}
+    if (nReason == DLL_PROCESS_ATTACH)
+    {
+        try {
+            ProgramInit();
+        }
+        catch (CException &ex)
+        {
+            snprintf(
+                ex.m_szMessageBuffer,
+                sizeof(ex.m_szMessageBuffer),
+                "ERROR [%s:%d]: %s\nReport about error to the project page.\n"
+                "Link: github.com/SNMetamorph/goldsrc-monitor/issues/1",
+                ex.GetFileName(),
+                ex.GetLineNumber(),
+                ex.GetDescription()
+            );
+            MessageBox(NULL, ex.m_szMessageBuffer, "GoldSrc Monitor", MB_OK | MB_ICONWARNING);
+            return FALSE;
+        }
+    }
+    else if (nReason == DLL_PROCESS_DETACH)
+    {
+        RemoveHooks();
+    }
 
-	return TRUE;
+    return TRUE;
 }

@@ -35,6 +35,9 @@
     <ClCompile Include="..\..\sources\library\buildinfo.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\sources\library\globals.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\sources\library\util.h">
@@ -65,6 +68,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sources\app_version.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\hooks.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
