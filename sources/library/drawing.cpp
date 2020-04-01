@@ -14,23 +14,23 @@ static char g_aStrings[STRING_COUNT][STRING_LENGTH];
 void DrawModeFull(float time, int screenWidth, int screenHeight)
 {
     const int stringCount = 17;
-    sprintf_s(g_aStrings[0], STRING_LENGTH, "Velocity: %.2f u/s [%.2f, %.2f, %.2f]", g_pPlayerMove->velocity.Length2D(), g_pPlayerMove->velocity.x, g_pPlayerMove->velocity.y, g_pPlayerMove->velocity.z);
-    sprintf_s(g_aStrings[1], STRING_LENGTH, "Origin: [%.2f, %.2f, %.2f]", g_pPlayerMove->origin.x, g_pPlayerMove->origin.y, g_pPlayerMove->origin.z);
-    sprintf_s(g_aStrings[2], STRING_LENGTH, "Angles: [%.2f, %.2f, %.2f]", g_pPlayerMove->angles.x, g_pPlayerMove->angles.y, g_pPlayerMove->angles.z);
-    sprintf_s(g_aStrings[3], STRING_LENGTH, "Base velocity: [%.2f, %.2f, %.2f]", g_pPlayerMove->basevelocity.x, g_pPlayerMove->basevelocity.y, g_pPlayerMove->basevelocity.z);
-    sprintf_s(g_aStrings[4], STRING_LENGTH, "Punch angle: [%.2f, %.2f, %.2f]", g_pPlayerMove->punchangle.x, g_pPlayerMove->punchangle.y, g_pPlayerMove->punchangle.z);
-    sprintf_s(g_aStrings[5], STRING_LENGTH, "View offset (Z): %.2f", g_pPlayerMove->view_ofs.z);
+    sprintf_s(g_aStrings[0], STRING_LENGTH, "Velocity: %.2f u/s (%.2f, %.2f, %.2f)", g_pPlayerMove->velocity.Length2D(), g_pPlayerMove->velocity.x, g_pPlayerMove->velocity.y, g_pPlayerMove->velocity.z);
+    sprintf_s(g_aStrings[1], STRING_LENGTH, "Origin: (%.2f, %.2f, %.2f)", g_pPlayerMove->origin.x, g_pPlayerMove->origin.y, g_pPlayerMove->origin.z);
+    sprintf_s(g_aStrings[2], STRING_LENGTH, "Angles: (%.2f, %.2f, %.2f)", g_pPlayerMove->angles.x, g_pPlayerMove->angles.y, g_pPlayerMove->angles.z);
+    sprintf_s(g_aStrings[3], STRING_LENGTH, "Base velocity: (%.2f, %.2f, %.2f)", g_pPlayerMove->basevelocity.x, g_pPlayerMove->basevelocity.y, g_pPlayerMove->basevelocity.z);
+    sprintf_s(g_aStrings[4], STRING_LENGTH, "Punch angle: (%.2f, %.2f, %.2f)", g_pPlayerMove->punchangle.x, g_pPlayerMove->punchangle.y, g_pPlayerMove->punchangle.z);
+    sprintf_s(g_aStrings[5], STRING_LENGTH, "View offset: (%.2f, %.2f, %.2f)", g_pPlayerMove->view_ofs.x, g_pPlayerMove->view_ofs.y, g_pPlayerMove->view_ofs.z);
     sprintf_s(g_aStrings[6], STRING_LENGTH, "Texture name: %s", g_pPlayerMove->sztexturename);
     sprintf_s(g_aStrings[7], STRING_LENGTH, "Hull type: %d", g_pPlayerMove->usehull);
     sprintf_s(g_aStrings[8], STRING_LENGTH, "Gravity: %.2f", g_pPlayerMove->gravity);
     sprintf_s(g_aStrings[9], STRING_LENGTH, "Friction: %.2f", g_pPlayerMove->friction);
     sprintf_s(g_aStrings[10], STRING_LENGTH, "Max speed: %.2f / client %.2f", g_pPlayerMove->maxspeed, g_pPlayerMove->clientmaxspeed);
-    sprintf_s(g_aStrings[11], STRING_LENGTH, "Flags: %x %x %x %x", g_pPlayerMove->flags >> 24, g_pPlayerMove->flags >> 16, g_pPlayerMove->flags >> 8, g_pPlayerMove->flags & 0xFF);
-    sprintf_s(g_aStrings[12], STRING_LENGTH, "On ground: %s", g_pPlayerMove->onground != -1 ? "+" : "-");
+    sprintf_s(g_aStrings[11], STRING_LENGTH, "Flags: %d", g_pPlayerMove->flags);
+    sprintf_s(g_aStrings[12], STRING_LENGTH, "On ground: %c", g_pPlayerMove->onground != -1 ? '+' : '-');
     sprintf_s(g_aStrings[13], STRING_LENGTH, "Duck time/status: %.2f / %d", g_pPlayerMove->flDuckTime, g_pPlayerMove->bInDuck);
     sprintf_s(g_aStrings[14], STRING_LENGTH, "Time: %.3f seconds", time);
-    sprintf_s(g_aStrings[15], STRING_LENGTH, "User variables (f): %.2f / %.2f / %.2f / %.2f", g_pPlayerMove->fuser1, g_pPlayerMove->fuser2, g_pPlayerMove->fuser3, g_pPlayerMove->fuser4);
-    sprintf_s(g_aStrings[16], STRING_LENGTH, "User variables (i): %d / %d / %d / %d", g_pPlayerMove->iuser1, g_pPlayerMove->iuser2, g_pPlayerMove->iuser3, g_pPlayerMove->iuser4);
+    sprintf_s(g_aStrings[15], STRING_LENGTH, "fuserX: %.2f / %.2f / %.2f / %.2f", g_pPlayerMove->fuser1, g_pPlayerMove->fuser2, g_pPlayerMove->fuser3, g_pPlayerMove->fuser4);
+    sprintf_s(g_aStrings[16], STRING_LENGTH, "iuserX: %d / %d / %d / %d", g_pPlayerMove->iuser1, g_pPlayerMove->iuser2, g_pPlayerMove->iuser3, g_pPlayerMove->iuser4);
 
     for (int i = 0; i < stringCount; ++i)
     {
@@ -155,14 +155,10 @@ static void TraceViewLine(pmtrace_t *destTraceData)
 
 void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
 {
-    int         stringCount;
-    int         entityIndex;
-    float       entityDistance;
-    vec3_t      entityOrigin;
-    vec3_t      entityAngles;
-    vec3_t      cameraOrigin;
-    model_t     *entityModel;
-    pmtrace_t   traceData;
+    int entityIndex;
+    int stringCount;
+    int stringWidth;
+    pmtrace_t traceData;
     cl_entity_t *traceEntity;
 
     TraceViewLine(&traceData);
@@ -170,16 +166,18 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
     {
         entityIndex = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
         traceEntity = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
-        entityOrigin = traceEntity->curstate.origin;
-        entityAngles = traceEntity->curstate.angles;
-        cameraOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-        entityDistance = (entityOrigin - cameraOrigin).Length();
-        entityModel = traceEntity->model;
+
+        vec3_t entityOrigin     = traceEntity->curstate.origin;
+        vec3_t entityAngles     = traceEntity->curstate.angles;
+        vec3_t cameraOrigin     = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+        float entityDistance    = (entityOrigin - g_pPlayerMove->origin).Length();
+        model_t *entityModel    = traceEntity->model;
+        stringWidth             = GetStringWidth(entityModel->name) + 100;
 
         snprintf(g_aStrings[0], STRING_LENGTH, "Entity index: %d", entityIndex);
-        snprintf(g_aStrings[1], STRING_LENGTH, "Origin: [%.1f; %.1f; %.1f]",
+        snprintf(g_aStrings[1], STRING_LENGTH, "Origin: (%.1f; %.1f; %.1f)",
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
-        snprintf(g_aStrings[2], STRING_LENGTH, "Angles: [%.1f; %.1f; %.1f]",
+        snprintf(g_aStrings[2], STRING_LENGTH, "Angles: (%.1f; %.1f; %.1f)",
             entityAngles.x, entityAngles.y, entityAngles.z);
         snprintf(g_aStrings[3], STRING_LENGTH, "Distance: %.1f units", entityDistance);
         snprintf(g_aStrings[4], STRING_LENGTH, "Model name: %s", entityModel->name);
@@ -201,12 +199,13 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
     {
         strcpy(g_aStrings[0], "Entity not found");
         stringCount = 1;
+        stringWidth = 0;
     }
 
     for (int i = 0; i < stringCount; ++i)
     {
         g_pClientEngFuncs->pfnDrawString(
-            screenWidth - STRING_MARGIN_RIGHT,
+            screenWidth - max(STRING_MARGIN_RIGHT, stringWidth),
             STRING_MARGIN_UP + (STRING_HEIGHT * i),
             g_aStrings[i],
             (int)gsm_color_r->value,
