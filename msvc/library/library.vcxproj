@@ -72,10 +72,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>gsm-$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>gsm-$(ProjectName)</TargetName>
     <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,7 +88,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\sources;$(HLSDK)\common;$(HLSDK)\pm_shared;$(HLSDK)\engine;$(HLSDK)\game_shared;$(HLSDK)\external;$(HLSDK)\utils\vgui\include;$(HLSDK)\public;$(HLSDK)\cl_dll;$(SolutionDir)..\external\polyhook;$(SolutionDir)..\external\polyhook\asmjit;$(SolutionDir)..\external\polyhook\capstone;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -113,7 +115,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)..\sources;$(HLSDK)\common;$(HLSDK)\pm_shared;$(HLSDK)\engine;$(HLSDK)\game_shared;$(HLSDK)\external;$(HLSDK)\utils\vgui\include;$(HLSDK)\public;$(HLSDK)\cl_dll;$(SolutionDir)..\external\polyhook;$(SolutionDir)..\external\polyhook\asmjit;$(SolutionDir)..\external\polyhook\capstone;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -152,6 +154,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\sources\library\util.cpp" />
+    <ClCompile Include="..\..\sources\string_stack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\sources\app_version.h" />
@@ -165,6 +168,7 @@
     <ClInclude Include="..\..\sources\library\stdafx.h" />
     <ClInclude Include="..\..\sources\library\util.h" />
     <ClInclude Include="..\..\sources\moduleinfo.h" />
+    <ClInclude Include="..\..\sources\string_stack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
