@@ -1,6 +1,6 @@
 # GoldSrc Monitor
 There is small and simple instrument for researching or debugging  games, based on GoldSrc engine.<br>
-[Gamebanana Page](https://gamebanana.com/gamefiles/8977)
+Download this program and read description you can on [Gamebanana Page](https://gamebanana.com/gamefiles/8977)
 
 # Cloning
 ```
