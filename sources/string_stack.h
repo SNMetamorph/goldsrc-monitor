@@ -14,12 +14,7 @@ public:
     inline int GetStringLength() const      { return m_iStringLen;  };
     inline int GetStringCount() const       { return m_iStackIndex; };
     inline int GetStringMaxCount() const    { return m_iArraySize;  };
-    inline const char *StringAt(int index) const { 
-        return StringAtEx(index); 
-    };
-
-private:
-    char *StringAtEx(int index) const;
+    const char *StringAt(int index);
 
 private:
     int m_iStackIndex;

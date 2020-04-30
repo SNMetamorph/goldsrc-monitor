@@ -12,9 +12,11 @@ CStringStack::CStringStack(char *stringArray, int stringLen, int maxStringCount)
 
 bool CStringStack::Push(const char *str)
 {
+    char *stringAddr;
     if (m_iStackIndex < m_iArraySize)
     {
-        strncpy(StringAtEx(m_iStackIndex), str, m_iStringLen);
+        stringAddr = &m_aStringArray[m_iStackIndex * m_iStringLen];
+        strncpy(stringAddr, str, m_iStringLen);
         ++m_iStackIndex;
         return true;
     }
@@ -28,7 +30,7 @@ bool CStringStack::PushPrintf(const char *format, ...)
 
     if (m_iStackIndex < m_iArraySize)
     {
-        stringAddr = StringAtEx(m_iStackIndex);
+        stringAddr = &m_aStringArray[m_iStackIndex * m_iStringLen];
         va_start(args, format);
         vsnprintf(stringAddr, m_iStringLen, format, args);
         va_end(args);
@@ -50,7 +52,7 @@ void CStringStack::Clear()
     m_iStackIndex = 0;
 }
 
-char *CStringStack::StringAtEx(int index) const
+const char *CStringStack::StringAt(int index)
 {
     if (index >= 0 && index < m_iArraySize)
         return &m_aStringArray[index * m_iStringLen];
