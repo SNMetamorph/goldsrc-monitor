@@ -11,60 +11,79 @@
 // hooking stuff
 typedef int (*pfnRedraw)(float, int);
 typedef void (*pfnPlayerMove)(playermove_t*, int);
+typedef int (*pfnKeyEvent)(int, int, const char *);
 typedef PLH::x86Detour detour_t;
 typedef PLH::CapstoneDisassembler disasm_t;
 
 static uint64_t     g_pfnOrigRedraw;
 static uint64_t     g_pfnOrigPlayerMove;
+static uint64_t     g_pfnOrigKeyEvent;
+
 static detour_t	    *g_DetourRedraw;
 static detour_t     *g_DetourPlayerMove;
-static disasm_t     *g_pDisasm;
+static detour_t     *g_DetourKeyEvent;
+static disasm_t     g_DisasmX86(PLH::Mode::x86);
 
 static int  HookRedraw(float time, int intermission);
+static int  HookKeyEvent(int down, int keyNum, const char *bindName);
 static void HookPlayerMove(playermove_t *pmove, int server);
+
+static void DisposeHookingStuff()
+{
+    if (g_DetourRedraw)
+        g_DetourRedraw->unHook();
+    if (g_DetourKeyEvent)
+        g_DetourKeyEvent->unHook();
+    if (g_DetourPlayerMove)
+        g_DetourPlayerMove->unHook();
+
+    delete g_DetourRedraw;
+    delete g_DetourKeyEvent;
+    delete g_DetourPlayerMove;
+}
 
 void ApplyHooks()
 {
-    // find function addresses
     char *pfnRedraw = (char *)GetProcAddress(g_hClientModule, "HUD_Redraw");
     char *pfnPlayerMove = (char *)GetProcAddress(g_hClientModule, "HUD_PlayerMove");
-    char *pfnHookRedraw = (char *)&HookRedraw;
-    char *pfnHookPlayerMove = (char *)&HookPlayerMove;
-    uint64_t *pfnOrigRedraw = (uint64_t *)&g_pfnOrigRedraw;
-    uint64_t *pfnOrigPlayerMove = (uint64_t *)&g_pfnOrigPlayerMove;
+    char *pfnKeyEvent = (char *)GetProcAddress(g_hClientModule, "HUD_Key_Event");
 
-    // initializing & applying hooks
-    g_pDisasm = new disasm_t(PLH::Mode::x86);
-    g_DetourRedraw = new detour_t(pfnRedraw, pfnHookRedraw, pfnOrigRedraw, *g_pDisasm);
+    char *pfnHookRedraw     = (char *)&HookRedraw;
+    char *pfnHookPlayerMove = (char *)&HookPlayerMove;
+    char *pfnHookKeyEvent   = (char *)&HookKeyEvent;
+
+    g_DetourRedraw = new detour_t(pfnRedraw, pfnHookRedraw, &g_pfnOrigRedraw, g_DisasmX86);
+    g_DetourKeyEvent = new detour_t(pfnKeyEvent, pfnHookKeyEvent, &g_pfnOrigKeyEvent, g_DisasmX86);
     g_DetourPlayerMove = new detour_t(
-        pfnPlayerMove, pfnHookPlayerMove, pfnOrigPlayerMove, *g_pDisasm
+        pfnPlayerMove, pfnHookPlayerMove, &g_pfnOrigPlayerMove, g_DisasmX86
     );
 
-    if (!g_DetourRedraw || !g_DetourPlayerMove || !g_pDisasm)
-        EXCEPT("failed to allocate hooking stuff");
-
-    if (!g_DetourRedraw->hook() || !g_DetourPlayerMove->hook())
+    if (!g_DetourRedraw || !g_DetourPlayerMove || !g_DetourKeyEvent)
     {
-        delete g_DetourRedraw;
-        delete g_DetourPlayerMove;
-        delete g_pDisasm;
+        DisposeHookingStuff();
+        EXCEPT("failed to allocate hooking stuff");
+    }
+
+    bool isHookSuccesful = (
+        g_DetourRedraw->hook() &&
+        g_DetourPlayerMove->hook() &&
+        g_DetourKeyEvent->hook()
+    );
+
+    if (!isHookSuccesful)
+    {
+        DisposeHookingStuff();
         EXCEPT("unable to hook desired functions");
     }
 }
 
 void RemoveHooks()
 {
-    if (!g_DetourRedraw || !g_DetourPlayerMove || !GetModuleHandle("client.dll"))
-        return;
-
-    g_DetourRedraw->unHook();
-    g_DetourPlayerMove->unHook();
-    delete g_DetourRedraw;
-    delete g_DetourPlayerMove;
-    delete g_pDisasm;
+    if (GetModuleHandle("client.dll"))
+        DisposeHookingStuff();
 }
 
-NOINLINE int __cdecl HookRedraw(float time, int intermission)
+NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
     // call original function
     PLH::FnCast(g_pfnOrigRedraw, pfnRedraw())(time, intermission);
@@ -80,8 +99,18 @@ NOINLINE int __cdecl HookRedraw(float time, int intermission)
     return 1;
 }
 
-NOINLINE void __cdecl HookPlayerMove(playermove_t *pmove, int server)
+NOINLINE static void __cdecl HookPlayerMove(playermove_t *pmove, int server)
 {
     PLH::FnCast(g_pfnOrigPlayerMove, pfnPlayerMove())(pmove, server);
     g_pPlayerMove = pmove;
+}
+
+NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyNum, const char *bindName)
+{
+    int returnCode = PLH::FnCast(g_pfnOrigKeyEvent, pfnKeyEvent())(
+        keyDown, keyNum, bindName
+    );
+    g_pClientEngFuncs->Con_Printf("KeyEvent() (down=%d, keyNum=%d, bindName=%s)\n",
+        keyDown, keyNum, bindName);
+    return returnCode;
 }
