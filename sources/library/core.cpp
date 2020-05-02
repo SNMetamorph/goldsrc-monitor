@@ -101,6 +101,9 @@ void FrameDraw(float time, bool intermission, int screenWidth, int screenHeight)
     case DISPLAYMODE_ANGLETRACKING:
         DrawModeAngleTrack(time, screenWidth, screenHeight);
         break;
+    case DISPLAYMODE_MEASUREMENT:
+        DrawModeMeasurement(time, screenWidth, screenHeight);
+        break;
     default:
         DrawModeFull(time, screenWidth, screenHeight);
         break;
@@ -126,7 +129,7 @@ void PrintTitleText()
     g_pClientEngFuncs->Con_Printf("         Debugging tool for GoldSrc-based games      \n");
     g_pClientEngFuncs->Con_Printf("   Use with caution, VAC can be react on this stuff  \n");
     g_pClientEngFuncs->Con_Printf(" \n");
-    g_pClientEngFuncs->pfnClientCmd("play buttons/blip2.wav");
+    g_pClientEngFuncs->pfnPlaySoundByName("buttons/blip2.wav", 0.6f);
 }
 
 static void CommandTimescale()

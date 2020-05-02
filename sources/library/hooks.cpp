@@ -3,6 +3,7 @@
 #include "core.h"
 #include "globals.h"
 #include "exception.h"
+#include "measurement.h"
 
 // polyhook headers
 #include "headers/CapstoneDisassembler.hpp"
@@ -110,7 +111,6 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyNum, const char *bi
     int returnCode = PLH::FnCast(g_pfnOrigKeyEvent, pfnKeyEvent())(
         keyDown, keyNum, bindName
     );
-    g_pClientEngFuncs->Con_Printf("KeyEvent() (down=%d, keyNum=%d, bindName=%s)\n",
-        keyDown, keyNum, bindName);
+    MeasurementHandleInput(keyNum);
     return returnCode;
 }

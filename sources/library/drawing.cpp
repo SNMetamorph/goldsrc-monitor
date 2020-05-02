@@ -3,6 +3,7 @@
 #include "core.h"
 #include "globals.h"
 #include "string_stack.h"
+#include "measurement.h"
 #include "studio.h"
 
 #define STRING_COUNT		20	
@@ -31,6 +32,37 @@ static float GetSmoothFrameTime()
     lastFrameTime   = frameTime;
     lastSysTime     = currSysTime;
     return frameTime;
+}
+
+static void DrawStringStack(int screenWidth, const CStringStack &stringStack)
+{
+    int linesSkipped = 0;
+    int maxStringWidth = 0;
+    int stringCount = stringStack.GetStringCount();
+
+    for (int i = 0; i < stringCount; ++i)
+    {
+        const char *textString = stringStack.StringAt(i);
+        int stringWidth = GetStringWidth(textString);
+        if (stringWidth > maxStringWidth)
+            maxStringWidth = stringWidth;
+    }
+
+    for (int i = 0; i < stringCount; ++i)
+    {
+        const char *textString = stringStack.StringAt(i);
+        g_pClientEngFuncs->pfnDrawString(
+            screenWidth - max(STRING_MARGIN_RIGHT, maxStringWidth + 5),
+            STRING_MARGIN_UP + (STRING_HEIGHT * (i + linesSkipped)),
+            textString,
+            (int)gsm_color_r->value,
+            (int)gsm_color_g->value,
+            (int)gsm_color_b->value
+        );
+
+        if (textString[strlen(textString) - 1] == '\n')
+            ++linesSkipped;
+    }
 }
 
 void DrawModeFull(float time, int screenWidth, int screenHeight)
@@ -78,36 +110,7 @@ void DrawModeFull(float time, int screenWidth, int screenHeight)
         g_pPlayerMove->iuser4
     );
 
-    int indexOffset = 0;
-    int maxStringWidth = 0;
-    int stringCount = g_ScreenText.GetStringCount();
-    for (int i = 0; i < stringCount; ++i)
-    {
-        const char *textString = g_ScreenText.StringAt(i);
-        int stringWidth = GetStringWidth(textString);
-
-        if (stringWidth > maxStringWidth)
-            maxStringWidth = stringWidth;
-    }
-
-    for (int i = 0; i < (stringCount + indexOffset); ++i)
-    {
-        const char *textString = g_ScreenText.StringAt(i - indexOffset);
-        g_pClientEngFuncs->pfnDrawString(
-            screenWidth - max(STRING_MARGIN_RIGHT, maxStringWidth + 5),
-            STRING_MARGIN_UP + (STRING_HEIGHT * i),
-            textString,
-            (int)gsm_color_r->value,
-            (int)gsm_color_g->value,
-            (int)gsm_color_b->value
-        );
-
-        if (textString[strlen(textString) - 1] == '\n')
-        {
-            ++i;
-            ++indexOffset;
-        }
-    }
+    DrawStringStack(screenWidth, g_ScreenText);
 }
 
 void DrawModeSpeedometer(float time, int screenWidth, int screenHeight)
@@ -182,34 +185,6 @@ void DrawModeAngleTrack(float time, int screenWidth, int screenHeight)
     lastYawVelocity = yawVelocity;
 }
 
-static void TraceViewLine(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen, pmtrace_t *traceData)
-{
-    vec3_t lineStart;
-    vec3_t lineEnd;
-    cl_entity_t *localPlayer;
-    
-    lineStart   = viewOrigin;
-    lineEnd     = lineStart + (viewDir * lineLen);
-    localPlayer = g_pClientEngFuncs->GetLocalPlayer();
-
-    g_pClientEngFuncs->pEventAPI->EV_SetUpPlayerPrediction(false, true);
-    g_pClientEngFuncs->pEventAPI->EV_PushPMStates();
-    g_pClientEngFuncs->pEventAPI->EV_SetSolidPlayers(localPlayer->index - 1);
-    g_pClientEngFuncs->pEventAPI->EV_SetTraceHull(2);
-    g_pClientEngFuncs->pEventAPI->EV_PlayerTrace(
-        lineStart, lineEnd, PM_NORMAL,
-        localPlayer->index, traceData
-    );
-    g_pClientEngFuncs->pEventAPI->EV_PopPMStates();
-}
-
-static studiohdr_t *GetStudioModelHeader(model_t *model)
-{
-    if (model && model->type == mod_studio)
-        return (studiohdr_t *)model->cache.data;
-    return nullptr;
-}
-
 static bool TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen, int &entIndex)
 {
     vec3_t bboxMin;
@@ -230,7 +205,11 @@ static bool TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen, int 
             continue;
 
         traceEntity = g_pClientEngFuncs->GetEntityByIndex(visEnt.info);
-        mdlHeader = GetStudioModelHeader(traceEntity->model);
+        if (traceEntity->model && traceEntity->model->type == mod_studio)
+            mdlHeader = (studiohdr_t *)traceEntity->model->cache.data;
+        else
+            mdlHeader = nullptr;
+
         if (mdlHeader)
         {
             seqDesc = (mstudioseqdesc_t*)((char *)mdlHeader + mdlHeader->seqindex);
@@ -270,7 +249,7 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
     g_pClientEngFuncs->GetViewAngles(viewAngles);
     g_pClientEngFuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
     viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-    TraceViewLine(viewOrigin, viewDir, lineLen, &traceData);
+    TraceLine(viewOrigin, viewDir, lineLen, &traceData);
 
     if (traceData.fraction < 1.f && traceData.ent > 0)
         entityIndex = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
@@ -291,7 +270,7 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
         }
 
         float entityDistance = (entityOrigin - viewOrigin).Length();        
-        g_ScreenText.PushPrintf("Entity index: %d", entityIndex);
+        g_ScreenText.PushPrintf("Entity Index: %d", entityIndex);
         g_ScreenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
         g_ScreenText.PushPrintf("Distance: %.1f units", entityDistance);
@@ -304,46 +283,53 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
         else
         {
             vec3_t brushSize = entityModel->maxs - entityModel->mins;
-            g_ScreenText.PushPrintf("Brush size: (%.1f; %.1f; %.1f)",
+            g_ScreenText.PushPrintf("Brush Size: (%.1f; %.1f; %.1f)",
                 brushSize.x, brushSize.y, brushSize.z);
         }
 
         if (entityModel->type != mod_brush)
         {
-            g_ScreenText.PushPrintf("Model name: %s", entityModel->name);
-            g_ScreenText.PushPrintf("Anim. frame: %.1f",
+            g_ScreenText.PushPrintf("Model Name: %s", entityModel->name);
+            g_ScreenText.PushPrintf("Anim. Frame: %.1f",
                 traceEntity->curstate.frame);
-            g_ScreenText.PushPrintf("Anim. sequence: %d",
+            g_ScreenText.PushPrintf("Anim. Sequence: %d",
                 traceEntity->curstate.sequence);
-            g_ScreenText.PushPrintf("Bodygroup number: %d",
+            g_ScreenText.PushPrintf("Bodygroup Number: %d",
                 traceEntity->curstate.body);
-            g_ScreenText.PushPrintf("Skin number: %d",
+            g_ScreenText.PushPrintf("Skin Number: %d",
                 traceEntity->curstate.skin);
         }
     }
     else
         g_ScreenText.Push("Entity not found");
 
-    int maxStringWidth = 0;
-    int stringCount = g_ScreenText.GetStringCount();
-    for (int i = 0; i < stringCount; ++i)
-    {
-        const char *textString = g_ScreenText.StringAt(i);
-        int stringWidth = GetStringWidth(textString);
+    DrawStringStack(screenWidth, g_ScreenText);
+}
 
-        if (stringWidth > maxStringWidth)
-            maxStringWidth = stringWidth;
-    }
+void DrawModeMeasurement(float time, int screenWidth, int screenHeight)
+{
+    vec3_t originPointA = GetPointOriginA();
+    vec3_t originPointB = GetPointOriginB();
+    float pointsDistance = GetPointsDistance();
 
-    for (int i = 0; i < stringCount; ++i)
-    {
-        g_pClientEngFuncs->pfnDrawString(
-            screenWidth - max(STRING_MARGIN_RIGHT, maxStringWidth + 5),
-            STRING_MARGIN_UP + (STRING_HEIGHT * i),
-            g_ScreenText.StringAt(i),
-            (int)gsm_color_r->value,
-            (int)gsm_color_g->value,
-            (int)gsm_color_b->value
-        );
-    }
+    g_ScreenText.Clear();
+    if (originPointA.Length() < 0.0001f)
+        g_ScreenText.Push("Point A not set");
+    else
+        g_ScreenText.PushPrintf("Point A origin: (%.2f, %.2f, %.2f)", 
+            originPointA.x, originPointA.y, originPointA.z);
+
+    if (originPointB.Length() < 0.0001f)
+        g_ScreenText.Push("Point B not set");
+    else
+        g_ScreenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)", 
+            originPointB.x, originPointB.y, originPointB.z);
+
+    g_ScreenText.PushPrintf("Points Distance: %.2f (%.2f meters)",
+        pointsDistance, pointsDistance / 39.37f);
+    g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", GetLineElevationAngle());
+    g_ScreenText.PushPrintf("Snap Mode: %s", GetSnapModeName());
+
+    DrawStringStack(screenWidth, g_ScreenText);
+    MeasurementVisualize(screenWidth, screenHeight);
 }

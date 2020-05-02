@@ -122,32 +122,26 @@ void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
     return valueAddr;
 }
 
-//static bool ClipLine(int d, 
-//    const vec3_t &bboxMin, const vec3_t &bboxMax, 
-//    const vec3_t &lineStart, const vec3_t &lineEnd,
-//    float &f_low, float &f_high)
-//{
-//    float f_dim_low, f_dim_high;
-//    f_dim_low = (bboxMin[d] - lineStart[d]) / (lineEnd[d] - lineStart[d]);
-//    f_dim_high = (bboxMax[d] - lineStart[d]) / (lineEnd[d] - lineStart[d]);
-//
-//    if (f_dim_high < f_dim_low)
-//        std::swap(f_dim_high, f_dim_low);
-//
-//    if (f_dim_high < f_low)
-//        return false;
-//
-//    if (f_dim_low > f_high)
-//        return false;
-//
-//    f_low = max(f_dim_low, f_low);
-//    f_high = max(f_dim_high, f_high);
-//
-//    if (f_low > f_high)
-//        return false;
-//
-//    return true;
-//}
+void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData)
+{
+    vec3_t lineStart;
+    vec3_t lineEnd;
+    cl_entity_t *localPlayer;
+
+    lineStart   = origin;
+    lineEnd     = lineStart + (dir * lineLen);
+    localPlayer = g_pClientEngFuncs->GetLocalPlayer();
+
+    g_pClientEngFuncs->pEventAPI->EV_SetUpPlayerPrediction(false, true);
+    g_pClientEngFuncs->pEventAPI->EV_PushPMStates();
+    g_pClientEngFuncs->pEventAPI->EV_SetSolidPlayers(localPlayer->index - 1);
+    g_pClientEngFuncs->pEventAPI->EV_SetTraceHull(2);
+    g_pClientEngFuncs->pEventAPI->EV_PlayerTrace(
+        lineStart, lineEnd, PM_NORMAL,
+        localPlayer->index, traceData
+    );
+    g_pClientEngFuncs->pEventAPI->EV_PopPMStates();
+}
 
 float TraceBBoxLine(
     const vec3_t &bboxMin, const vec3_t &bboxMax, 

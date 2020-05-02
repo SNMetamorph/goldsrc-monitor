@@ -52,7 +52,7 @@ void CStringStack::Clear()
     m_iStackIndex = 0;
 }
 
-const char *CStringStack::StringAt(int index)
+const char *CStringStack::StringAt(int index) const
 {
     if (index >= 0 && index < m_iArraySize)
         return &m_aStringArray[index * m_iStringLen];
