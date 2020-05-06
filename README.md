@@ -1,7 +1,8 @@
 # GoldSrc Monitor
 Simple utility for mapping/scripting or researching games based on GoldSrc engine<br>
 Download this program and read description you can on [Gamebanana Page](https://gamebanana.com/gamefiles/8977)
-![](https://gamebanana.com/gamefiles/embeddables/8977?type=large)
+<br>
+![Gamebanana Page](https://gamebanana.com/gamefiles/embeddables/8977?type=large)
 # Cloning
 ```
 git clone --recursive https://github.com/SNMetamorph/goldsrc-monitor.git
