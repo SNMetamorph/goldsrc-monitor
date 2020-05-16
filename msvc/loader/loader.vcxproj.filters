@@ -34,5 +34,11 @@
     <ClInclude Include="..\..\sources\app_version.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\sources\loader\resource.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="loader.rc" />
   </ItemGroup>
 </Project>

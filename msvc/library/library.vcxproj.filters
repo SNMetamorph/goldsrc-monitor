@@ -85,5 +85,11 @@
     <ClInclude Include="..\..\sources\library\measurement.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\sources\library\resource.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="library.rc" />
   </ItemGroup>
 </Project>

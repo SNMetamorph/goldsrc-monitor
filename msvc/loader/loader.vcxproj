@@ -45,10 +45,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
     <TargetName>gsm-$(ProjectName)</TargetName>
+    <IncludePath>$(SolutionDir)..\sources;$(SolutionDir)..\sources\library;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)..\build\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
     <TargetName>gsm-$(ProjectName)</TargetName>
+    <IncludePath>$(SolutionDir)..\sources;$(SolutionDir)..\sources\library;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)..\build\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,8 +98,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\sources\app_version.h" />
     <ClInclude Include="..\..\sources\exception.h" />
+    <ClInclude Include="..\..\sources\loader\resource.h" />
     <ClInclude Include="..\..\sources\moduleinfo.h" />
     <ClInclude Include="..\..\sources\loader\util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="loader.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

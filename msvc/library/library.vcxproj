@@ -44,13 +44,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>gsm-$(ProjectName)</TargetName>
-    <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\build\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\build\$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Configuration)\$(ProjectName)</IntDir>
+    <IncludePath>$(SolutionDir)..\sources;$(SolutionDir)..\sources\library;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>gsm-$(ProjectName)</TargetName>
-    <OutDir>$(SolutionDir)..\build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\build\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)..\build\$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Configuration)\$(ProjectName)</IntDir>
+    <IncludePath>$(SolutionDir)..\sources;$(SolutionDir)..\sources\library;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -58,7 +60,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\sources;$(HLSDK)\common;$(HLSDK)\pm_shared;$(HLSDK)\engine;$(HLSDK)\game_shared;$(HLSDK)\external;$(HLSDK)\utils\vgui\include;$(HLSDK)\public;$(HLSDK)\cl_dll;$(SolutionDir)..\external\polyhook;$(SolutionDir)..\external\polyhook\asmjit;$(SolutionDir)..\external\polyhook\capstone;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\sources;$(SolutionDir)..\sources\library;$(HLSDK)\common;$(HLSDK)\pm_shared;$(HLSDK)\engine;$(HLSDK)\game_shared;$(HLSDK)\external;$(HLSDK)\utils\vgui\include;$(HLSDK)\public;$(HLSDK)\cl_dll;$(SolutionDir)..\external\polyhook;$(SolutionDir)..\external\polyhook\asmjit;$(SolutionDir)..\external\polyhook\capstone;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>PSAPI_VERSION=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -122,6 +124,10 @@
     <ClInclude Include="..\..\sources\library\util.h" />
     <ClInclude Include="..\..\sources\moduleinfo.h" />
     <ClInclude Include="..\..\sources\string_stack.h" />
+    <ClInclude Include="..\..\sources\library\resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="library.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
