@@ -134,6 +134,9 @@ static void ProgramInit()
     ApplyHooks();
     SetupConVars(engineDLL);
     PrintTitleText();
+
+    // load configuration file
+    g_pClientEngFuncs->pfnClientCmd("exec gsm_config.cfg");
 }
 
 
