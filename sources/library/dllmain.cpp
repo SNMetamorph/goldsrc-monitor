@@ -19,6 +19,17 @@ static bool FindClientModule()
         return false;
 }
 
+static bool FindEngineModule()
+{
+    g_hEngineModule = GetModuleHandle("hw.dll");
+    if (!g_hEngineModule)
+    {
+        g_hEngineModule = GetModuleHandle("sw.dll");
+        if (!g_hEngineModule)
+            g_hEngineModule = GetModuleHandle("swds.dll");
+    }
+    return g_hEngineModule != NULL;
+}
 
 static void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 {
@@ -113,9 +124,7 @@ static void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
 
 static void ProgramInit()
 {
-    // get module handles
-    g_hEngineModule = GetModuleHandle("hw.dll");
-    if (!g_hEngineModule)
+    if (!FindEngineModule())
         EXCEPT("failed to get engine module handle");
 
     if (!FindClientModule())
