@@ -312,6 +312,10 @@ void DrawModeMeasurement(float time, int screenWidth, int screenHeight)
     vec3_t originPointB = GetPointOriginB();
     float pointsDistance = GetPointsDistance();
 
+    const float roundThreshold = 0.935f;
+    if (fmodf(pointsDistance, 1.f) >= roundThreshold)
+        pointsDistance += (1.f - roundThreshold);
+
     g_ScreenText.Clear();
     if (originPointA.Length() < 0.0001f)
         g_ScreenText.Push("Point A not set");
@@ -325,7 +329,7 @@ void DrawModeMeasurement(float time, int screenWidth, int screenHeight)
         g_ScreenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)", 
             originPointB.x, originPointB.y, originPointB.z);
 
-    g_ScreenText.PushPrintf("Points Distance: %.2f (%.2f meters)",
+    g_ScreenText.PushPrintf("Points Distance: %.1f (%.2f meters)",
         pointsDistance, pointsDistance / 39.37f);
     g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", GetLineElevationAngle());
     g_ScreenText.PushPrintf("Snap Mode: %s", GetSnapModeName());

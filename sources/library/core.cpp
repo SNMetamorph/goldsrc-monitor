@@ -15,7 +15,7 @@ static cvar_t *RegisterConVar(const char *name, const char *value, int flags)
     return g_pClientEngFuncs->pfnRegisterVariable(name, value, flags);
 }
 
-static void FindTimescaleConVar(moduleinfo_t &engineLib)
+static void FindTimescaleConVar(const moduleinfo_t &engineLib)
 {
     uint8_t *probeAddr;
     uint8_t *stringAddr;
@@ -68,10 +68,7 @@ static void FindTimescaleConVar(moduleinfo_t &engineLib)
 static bool FindServerModule(HMODULE &moduleHandle)
 {
     moduleHandle = FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
-    if (moduleHandle)
-        return true;
-    else
-        return false;
+    return moduleHandle != NULL;
 }
 
 void SetupConVars(moduleinfo_t &engineLib)
@@ -157,8 +154,10 @@ static void CommandTimescale()
             g_pClientEngFuncs->Con_Printf("Command using example: gsm_timescale 0.5\n");
     }
     else
+    {
         g_pClientEngFuncs->Con_Printf(
             "Server module not found! Start singleplayer "
             "or listen server and execute command again\n"
         );
+    }
 }
