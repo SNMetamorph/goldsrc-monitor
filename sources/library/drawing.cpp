@@ -308,9 +308,11 @@ void DrawModeEntityReport(float time, int screenWidth, int screenHeight)
 
 void DrawModeMeasurement(float time, int screenWidth, int screenHeight)
 {
-    vec3_t originPointA = GetPointOriginA();
-    vec3_t originPointB = GetPointOriginB();
-    float pointsDistance = GetPointsDistance();
+    vec3_t originPointA = g_Measurement.GetPointOriginA();
+    vec3_t originPointB = g_Measurement.GetPointOriginB();
+    float pointsDistance = g_Measurement.GetPointsDistance();
+    float elevationAngle = g_Measurement.GetLineElevationAngle();
+    const char *snapModeName = g_Measurement.GetSnapModeName();
 
     const float roundThreshold = 0.935f;
     if (fmodf(pointsDistance, 1.f) >= roundThreshold)
@@ -331,9 +333,9 @@ void DrawModeMeasurement(float time, int screenWidth, int screenHeight)
 
     g_ScreenText.PushPrintf("Points Distance: %.1f (%.2f meters)",
         pointsDistance, pointsDistance / 39.37f);
-    g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", GetLineElevationAngle());
-    g_ScreenText.PushPrintf("Snap Mode: %s", GetSnapModeName());
+    g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
+    g_ScreenText.PushPrintf("Snap Mode: %s", snapModeName);
 
     DrawStringStack(screenWidth, g_ScreenText);
-    MeasurementVisualize(screenWidth, screenHeight);
+    g_Measurement.Visualize(screenWidth, screenHeight);
 }

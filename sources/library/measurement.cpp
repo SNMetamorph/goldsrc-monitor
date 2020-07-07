@@ -6,14 +6,11 @@
 // HLSDK
 #include "keydefs.h"
 
-static vec3_t       g_vecPointA;
-static vec3_t       g_vecPointB;
-static HLSPRITE     g_iLaserSprite;
-static int          g_iSnapMode = { SNAPMODE_FREE };
+CMeasurement &g_Measurement = CMeasurement::GetInstance();
 
-static void UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
+void CMeasurement::UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
 {
-    switch (g_iSnapMode)
+    switch (m_iSnapMode)
     {
     case SNAPMODE_AXIS_X:
         destPoint.x = srcPoint.x;
@@ -30,11 +27,11 @@ static void UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
     }
 }
 
-static void TraceAlongNormal(pmtrace_t &traceData, float traceLength)
+void CMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
 {
     vec3_t traceOrigin      = traceData.endpos;
     vec3_t planeNormal      = traceData.plane.normal;
-    vec3_t *pointsList[2]   = { &g_vecPointA, &g_vecPointB };
+    vec3_t *pointsList[2]   = { &m_vecPointA, &m_vecPointB };
 
     for (int i = 0; i < 2; ++i)
     {
@@ -45,7 +42,7 @@ static void TraceAlongNormal(pmtrace_t &traceData, float traceLength)
     }
 }
 
-static bool WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
+bool CMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
 {
     Vector2D screenCoords;
     if (!g_pClientEngFuncs->pTriAPI->WorldToScreen(origin, &screenCoords.x))
@@ -57,22 +54,22 @@ static bool WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
     return false;
 }
 
-vec3_t GetPointOriginA()
+const vec3_t& CMeasurement::GetPointOriginA()
 {
-    return g_vecPointA;
+    return m_vecPointA;
 }
 
-vec3_t GetPointOriginB()
+const vec3_t& CMeasurement::GetPointOriginB()
 {
-    return g_vecPointB;
+    return m_vecPointB;
 }
 
-float GetPointsDistance()
+float CMeasurement::GetPointsDistance()
 {
-    return (g_vecPointB - g_vecPointA).Length();
+    return (m_vecPointB - m_vecPointA).Length();
 }
 
-void MeasurementHandleInput(int keyCode)
+void CMeasurement::HandleInput(int keyCode)
 {
     int currentMode;
     vec3_t viewDir;
@@ -94,22 +91,22 @@ void MeasurementHandleInput(int keyCode)
         TraceLine(viewOrigin, viewDir, traceLen, &traceData);
 
         if (keyCode == K_MOUSE1)
-            UpdatePointOrigin(g_vecPointA, traceData.endpos);
+            UpdatePointOrigin(m_vecPointA, traceData.endpos);
         else if (keyCode == K_MOUSE2)
-            UpdatePointOrigin(g_vecPointB, traceData.endpos);
+            UpdatePointOrigin(m_vecPointB, traceData.endpos);
         else if (keyCode == K_MOUSE3)
             TraceAlongNormal(traceData, traceLen);
     }
     else if (keyCode == 'v')
     {
-        ++g_iSnapMode;
-        if (g_iSnapMode == SNAPMODE_MAX)
-            g_iSnapMode = SNAPMODE_FREE;
+        ++m_iSnapMode;
+        if (m_iSnapMode == SNAPMODE_MAX)
+            m_iSnapMode = SNAPMODE_FREE;
         g_pClientEngFuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
     }
 }
 
-static void DrawMeasurementLine(float lifeTime)
+void CMeasurement::DrawMeasurementLine(float lifeTime)
 {
     const float lineWidth       = 2.0f;
     const float lineBrightness  = 1.0f;
@@ -119,14 +116,14 @@ static void DrawMeasurementLine(float lifeTime)
     const float lineColorB      = 0.0f;
 
     g_pClientEngFuncs->pEfxAPI->R_BeamPoints(
-        g_vecPointA, g_vecPointB, g_iLaserSprite,
+        m_vecPointA, m_vecPointB, m_iLineSprite,
         lifeTime * 2.f, lineWidth, 0,
         lineBrightness, lineSpeed, 0, 0,
         lineColorR, lineColorG, lineColorB
     );
 }
 
-static void DrawPointHints(int screenWidth, int screenHeight)
+void CMeasurement::DrawPointHints(int screenWidth, int screenHeight)
 {
     int screenX;
     int screenY;
@@ -134,23 +131,23 @@ static void DrawPointHints(int screenWidth, int screenHeight)
     const int textColorG = 255;
     const int textColorB = 255;
 
-    if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, g_vecPointA))
+    if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, m_vecPointA))
     {
         g_pClientEngFuncs->pfnDrawString(
             screenX, screenY, "A", textColorR, textColorG, textColorB);
     }
 
-    if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, g_vecPointB))
+    if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, m_vecPointB))
     {
         g_pClientEngFuncs->pfnDrawString(
             screenX, screenY, "B", textColorR, textColorG, textColorB);
     }
 }
 
-static void DrawSupportLines(float lifeTime)
+void CMeasurement::DrawSupportLines(float lifeTime)
 {
     vec3_t axisVector               = { 0.f, 0.f, 0.f };
-    const vec3_t *pointsList[2]     = { &g_vecPointA, &g_vecPointB };
+    const vec3_t *pointsList[2]     = { &m_vecPointA, &m_vecPointB };
     const float lineWidth           = 1.0f;
     const float lineLenght          = 24.0f;
     const float lineSpeed           = 5.0f;
@@ -159,11 +156,11 @@ static void DrawSupportLines(float lifeTime)
     const float lineColorB          = 0.2f;
     const float lineBrightness      = 1.0f;
 
-    if (g_iSnapMode == SNAPMODE_AXIS_X)
+    if (m_iSnapMode == SNAPMODE_AXIS_X)
         axisVector.x = 1.f;
-    else if (g_iSnapMode == SNAPMODE_AXIS_Y)
+    else if (m_iSnapMode == SNAPMODE_AXIS_Y)
         axisVector.y = 1.f;
-    else if (g_iSnapMode == SNAPMODE_AXIS_Z)
+    else if (m_iSnapMode == SNAPMODE_AXIS_Z)
         axisVector.z = 1.f;
 
     for (int i = 0; i < 2; ++i)
@@ -171,7 +168,7 @@ static void DrawSupportLines(float lifeTime)
         g_pClientEngFuncs->pEfxAPI->R_BeamPoints(
             *pointsList[i] + (axisVector * lineLenght),
             *pointsList[i] - (axisVector * lineLenght),
-            g_iLaserSprite,
+            m_iLineSprite,
             lifeTime * 2.0f, lineWidth, 0,
             lineBrightness, lineSpeed, 0, 0,
             lineColorR, lineColorG, lineColorB
@@ -179,22 +176,25 @@ static void DrawSupportLines(float lifeTime)
     }
 }
 
-void MeasurementVisualize(int screenWidth, int screenHeight)
+void CMeasurement::LoadLineSprite()
+{
+    const char *spritePath = "sprites/laserbeam.spr";
+    g_pClientEngFuncs->pfnSPR_Load(spritePath);
+    m_iLineSprite = 
+        g_pClientEngFuncs->pEventAPI->EV_FindModelIndex(spritePath);
+}
+
+void CMeasurement::Visualize(int screenWidth, int screenHeight)
 {
     float lifeTime;
     static float lastTime;
 
     // disable visualisation when points not set
-    if (g_vecPointA.Length() <= 0.0001f || g_vecPointB.Length() <= 0.0001f)
+    if (m_vecPointA.Length() <= 0.0001f || m_vecPointB.Length() <= 0.0001f)
         return;
 
-    if (!g_iLaserSprite || g_pPlayerMove->time < lastTime)
-    {
-        const char *spritePath = "sprites/laserbeam.spr";
-        g_pClientEngFuncs->pfnSPR_Load(spritePath);
-        g_iLaserSprite = 
-            g_pClientEngFuncs->pEventAPI->EV_FindModelIndex(spritePath);
-    }
+    if (!m_iLineSprite || g_pPlayerMove->time < lastTime)
+        LoadLineSprite();
 
     lastTime = g_pPlayerMove->time;
     lifeTime = min(0.05f, g_pPlayerMove->frametime);
@@ -202,13 +202,13 @@ void MeasurementVisualize(int screenWidth, int screenHeight)
     DrawMeasurementLine(lifeTime);
     DrawPointHints(screenWidth, screenHeight);
 
-    if (g_iSnapMode != SNAPMODE_FREE)
+    if (m_iSnapMode != SNAPMODE_FREE)
         DrawSupportLines(lifeTime);
 }
 
-const char *GetSnapModeName()
+const char *CMeasurement::GetSnapModeName()
 {
-    switch (g_iSnapMode)
+    switch (m_iSnapMode)
     {
     case SNAPMODE_FREE:
         return "Free";
@@ -226,24 +226,30 @@ const char *GetSnapModeName()
     return "";
 }
 
-float GetLineElevationAngle()
+float CMeasurement::GetLineElevationAngle()
 {
     vec3_t highPoint;
     vec3_t lowPoint;
     vec3_t lineDirection;
 
-    if (g_vecPointA.z > g_vecPointB.z)
+    if (m_vecPointA.z > m_vecPointB.z)
     {
-        highPoint = g_vecPointA;
-        lowPoint  = g_vecPointB;
+        highPoint = m_vecPointA;
+        lowPoint  = m_vecPointB;
     }
     else
     {
-        highPoint = g_vecPointB;
-        lowPoint  = g_vecPointA;
+        highPoint = m_vecPointB;
+        lowPoint  = m_vecPointA;
     }
 
     lineDirection = highPoint - lowPoint;
     lineDirection = lineDirection.Normalize();
     return asinf(lineDirection.z) * 180.0f / 3.14f;
+}
+
+CMeasurement &CMeasurement::GetInstance()
+{
+    static CMeasurement instance;
+    return instance;
 }

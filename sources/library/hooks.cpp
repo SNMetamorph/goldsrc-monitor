@@ -80,6 +80,7 @@ void ApplyHooks()
 
 void RemoveHooks()
 {
+    // check for client.dll not already unloaded from process
     if (GetModuleHandle("client.dll"))
         DisposeHookingStuff();
 }
@@ -111,6 +112,6 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyNum, const char *bi
     int returnCode = PLH::FnCast(g_pfnOrigKeyEvent, pfnKeyEvent())(
         keyDown, keyNum, bindName
     );
-    MeasurementHandleInput(keyNum);
+    g_Measurement.HandleInput(keyNum);
     return returnCode;
 }
