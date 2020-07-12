@@ -67,7 +67,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PolyHook_2.lib;capstone.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PolyHook_2.lib;capstone.lib;psapi.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -89,7 +89,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\build;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>PolyHook_2.lib;capstone.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PolyHook_2.lib;capstone.lib;psapi.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
@@ -98,11 +98,14 @@
     <ClCompile Include="..\..\sources\exception.cpp" />
     <ClCompile Include="..\..\sources\library\buildinfo.cpp" />
     <ClCompile Include="..\..\sources\library\core.cpp" />
-    <ClCompile Include="..\..\sources\library\dllmain.cpp" />
-    <ClCompile Include="..\..\sources\library\drawing.cpp" />
+    <ClCompile Include="..\..\sources\library\displaymode_angletracking.cpp" />
+    <ClCompile Include="..\..\sources\library\displaymode_entityreport.cpp" />
+    <ClCompile Include="..\..\sources\library\displaymode_full.cpp" />
+    <ClCompile Include="..\..\sources\library\displaymode_measurement.cpp" />
+    <ClCompile Include="..\..\sources\library\displaymode_speedometer.cpp" />
+    <ClCompile Include="..\..\sources\library\dll_main.cpp" />
     <ClCompile Include="..\..\sources\library\globals.cpp" />
     <ClCompile Include="..\..\sources\library\hooks.cpp" />
-    <ClCompile Include="..\..\sources\library\measurement.cpp" />
     <ClCompile Include="..\..\sources\library\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -115,11 +118,15 @@
     <ClInclude Include="..\..\sources\exception.h" />
     <ClInclude Include="..\..\sources\library\buildinfo.h" />
     <ClInclude Include="..\..\sources\library\core.h" />
-    <ClInclude Include="..\..\sources\library\drawing.h" />
+    <ClInclude Include="..\..\sources\library\displaymode_angletracking.h" />
+    <ClInclude Include="..\..\sources\library\displaymode_entityreport.h" />
+    <ClInclude Include="..\..\sources\library\displaymode_full.h" />
+    <ClInclude Include="..\..\sources\library\displaymode_measurement.h" />
+    <ClInclude Include="..\..\sources\library\displaymode_speedometer.h" />
+    <ClInclude Include="..\..\sources\library\display_mode.h" />
     <ClInclude Include="..\..\sources\library\funcdata.h" />
     <ClInclude Include="..\..\sources\library\globals.h" />
     <ClInclude Include="..\..\sources\library\hooks.h" />
-    <ClInclude Include="..\..\sources\library\measurement.h" />
     <ClInclude Include="..\..\sources\library\stdafx.h" />
     <ClInclude Include="..\..\sources\library\util.h" />
     <ClInclude Include="..\..\sources\moduleinfo.h" />

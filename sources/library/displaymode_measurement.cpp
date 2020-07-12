@@ -1,4 +1,4 @@
-#include "measurement.h"
+#include "displaymode_measurement.h"
 #include "core.h"
 #include "util.h"
 #include "globals.h"
@@ -6,9 +6,15 @@
 // HLSDK
 #include "keydefs.h"
 
-CMeasurement &g_Measurement = CMeasurement::GetInstance();
+CModeMeasurement &g_ModeMeasurement = CModeMeasurement::GetInstance();
 
-void CMeasurement::UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
+CModeMeasurement &CModeMeasurement::GetInstance()
+{
+    static CModeMeasurement instance;
+    return instance;
+}
+
+void CModeMeasurement::UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
 {
     switch (m_iSnapMode)
     {
@@ -27,7 +33,7 @@ void CMeasurement::UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
     }
 }
 
-void CMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
+void CModeMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
 {
     vec3_t traceOrigin      = traceData.endpos;
     vec3_t planeNormal      = traceData.plane.normal;
@@ -42,9 +48,9 @@ void CMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
     }
 }
 
-bool CMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
+bool CModeMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
 {
-    Vector2D screenCoords;
+    vec3_t screenCoords;
     if (!g_pClientEngFuncs->pTriAPI->WorldToScreen(origin, &screenCoords.x))
     {
         x = static_cast<int>((1.0f + screenCoords.x) * w * 0.5f);
@@ -54,22 +60,40 @@ bool CMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
     return false;
 }
 
-const vec3_t& CMeasurement::GetPointOriginA()
+void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
+{
+    float lifeTime;
+    static float lastTime;
+
+    if (!m_iLineSprite || g_pPlayerMove->time < lastTime)
+        LoadLineSprite();
+
+    lastTime = g_pPlayerMove->time;
+    lifeTime = min(0.05f, g_pPlayerMove->frametime);
+
+    DrawMeasurementLine(lifeTime);
+    DrawPointHints(screenWidth, screenHeight);
+
+    if (m_iSnapMode != SNAPMODE_FREE)
+        DrawSupportLines(lifeTime);
+}
+
+const vec3_t& CModeMeasurement::GetPointOriginA()
 {
     return m_vecPointA;
 }
 
-const vec3_t& CMeasurement::GetPointOriginB()
+const vec3_t& CModeMeasurement::GetPointOriginB()
 {
     return m_vecPointB;
 }
 
-float CMeasurement::GetPointsDistance()
+float CModeMeasurement::GetPointsDistance()
 {
     return (m_vecPointB - m_vecPointA).Length();
 }
 
-void CMeasurement::HandleInput(int keyCode)
+bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
 {
     int currentMode;
     vec3_t viewDir;
@@ -77,10 +101,10 @@ void CMeasurement::HandleInput(int keyCode)
     vec3_t viewAngles;
     pmtrace_t traceData;
     const float traceLen = 64000.f;
-    
+
     currentMode = (int)gsm_mode->value;
-    if (currentMode != DISPLAYMODE_MEASUREMENT)
-        return;
+    if (currentMode != DISPLAYMODE_MEASUREMENT || !isKeyDown)
+        return true;
 
     if (keyCode >= K_MOUSE1 && keyCode <= K_MOUSE3)
     {
@@ -96,6 +120,7 @@ void CMeasurement::HandleInput(int keyCode)
             UpdatePointOrigin(m_vecPointB, traceData.endpos);
         else if (keyCode == K_MOUSE3)
             TraceAlongNormal(traceData, traceLen);
+        return false;
     }
     else if (keyCode == 'v')
     {
@@ -103,10 +128,12 @@ void CMeasurement::HandleInput(int keyCode)
         if (m_iSnapMode == SNAPMODE_MAX)
             m_iSnapMode = SNAPMODE_FREE;
         g_pClientEngFuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
+        return false;
     }
+    return true;
 }
 
-void CMeasurement::DrawMeasurementLine(float lifeTime)
+void CModeMeasurement::DrawMeasurementLine(float lifeTime)
 {
     const float lineWidth       = 2.0f;
     const float lineBrightness  = 1.0f;
@@ -123,7 +150,7 @@ void CMeasurement::DrawMeasurementLine(float lifeTime)
     );
 }
 
-void CMeasurement::DrawPointHints(int screenWidth, int screenHeight)
+void CModeMeasurement::DrawPointHints(int screenWidth, int screenHeight)
 {
     int screenX;
     int screenY;
@@ -144,7 +171,7 @@ void CMeasurement::DrawPointHints(int screenWidth, int screenHeight)
     }
 }
 
-void CMeasurement::DrawSupportLines(float lifeTime)
+void CModeMeasurement::DrawSupportLines(float lifeTime)
 {
     vec3_t axisVector               = { 0.f, 0.f, 0.f };
     const vec3_t *pointsList[2]     = { &m_vecPointA, &m_vecPointB };
@@ -176,7 +203,7 @@ void CMeasurement::DrawSupportLines(float lifeTime)
     }
 }
 
-void CMeasurement::LoadLineSprite()
+void CModeMeasurement::LoadLineSprite()
 {
     const char *spritePath = "sprites/laserbeam.spr";
     g_pClientEngFuncs->pfnSPR_Load(spritePath);
@@ -184,29 +211,46 @@ void CMeasurement::LoadLineSprite()
         g_pClientEngFuncs->pEventAPI->EV_FindModelIndex(spritePath);
 }
 
-void CMeasurement::Visualize(int screenWidth, int screenHeight)
+void CModeMeasurement::Render2D(int screenWidth, int screenHeight)
 {
-    float lifeTime;
-    static float lastTime;
+    vec3_t originPointA = GetPointOriginA();
+    vec3_t originPointB = GetPointOriginB();
+    float pointsDistance = GetPointsDistance();
+    float elevationAngle = GetLineElevationAngle();
+    const char *snapModeName = GetSnapModeName();
 
-    // disable visualisation when points not set
-    if (m_vecPointA.Length() <= 0.0001f || m_vecPointB.Length() <= 0.0001f)
-        return;
+    const float roundThreshold = 0.935f;
+    if (fmodf(pointsDistance, 1.f) >= roundThreshold)
+        pointsDistance += (1.f - roundThreshold);
 
-    if (!m_iLineSprite || g_pPlayerMove->time < lastTime)
-        LoadLineSprite();
+    g_ScreenText.Clear();
+    if (originPointA.Length() < 0.0001f)
+        g_ScreenText.Push("Point A not set");
+    else
+        g_ScreenText.PushPrintf("Point A origin: (%.2f, %.2f, %.2f)", 
+            originPointA.x, originPointA.y, originPointA.z);
 
-    lastTime = g_pPlayerMove->time;
-    lifeTime = min(0.05f, g_pPlayerMove->frametime);
+    if (originPointB.Length() < 0.0001f)
+        g_ScreenText.Push("Point B not set");
+    else
+        g_ScreenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)", 
+            originPointB.x, originPointB.y, originPointB.z);
 
-    DrawMeasurementLine(lifeTime);
-    DrawPointHints(screenWidth, screenHeight);
+    g_ScreenText.PushPrintf("Points Distance: %.1f (%.2f meters)",
+        pointsDistance, pointsDistance / 39.37f);
+    g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
+    g_ScreenText.PushPrintf("Snap Mode: %s", snapModeName);
 
-    if (m_iSnapMode != SNAPMODE_FREE)
-        DrawSupportLines(lifeTime);
+    DrawStringStack(400, 15, g_ScreenText);
+    if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f)
+        DrawVisualization(screenWidth, screenHeight);
 }
 
-const char *CMeasurement::GetSnapModeName()
+void CModeMeasurement::Render3D()
+{
+}
+
+const char *CModeMeasurement::GetSnapModeName()
 {
     switch (m_iSnapMode)
     {
@@ -226,7 +270,7 @@ const char *CMeasurement::GetSnapModeName()
     return "";
 }
 
-float CMeasurement::GetLineElevationAngle()
+float CModeMeasurement::GetLineElevationAngle()
 {
     vec3_t highPoint;
     vec3_t lowPoint;
@@ -246,10 +290,4 @@ float CMeasurement::GetLineElevationAngle()
     lineDirection = highPoint - lowPoint;
     lineDirection = lineDirection.Normalize();
     return asinf(lineDirection.z) * 180.0f / 3.14f;
-}
-
-CMeasurement &CMeasurement::GetInstance()
-{
-    static CMeasurement instance;
-    return instance;
 }

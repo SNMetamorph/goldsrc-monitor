@@ -11,9 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sources\library\dllmain.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\sources\library\util.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -29,9 +26,6 @@
     <ClCompile Include="..\..\sources\library\core.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\sources\library\drawing.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\sources\library\buildinfo.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -41,7 +35,22 @@
     <ClCompile Include="..\..\sources\string_stack.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\sources\library\measurement.cpp">
+    <ClCompile Include="..\..\sources\library\displaymode_angletracking.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sources\library\displaymode_entityreport.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sources\library\displaymode_full.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sources\library\displaymode_measurement.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sources\library\displaymode_speedometer.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sources\library\dll_main.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,9 +68,6 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sources\library\core.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\sources\library\drawing.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sources\library\funcdata.h">
@@ -82,10 +88,25 @@
     <ClInclude Include="..\..\sources\string_stack.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\sources\library\measurement.h">
+    <ClInclude Include="..\..\sources\library\resource.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\sources\library\resource.h">
+    <ClInclude Include="..\..\sources\library\display_mode.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\displaymode_angletracking.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\displaymode_entityreport.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\displaymode_full.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\displaymode_measurement.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sources\library\displaymode_speedometer.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>

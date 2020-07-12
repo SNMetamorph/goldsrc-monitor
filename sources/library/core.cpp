@@ -1,11 +1,136 @@
 #include "core.h"
 #include "util.h"
-#include "drawing.h"
+#include "hooks.h"
+#include "globals.h"
 #include "app_version.h"
+#include "exception.h"
+#include "buildinfo.h"
 #include <stdint.h>
+#include <gl/GL.h>
 
-static void CommandTimescale();
+#include "displaymode_full.h"
+#include "displaymode_measurement.h"
+#include "displaymode_speedometer.h"
+#include "displaymode_entityreport.h"
+#include "displaymode_angletracking.h"
+
 static cvar_t *sys_timescale;
+
+static bool FindServerModule(HMODULE &moduleHandle)
+{
+    moduleHandle = FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
+    return moduleHandle != NULL;
+}
+
+static bool FindClientModule()
+{
+    g_hClientModule = FindModuleByExport(GetCurrentProcess(), "V_CalcRefdef");
+    if (g_hClientModule)
+        return true;
+    else
+        return false;
+}
+
+static bool FindEngineModule()
+{
+    g_hEngineModule = GetModuleHandle("hw.dll");
+    if (!g_hEngineModule)
+    {
+        g_hEngineModule = GetModuleHandle("sw.dll");
+        if (!g_hEngineModule)
+            g_hEngineModule = GetModuleHandle("swds.dll");
+    }
+    return g_hEngineModule != NULL;
+}
+
+static void FindClientEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
+{
+    void *pfnSPR_Load;
+    void *pfnSPR_Frames;
+    uint8_t *probeAddr;
+    uint8_t *coincidenceAddr;
+    uint8_t *scanStartAddr;
+    uint8_t *moduleEndAddr;
+
+    moduleEndAddr = moduleAddr + moduleSize;
+    pfnSPR_Load = FindFunctionAddress(
+        FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
+    );
+    if (!pfnSPR_Load)
+        EXCEPT("SPR_Load() address not found");
+
+    scanStartAddr = moduleAddr;
+    while (true)
+    {
+        coincidenceAddr = (uint8_t*)FindMemoryInt32(
+            scanStartAddr,
+            moduleEndAddr,
+            (uint32_t)pfnSPR_Load
+        );
+        if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
+            EXCEPT("valid pointer to SPR_Load() not found");
+        else
+            scanStartAddr = coincidenceAddr + sizeof(uint32_t);
+
+        probeAddr = *(uint8_t**)(coincidenceAddr + sizeof(uint32_t));
+        // check for module range to avoid segfault
+        if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
+        {
+            pfnSPR_Frames = FindFunctionAddress(FUNCTYPE_SPR_FRAMES, probeAddr);
+            if (pfnSPR_Frames)
+            {
+                g_pClientEngFuncs = (cl_enginefunc_t*)coincidenceAddr;
+                return;
+            }
+        }
+    }
+}
+
+static void FindServerEngfuncs(uint8_t *moduleAddr, size_t moduleSize)
+{
+    void *pfnPrecacheModel;
+    void *pfnPrecacheSound;
+    uint8_t *probeAddr;
+    uint8_t *coincidenceAddr;
+    uint8_t *scanStartAddr;
+    uint8_t *moduleEndAddr;
+
+    moduleEndAddr = moduleAddr + moduleSize;
+    pfnPrecacheModel = FindFunctionAddress(
+        FUNCTYPE_PRECACHE_MODEL,
+        moduleAddr,
+        moduleEndAddr
+    );
+    if (!pfnPrecacheModel)
+        EXCEPT("PrecacheModel() address not found");
+
+    scanStartAddr = moduleAddr;
+    while (true)
+    {
+        coincidenceAddr = (uint8_t*)FindMemoryInt32(
+            scanStartAddr,
+            moduleEndAddr,
+            (uint32_t)pfnPrecacheModel
+        );
+        if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
+            EXCEPT("valid pointer to PrecacheModel() not found");
+        else
+            scanStartAddr = coincidenceAddr + sizeof(uint32_t);
+
+        probeAddr = *(uint8_t**)(coincidenceAddr + sizeof(uint32_t));
+        if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
+        {
+            pfnPrecacheSound = FindFunctionAddress(
+                FUNCTYPE_PRECACHE_SOUND, probeAddr
+            );
+            if (pfnPrecacheSound)
+            {
+                g_pEngineFuncs = (enginefuncs_t*)coincidenceAddr;
+                return;
+            }
+        }
+    }
+}
 
 static cvar_t *RegisterConVar(const char *name, const char *value, int flags)
 {
@@ -65,70 +190,6 @@ static void FindTimescaleConVar(const moduleinfo_t &engineLib)
     }
 }
 
-static bool FindServerModule(HMODULE &moduleHandle)
-{
-    moduleHandle = FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
-    return moduleHandle != NULL;
-}
-
-void SetupConVars(moduleinfo_t &engineLib)
-{
-    g_ScreenInfo.iSize = sizeof(g_ScreenInfo);
-    g_pClientEngFuncs->pfnGetScreenInfo(&g_ScreenInfo);
-    g_pEngineFuncs->pfnAddServerCommand("gsm_timescale", &CommandTimescale);
-
-    FindTimescaleConVar(engineLib);
-    gsm_color_r = RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
-    gsm_color_g = RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
-    gsm_color_b = RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);
-    gsm_mode = RegisterConVar("gsm_mode", "0", FCVAR_CLIENTDLL);
-}
-
-void FrameDraw(float time, bool intermission, int screenWidth, int screenHeight)
-{
-    int displayMode = (int)gsm_mode->value;
-    switch (displayMode)
-    {
-    case DISPLAYMODE_SPEEDOMETER:
-        DrawModeSpeedometer(time, screenWidth, screenHeight);
-        break;
-    case DISPLAYMODE_ENTITYREPORT:
-        DrawModeEntityReport(time, screenWidth, screenHeight);
-        break;
-    case DISPLAYMODE_ANGLETRACKING:
-        DrawModeAngleTrack(time, screenWidth, screenHeight);
-        break;
-    case DISPLAYMODE_MEASUREMENT:
-        DrawModeMeasurement(time, screenWidth, screenHeight);
-        break;
-    default:
-        DrawModeFull(time, screenWidth, screenHeight);
-        break;
-    }
-}
-
-int GetStringWidth(const char *str)
-{
-    int totalWidth = 0;
-    for (char *i = (char*)str; *i; ++i)
-        totalWidth += g_ScreenInfo.charWidths[*i];
-    return totalWidth;
-}
-
-void PrintTitleText()
-{
-    const int verMajor = APP_VERSION_MAJOR;
-    const int verMinor = APP_VERSION_MINOR;
-
-    g_pClientEngFuncs->Con_Printf(" \n");
-    g_pClientEngFuncs->Con_Printf("   GoldScr Monitor | version %d.%d | by SNMetamorph  \n",
-        verMajor, verMinor);
-    g_pClientEngFuncs->Con_Printf("         Debugging tool for GoldSrc-based games      \n");
-    g_pClientEngFuncs->Con_Printf("   Use with caution, VAC can be react on this stuff  \n");
-    g_pClientEngFuncs->Con_Printf(" \n");
-    g_pClientEngFuncs->pfnPlaySoundByName("buttons/blip2.wav", 0.6f);
-}
-
 static void CommandTimescale()
 {
     if (!sys_timescale)
@@ -160,4 +221,136 @@ static void CommandTimescale()
             "or listen server and execute command again\n"
         );
     }
+}
+
+static void PrintTitleText()
+{
+    const int verMajor = APP_VERSION_MAJOR;
+    const int verMinor = APP_VERSION_MINOR;
+
+    g_pClientEngFuncs->Con_Printf(" \n");
+    g_pClientEngFuncs->Con_Printf("   GoldScr Monitor | version %d.%d | by SNMetamorph  \n",
+        verMajor, verMinor);
+    g_pClientEngFuncs->Con_Printf("         Debugging tool for GoldSrc-based games      \n");
+    g_pClientEngFuncs->Con_Printf("   Use with caution, VAC can be react on this stuff  \n");
+    g_pClientEngFuncs->Con_Printf(" \n");
+    g_pClientEngFuncs->pfnPlaySoundByName("buttons/blip2.wav", 0.6f);
+}
+
+static void SetupConVars(moduleinfo_t &engineLib)
+{
+    g_ScreenInfo.iSize = sizeof(g_ScreenInfo);
+    g_pClientEngFuncs->pfnGetScreenInfo(&g_ScreenInfo);
+    g_pEngineFuncs->pfnAddServerCommand("gsm_timescale", &CommandTimescale);
+
+    FindTimescaleConVar(engineLib);
+    gsm_color_r = RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
+    gsm_color_g = RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
+    gsm_color_b = RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);
+    gsm_mode = RegisterConVar("gsm_mode", "0", FCVAR_CLIENTDLL);
+}
+
+void ProgramInit()
+{
+    if (!FindEngineModule())
+        EXCEPT("failed to get engine module handle");
+
+    if (!FindClientModule())
+        EXCEPT("failed to get client module handle");
+
+    // try to find GetBuildNumber() address
+    moduleinfo_t engineDLL;
+    GetModuleInfo(GetCurrentProcess(), g_hEngineModule, engineDLL);
+    if (!FindBuildNumberFunc(engineDLL))
+        EXCEPT("GetBuildNumber() address not found");
+
+    // find engine functions pointer arrays
+    FindClientEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
+    FindServerEngfuncs(engineDLL.baseAddr, engineDLL.imageSize);
+
+    SetupConVars(engineDLL);
+    AssignDisplayMode();
+    ApplyHooks();
+    PrintTitleText();
+
+    // load configuration file
+    g_pClientEngFuncs->pfnClientCmd("exec gsm_config.cfg");
+}
+
+void AssignDisplayMode()
+{
+    int displayMode = (int)gsm_mode->value;
+    switch (displayMode)
+    {
+    case DISPLAYMODE_SPEEDOMETER:
+        g_pDisplayMode = &g_ModeSpeedometer;
+        break;
+    case DISPLAYMODE_ENTITYREPORT:
+        g_pDisplayMode = &g_ModeEntityReport;
+        break;
+    case DISPLAYMODE_ANGLETRACKING:
+        g_pDisplayMode = &g_ModeAngleTrack;
+        break;
+    case DISPLAYMODE_MEASUREMENT:
+        g_pDisplayMode = &g_ModeMeasurement;
+        break;
+    default:
+        g_pDisplayMode = &g_ModeFull;
+        break;
+    }
+}
+
+int GetStringWidth(const char *str)
+{
+    int totalWidth = 0;
+    for (char *i = (char*)str; *i; ++i)
+        totalWidth += g_ScreenInfo.charWidths[*i];
+    return totalWidth;
+}
+
+void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack)
+{
+    int linesSkipped = 0;
+    int maxStringWidth = 0;
+    int stringCount = stringStack.GetStringCount();
+    const int stringHeight = 15;
+
+    for (int i = 0; i < stringCount; ++i)
+    {
+        const char *textString = stringStack.StringAt(i);
+        int stringWidth = GetStringWidth(textString);
+        if (stringWidth > maxStringWidth)
+            maxStringWidth = stringWidth;
+    }
+
+    for (int i = 0; i < stringCount; ++i)
+    {
+        const char *textString = stringStack.StringAt(i);
+        g_pClientEngFuncs->pfnDrawString(
+            g_ScreenInfo.iWidth - max(marginRight, maxStringWidth + 5),
+            marginUp + (stringHeight * (i + linesSkipped)),
+            textString,
+            (int)gsm_color_r->value,
+            (int)gsm_color_g->value,
+            (int)gsm_color_b->value
+        );
+
+        int lastCharIndex = strlen(textString) - 1;
+        if (textString[lastCharIndex] == '\n')
+            ++linesSkipped;
+    }
+}
+
+bool IsSoftwareRenderer()
+{
+    static bool isChecked = false;
+    static bool isSoftwareRenderer;
+
+    if (!isChecked)
+    {
+        isSoftwareRenderer = GetModuleHandle("sw.dll") != nullptr;
+        isChecked = true;
+    }
+        
+    return isSoftwareRenderer;
 }

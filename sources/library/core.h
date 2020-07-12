@@ -1,17 +1,9 @@
 #pragma once
-#include "globals.h"
 #include "moduleinfo.h"
+#include "string_stack.h"
 
-enum display_mode_t
-{
-	DISPLAYMODE_FULL,
-	DISPLAYMODE_SPEEDOMETER,
-    DISPLAYMODE_ENTITYREPORT,
-    DISPLAYMODE_MEASUREMENT,
-    DISPLAYMODE_ANGLETRACKING
-};
-
-void	PrintTitleText();
+void    ProgramInit();
+void	AssignDisplayMode();
 int		GetStringWidth(const char *str);
-void	SetupConVars(moduleinfo_t &engine_lib);
-void	FrameDraw(float time, bool intermission, int scr_width, int scr_height);
+void    DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
+bool    IsSoftwareRenderer();
