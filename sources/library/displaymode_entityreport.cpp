@@ -32,7 +32,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
     if (traceData.fraction < 1.f && traceData.ent > 0)
         m_iEntityIndex = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
     else
-        TraceVisEnt(viewOrigin, viewDir, lineLen * traceData.fraction);
+        m_iEntityIndex = TraceVisEnt(viewOrigin, viewDir, lineLen * traceData.fraction);
 
     if (m_iEntityIndex)
     {
@@ -40,11 +40,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
         model_t *entityModel = traceEntity->model;
 
         if (entityModel->type == mod_brush)
-        {
             entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;
-            m_vecBboxMin = entityModel->mins;
-            m_vecBboxMax = entityModel->maxs;
-        }
         else
         {
             entityOrigin = traceEntity->curstate.origin;
@@ -90,103 +86,109 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
 
 void CModeEntityReport::Render3D()
 {
-    const float colorR = 0.f;
-    const float colorG = 1.f;
-    const float colorB = 0.f;
-    const float transparency = 0.7f;
+    const float colorR = 0.0f;
+    const float colorG = 1.0f;
+    const float colorB = 0.0f;
 
-    if (IsSoftwareRenderer())
+    if (m_iEntityIndex <= 0) 
         return;
 
-    if (m_iEntityIndex != 0)
-    {
-        vec3_t bboxSize = m_vecBboxMax - m_vecBboxMin;
-        vec3_t boxVertices[8] = {
-            {m_vecBboxMin.x, m_vecBboxMin.y, m_vecBboxMin.z},
-            {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y, m_vecBboxMin.z},
-            {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y, m_vecBboxMin.z + bboxSize.z},
-            {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z + bboxSize.z},
-            {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z},
-            {m_vecBboxMin.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z},
-            {m_vecBboxMin.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z + bboxSize.z},
-            {m_vecBboxMin.x, m_vecBboxMin.y, m_vecBboxMin.z + bboxSize.z}
-        };
+    GetEntityBbox(m_iEntityIndex, m_vecBboxMin, m_vecBboxMax);
+    vec3_t bboxSize = m_vecBboxMax - m_vecBboxMin;
+    vec3_t boxVertices[8] = {
+        {m_vecBboxMin.x, m_vecBboxMin.y, m_vecBboxMin.z},
+        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y, m_vecBboxMin.z},
+        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y, m_vecBboxMin.z + bboxSize.z},
+        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z + bboxSize.z},
+        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z},
+        {m_vecBboxMin.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z},
+        {m_vecBboxMin.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z + bboxSize.z},
+        {m_vecBboxMin.x, m_vecBboxMin.y, m_vecBboxMin.z + bboxSize.z}
+    };
 
-        g_pClientEngFuncs->pTriAPI->RenderMode(kRenderTransAlpha);
+    if (!IsSoftwareRenderer())
+    {
+        g_pClientEngFuncs->pTriAPI->RenderMode(kRenderNormal);
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_LINE_LOOP);
-
-        glColor4f(colorR, colorG, colorB, transparency);
-        glVertex3fv(boxVertices[0]); // 1
-        glVertex3fv(boxVertices[1]); // 2
-        glVertex3fv(boxVertices[2]); // 3
-        glVertex3fv(boxVertices[3]); // 4
-        glVertex3fv(boxVertices[4]); // 5
-        glVertex3fv(boxVertices[5]); // 6
-        glVertex3fv(boxVertices[6]); // 7
-        glVertex3fv(boxVertices[7]); // 8
-        glVertex3fv(boxVertices[0]); // 1
-        glVertex3fv(boxVertices[7]); // 8
-        glVertex3fv(boxVertices[2]); // 3
-        glVertex3fv(boxVertices[1]); // 2
-        glVertex3fv(boxVertices[4]); // 5
-        glVertex3fv(boxVertices[3]); // 4
-        glVertex3fv(boxVertices[6]); // 7
-        glVertex3fv(boxVertices[5]); // 6
-
+            glColor3f(colorR, colorG, colorB);
+            glVertex3fv(boxVertices[0]); // 1
+            glVertex3fv(boxVertices[1]); // 2
+            glVertex3fv(boxVertices[2]); // 3
+            glVertex3fv(boxVertices[3]); // 4
+            glVertex3fv(boxVertices[4]); // 5
+            glVertex3fv(boxVertices[5]); // 6
+            glVertex3fv(boxVertices[6]); // 7
+            glVertex3fv(boxVertices[7]); // 8
+            glVertex3fv(boxVertices[0]); // 1
+            glVertex3fv(boxVertices[7]); // 8
+            glVertex3fv(boxVertices[2]); // 3
+            glVertex3fv(boxVertices[1]); // 2
+            glVertex3fv(boxVertices[4]); // 5
+            glVertex3fv(boxVertices[3]); // 4
+            glVertex3fv(boxVertices[6]); // 7
+            glVertex3fv(boxVertices[5]); // 6
         glEnd();
         glEnable(GL_TEXTURE_2D);
-        g_pClientEngFuncs->pTriAPI->RenderMode(kRenderNormal);
     }
 }
 
-bool CModeEntityReport::TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
+int CModeEntityReport::TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
 {
     vec3_t bboxMin;
     vec3_t bboxMax;
     vec3_t lineEnd;
-    cl_entity_t *traceEntity;
-    studiohdr_t *mdlHeader;
-    mstudioseqdesc_t *seqDesc;
+    int entIndex = 0;
     float minFraction = 1.0f;
-
-    for (int i = 1; i < g_pPlayerMove->numvisent; ++i)
+    
+    for (int i = 0; i < g_pPlayerMove->numvisent; ++i)
     {
         physent_t &visEnt = g_pPlayerMove->visents[i];
         vec3_t entDirection = (visEnt.origin - viewOrigin).Normalize();
-
-        // skip studiomodel visents which is not in view cone
-        if (visEnt.studiomodel && DotProduct(entDirection, viewDir) < 0.95f)
+    
+        // skip brush visents
+        if (!visEnt.studiomodel)
             continue;
 
-        traceEntity = g_pClientEngFuncs->GetEntityByIndex(visEnt.info);
-        if (traceEntity->model && traceEntity->model->type == mod_studio)
-            mdlHeader = (studiohdr_t *)traceEntity->model->cache.data;
-        else
-            mdlHeader = nullptr;
+        // skip studiomodel visents which is not visible
+        GetEntityBbox(visEnt.info, bboxMin, bboxMax);
+        if (!g_pClientEngFuncs->pTriAPI->BoxInPVS(bboxMin, bboxMax))
+            continue;
 
-        if (mdlHeader)
+        // check for intersection
+        lineEnd = viewOrigin + (viewDir * lineLen);
+        float traceFraction = TraceBBoxLine(bboxMin, bboxMax, viewOrigin, lineEnd);
+        if (traceFraction < minFraction)
         {
-            seqDesc = (mstudioseqdesc_t*)((char *)mdlHeader + mdlHeader->seqindex);
-            bboxMin = visEnt.origin + seqDesc[traceEntity->curstate.sequence].bbmin;
-            bboxMax = visEnt.origin + seqDesc[traceEntity->curstate.sequence].bbmax;
-
-            // check for intersection
-            lineEnd = viewOrigin + (viewDir * lineLen);
-            float traceFraction = TraceBBoxLine(bboxMin, bboxMax, viewOrigin, lineEnd);
-            if (traceFraction < minFraction)
-            {
-                minFraction     = traceFraction;
-                m_iEntityIndex  = visEnt.info;
-                m_vecBboxMin    = bboxMin;
-                m_vecBboxMax    = bboxMax;
-            }
+            entIndex    = visEnt.info;
+            minFraction = traceFraction;
         }
     }
 
-    if (minFraction < 1.0f)
-        return true;
+    return entIndex;
+}
 
-    m_iEntityIndex = 0;
-    return false;
+void CModeEntityReport::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
+{ 
+    int seqIndex;
+    cl_entity_t *entTarget;
+    studiohdr_t *mdlHeader;
+    mstudioseqdesc_t *seqDesc;
+    
+    entTarget = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+    if (entTarget->model && entTarget->model->type == mod_studio)
+    {
+        vec3_t &entOrigin = entTarget->curstate.origin;
+        mdlHeader = (studiohdr_t *)entTarget->model->cache.data;
+        seqDesc = (mstudioseqdesc_t*)((char *)mdlHeader + mdlHeader->seqindex);
+        seqIndex = entTarget->curstate.sequence;
+
+        bboxMin = entOrigin + seqDesc[seqIndex].bbmin;
+        bboxMax = entOrigin + seqDesc[seqIndex].bbmax;
+    }
+    else
+    {
+        bboxMin = entTarget->curstate.mins;
+        bboxMax = entTarget->curstate.maxs;
+    }
 }

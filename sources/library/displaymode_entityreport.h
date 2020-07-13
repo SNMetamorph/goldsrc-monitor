@@ -16,7 +16,8 @@ private:
     CModeEntityReport(const CModeEntityReport&) = delete;
     CModeEntityReport& operator=(const CModeEntityReport&) = delete;
 
-    bool TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
+    int TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
+    void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
 
     int m_iEntityIndex;
     vec3_t m_vecBboxMin;
