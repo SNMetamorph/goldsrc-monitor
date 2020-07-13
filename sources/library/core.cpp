@@ -270,8 +270,8 @@ void ProgramInit()
 
     SetupConVars(engineDLL);
     AssignDisplayMode();
-    ApplyHooks();
     PrintTitleText();
+    ApplyHooks();
 
     // load configuration file
     g_pClientEngFuncs->pfnClientCmd("exec gsm_config.cfg");

@@ -5,8 +5,8 @@
 #include "exception.h"
 
 // polyhook headers
-#include "headers/CapstoneDisassembler.hpp"
-#include "headers/Detour/x86Detour.hpp"
+#include <polyhook2/ZydisDisassembler.hpp>
+#include <polyhook2/Detour/x86Detour.hpp>
 
 // hooking stuff
 typedef int (*pfnRedraw)(float, int);
@@ -15,7 +15,7 @@ typedef int (*pfnKeyEvent)(int, int, const char *);
 typedef void (*pfnDrawTriangles)();
 
 typedef PLH::x86Detour detour_t;
-typedef PLH::CapstoneDisassembler disasm_t;
+typedef PLH::ZydisDisassembler disasm_t;
 
 static uint64_t     g_pfnOrigRedraw;
 static uint64_t     g_pfnOrigPlayerMove;
@@ -25,7 +25,7 @@ static uint64_t     g_pfnOrigDrawTriangles;
 static detour_t	    *g_DetourRedraw;
 static detour_t     *g_DetourPlayerMove;
 static detour_t     *g_DetourKeyEvent;
-static detour_t     *g_DetourDrawNormalTriangles;
+static detour_t     *g_DetourDrawTriangles;
 static disasm_t     g_DisasmX86(PLH::Mode::x86);
 
 static int  HookRedraw(float time, int intermission);
@@ -41,13 +41,13 @@ static void DisposeHookingStuff()
         g_DetourKeyEvent->unHook();
     if (g_DetourPlayerMove)
         g_DetourPlayerMove->unHook();
-    if (g_DetourDrawNormalTriangles)
-        g_DetourDrawNormalTriangles->unHook();
+    if (g_DetourDrawTriangles)
+        g_DetourDrawTriangles->unHook();
 
     delete g_DetourRedraw;
     delete g_DetourKeyEvent;
     delete g_DetourPlayerMove;
-    delete g_DetourDrawNormalTriangles;
+    delete g_DetourDrawTriangles;
 }
 
 void ApplyHooks()
@@ -60,18 +60,21 @@ void ApplyHooks()
     char *pfnHookRedraw     = (char *)&HookRedraw;
     char *pfnHookPlayerMove = (char *)&HookPlayerMove;
     char *pfnHookKeyEvent   = (char *)&HookKeyEvent;
-    char *pfnHookDrawNormalTriangles = (char *)&HookDrawTriangles;
+    char *pfnHookDrawTriangles = (char *)&HookDrawTriangles;
 
     g_DetourRedraw = new detour_t(pfnRedraw, pfnHookRedraw, &g_pfnOrigRedraw, g_DisasmX86);
     g_DetourKeyEvent = new detour_t(pfnKeyEvent, pfnHookKeyEvent, &g_pfnOrigKeyEvent, g_DisasmX86);
     g_DetourPlayerMove = new detour_t(
         pfnPlayerMove, pfnHookPlayerMove, &g_pfnOrigPlayerMove, g_DisasmX86
     );
-    g_DetourDrawNormalTriangles = new detour_t(
-        pfnDrawTriangles, pfnHookDrawNormalTriangles, &g_pfnOrigDrawTriangles, g_DisasmX86
+    g_DetourDrawTriangles = new detour_t(
+        pfnDrawTriangles, pfnHookDrawTriangles, &g_pfnOrigDrawTriangles, g_DisasmX86
     );
 
-    if (!g_DetourRedraw || !g_DetourPlayerMove || !g_DetourKeyEvent || !g_DetourDrawNormalTriangles)
+    if (!g_DetourRedraw || 
+        !g_DetourPlayerMove || 
+        !g_DetourKeyEvent || 
+        !g_DetourDrawTriangles)
     {
         DisposeHookingStuff();
         EXCEPT("failed to allocate hooking stuff");
@@ -79,10 +82,34 @@ void ApplyHooks()
 
     bool isHookSuccessful = (
         g_DetourRedraw->hook() &&
-        g_DetourPlayerMove->hook() &&
-        g_DetourKeyEvent->hook() &&
-        g_DetourDrawNormalTriangles->hook()
+        g_DetourPlayerMove->hook()
     );
+
+    if (!g_DetourKeyEvent->hook())
+    {
+        g_pClientEngFuncs->Con_Printf(
+            "WARNING: KeyEvent() hooking failed: "
+            "measurement mode will not react to keys."
+        );
+    }
+
+    if (!g_DetourDrawTriangles->hook())
+    {
+        pfnDrawTriangles = (char *)GetProcAddress(g_hClientModule, "HUD_DrawNormalTriangles");
+
+        delete g_DetourDrawTriangles;
+        g_DetourDrawTriangles = new detour_t(
+            pfnDrawTriangles, pfnHookDrawTriangles, &g_pfnOrigDrawTriangles, g_DisasmX86
+        );
+
+        if (!g_DetourDrawTriangles->hook())
+        {
+            g_pClientEngFuncs->Con_Printf(
+                "WARNING: DrawTriangles() hooking failed: entity "
+                "report mode will not draw entity hull lines."
+            );
+        }
+    }
 
     if (!isHookSuccessful)
     {
