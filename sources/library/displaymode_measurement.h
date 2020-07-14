@@ -11,6 +11,7 @@ public:
         SNAPMODE_AXIS_X,
         SNAPMODE_AXIS_Y,
         SNAPMODE_AXIS_Z,
+        SNAPMODE_ALONGLINE,
         SNAPMODE_MAX,
     };
 
@@ -18,7 +19,7 @@ public:
     static CModeMeasurement &GetInstance();
 
     void Render2D(int screenWidth, int screenHeight) override;
-    void Render3D() override;
+    void Render3D() override {};
     bool KeyInput(int isKeyDown, int keyCode, const char *) override;
 
     const vec3_t&   GetPointOriginA();
@@ -32,7 +33,7 @@ private:
     CModeMeasurement(const CModeMeasurement&) = delete;
     CModeMeasurement& operator=(const CModeMeasurement&) = delete;
 
-    void UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint);
+    void UpdatePointOrigin(vec3_t &linePoint, const vec3_t &targetPoint);
     void TraceAlongNormal(pmtrace_t &traceData, float traceLength);
     bool WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin);
     void DrawVisualization(int screenWidth, int screenHeight);

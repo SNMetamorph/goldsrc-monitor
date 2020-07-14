@@ -195,8 +195,8 @@ float TraceBBoxLine(
     if (fractionFar.y < farDotFract)
         farDotFract = fractionFar.y;
 
-    fractionMin.z   = (bboxMin.z - rayOrigin.z) / rayDirection.z;
-    fractionMax.z   = (bboxMax.z - rayOrigin.z) / rayDirection.z;
+    fractionMin.z   = (bboxMin.z - rayOrigin.z) * invertedDir.z;
+    fractionMax.z   = (bboxMax.z - rayOrigin.z) * invertedDir.z;
     fractionFar.z   = max(fractionMin.z, fractionMax.z);
     fractionNear.z  = min(fractionMin.z, fractionMax.z);
 

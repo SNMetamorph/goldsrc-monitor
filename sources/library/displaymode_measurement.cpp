@@ -14,21 +14,30 @@ CModeMeasurement &CModeMeasurement::GetInstance()
     return instance;
 }
 
-void CModeMeasurement::UpdatePointOrigin(vec3_t &destPoint, const vec3_t &srcPoint)
+void CModeMeasurement::UpdatePointOrigin(vec3_t &linePoint, const vec3_t &targetPoint)
 {
+    if (m_iSnapMode == SNAPMODE_ALONGLINE)
+    {
+        vec3_t lineVector = m_vecPointB - m_vecPointA;
+        vec3_t targVector = targetPoint - linePoint;
+        float len = DotProduct(lineVector, targVector) / lineVector.Length();
+        linePoint = linePoint + lineVector.Normalize() * len;
+        return;
+    }
+
     switch (m_iSnapMode)
     {
     case SNAPMODE_AXIS_X:
-        destPoint.x = srcPoint.x;
+        linePoint.x = targetPoint.x;
         break;
     case SNAPMODE_AXIS_Y:
-        destPoint.y = srcPoint.y;
+        linePoint.y = targetPoint.y;
         break;
     case SNAPMODE_AXIS_Z:
-        destPoint.z = srcPoint.z;
+        linePoint.z = targetPoint.z;
         break;
     default:
-        destPoint = srcPoint;
+        linePoint = targetPoint;
         break;
     }
 }
@@ -246,10 +255,6 @@ void CModeMeasurement::Render2D(int screenWidth, int screenHeight)
         DrawVisualization(screenWidth, screenHeight);
 }
 
-void CModeMeasurement::Render3D()
-{
-}
-
 const char *CModeMeasurement::GetSnapModeName()
 {
     switch (m_iSnapMode)
@@ -265,6 +270,9 @@ const char *CModeMeasurement::GetSnapModeName()
         break;
     case SNAPMODE_AXIS_Z:
         return "Axis Z";
+        break;
+    case SNAPMODE_ALONGLINE:
+        return "Along Line";
         break;
     }
     return "";
