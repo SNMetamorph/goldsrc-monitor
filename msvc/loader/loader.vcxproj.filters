@@ -37,8 +37,14 @@
     <ClInclude Include="..\..\sources\loader\resource.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="loader.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\resources\logo.ico" />
   </ItemGroup>
 </Project>
