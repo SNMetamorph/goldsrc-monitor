@@ -16,29 +16,30 @@ CModeMeasurement &CModeMeasurement::GetInstance()
 
 void CModeMeasurement::UpdatePointOrigin(vec3_t &linePoint, const vec3_t &targetPoint)
 {
-    if (m_iSnapMode == SNAPMODE_ALONGLINE)
+    if (m_iSnapMode != SNAPMODE_ALONGLINE)
+    {
+        switch (m_iSnapMode)
+        {
+        case SNAPMODE_AXIS_X:
+            linePoint.x = targetPoint.x;
+            break;
+        case SNAPMODE_AXIS_Y:
+            linePoint.y = targetPoint.y;
+            break;
+        case SNAPMODE_AXIS_Z:
+            linePoint.z = targetPoint.z;
+            break;
+        default:
+            linePoint = targetPoint;
+            break;
+        }
+    }
+    else
     {
         vec3_t lineVector = m_vecPointB - m_vecPointA;
         vec3_t targVector = targetPoint - linePoint;
-        float len = DotProduct(lineVector, targVector) / lineVector.Length();
-        linePoint = linePoint + lineVector.Normalize() * len;
-        return;
-    }
-
-    switch (m_iSnapMode)
-    {
-    case SNAPMODE_AXIS_X:
-        linePoint.x = targetPoint.x;
-        break;
-    case SNAPMODE_AXIS_Y:
-        linePoint.y = targetPoint.y;
-        break;
-    case SNAPMODE_AXIS_Z:
-        linePoint.z = targetPoint.z;
-        break;
-    default:
-        linePoint = targetPoint;
-        break;
+        float projLen = DotProduct(lineVector, targVector) / lineVector.Length();
+        linePoint = linePoint + lineVector.Normalize() * projLen;
     }
 }
 
@@ -83,7 +84,8 @@ void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
     DrawMeasurementLine(lifeTime);
     DrawPointHints(screenWidth, screenHeight);
 
-    if (m_iSnapMode != SNAPMODE_FREE)
+    if (m_iSnapMode != SNAPMODE_FREE &&
+        m_iSnapMode != SNAPMODE_ALONGLINE)
         DrawSupportLines(lifeTime);
 }
 
@@ -222,15 +224,18 @@ void CModeMeasurement::LoadLineSprite()
 
 void CModeMeasurement::Render2D(int screenWidth, int screenHeight)
 {
-    vec3_t originPointA = GetPointOriginA();
-    vec3_t originPointB = GetPointOriginB();
+    const vec3_t &originPointA = GetPointOriginA();
+    const vec3_t &originPointB = GetPointOriginB();
     float pointsDistance = GetPointsDistance();
     float elevationAngle = GetLineElevationAngle();
     const char *snapModeName = GetSnapModeName();
 
-    const float roundThreshold = 0.935f;
-    if (fmodf(pointsDistance, 1.f) >= roundThreshold)
-        pointsDistance += (1.f - roundThreshold);
+    const float roundThreshold = 0.08f;
+    float fractionalPart = fmodf(pointsDistance, 1.f);
+    if (fractionalPart >= (1.f - roundThreshold))
+        pointsDistance += (1.f - fractionalPart);
+    else if (fractionalPart <= roundThreshold)
+        pointsDistance -= fractionalPart;
 
     g_ScreenText.Clear();
     if (originPointA.Length() < 0.0001f)
@@ -245,7 +250,7 @@ void CModeMeasurement::Render2D(int screenWidth, int screenHeight)
         g_ScreenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)", 
             originPointB.x, originPointB.y, originPointB.z);
 
-    g_ScreenText.PushPrintf("Points Distance: %.1f (%.2f meters)",
+    g_ScreenText.PushPrintf("Points Distance: %.1f (%.3f meters)",
         pointsDistance, pointsDistance / 39.37f);
     g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
     g_ScreenText.PushPrintf("Snap Mode: %s", snapModeName);
@@ -280,22 +285,22 @@ const char *CModeMeasurement::GetSnapModeName()
 
 float CModeMeasurement::GetLineElevationAngle()
 {
-    vec3_t highPoint;
-    vec3_t lowPoint;
     vec3_t lineDirection;
-
+    const vec3_t *highPoint;
+    const vec3_t *lowPoint;
+    
     if (m_vecPointA.z > m_vecPointB.z)
     {
-        highPoint = m_vecPointA;
-        lowPoint  = m_vecPointB;
+        highPoint = &m_vecPointA;
+        lowPoint  = &m_vecPointB;
     }
     else
     {
-        highPoint = m_vecPointB;
-        lowPoint  = m_vecPointA;
+        highPoint = &m_vecPointB;
+        lowPoint  = &m_vecPointA;
     }
 
-    lineDirection = highPoint - lowPoint;
+    lineDirection = *highPoint - *lowPoint;
     lineDirection = lineDirection.Normalize();
     return asinf(lineDirection.z) * 180.0f / 3.14f;
 }

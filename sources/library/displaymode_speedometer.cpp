@@ -13,12 +13,10 @@ CModeSpeedometer &CModeSpeedometer::GetInstance()
 void CModeSpeedometer::Render2D(int scrWidth, int scrHeight)
 {
     int stringWidth;
-    float playerSpeed;
     const int speedometerMargin = 35;
 
     g_ScreenText.Clear();
-    playerSpeed = g_pPlayerMove->velocity.Length2D();
-    g_ScreenText.PushPrintf("%.2f", playerSpeed);
+    g_ScreenText.PushPrintf("%.2f", g_pPlayerMove->velocity.Length2D());
     stringWidth = GetStringWidth(g_ScreenText.StringAt(0));
 
     DrawStringStack(
