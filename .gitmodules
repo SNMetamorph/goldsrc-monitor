@@ -1,7 +1,7 @@
 [submodule "external/polyhook"]
 	path = external/polyhook
 	url = https://github.com/stevemk14ebr/PolyHook_2_0.git
-	
+
 [submodule "external/hlsdk"]
 	path = external/hlsdk
 	url = https://github.com/alliedmodders/hlsdk.git
