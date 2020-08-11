@@ -111,6 +111,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="library.rc" />
+    <ResourceCompile Include="..\..\sources\library\library.rc">
+      <Filter>Sources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

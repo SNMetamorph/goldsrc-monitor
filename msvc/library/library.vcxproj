@@ -134,7 +134,7 @@
     <ClInclude Include="..\..\sources\library\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="library.rc" />
+    <ResourceCompile Include="..\..\sources\library\library.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
