@@ -1,45 +1,39 @@
 cmake_minimum_required(VERSION 3.3)
 
-set(CMAKE_CXX_STANDARD 17)
+project(goldsrc-monitor-library CXX)
 include("../cotire.cmake")
+include("../compiler_runtime.cmake")
+include("../msvc_winxp_support.cmake")
 
-
-if(POLICY CMP0069)
+if (POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
 endif()
+
 cmake_policy(SET CMP0063 NEW)
-if(POLICY CMP0091)
+if (POLICY CMP0091)
     cmake_policy(SET CMP0091 NEW)
 endif()
 
-project(goldsrc-monitor-library CXX)
-
 add_library(${PROJECT_NAME} SHARED
-../../sources/exception.cpp
-../../sources/string_stack.cpp
-../../sources/library/util.cpp
-../../sources/library/buildinfo.cpp
-../../sources/library/core.cpp
-../../sources/library/display_mode.h
-../../sources/library/displaymode_angletracking.cpp
-../../sources/library/displaymode_entityreport.cpp
-../../sources/library/displaymode_full.cpp
-../../sources/library/displaymode_measurement.cpp
-../../sources/library/displaymode_speedometer.cpp
-../../sources/library/dll_main.cpp
-../../sources/library/globals.cpp
-../../sources/library/hooks.cpp
-../../sources/library/stdafx.cpp
-../../sources/library/util.cpp
+	../../sources/exception.cpp
+	../../sources/string_stack.cpp
+	../../sources/library/util.cpp
+	../../sources/library/buildinfo.cpp
+	../../sources/library/core.cpp
+	../../sources/library/display_mode.h
+	../../sources/library/displaymode_angletracking.cpp
+	../../sources/library/displaymode_entityreport.cpp
+	../../sources/library/displaymode_full.cpp
+	../../sources/library/displaymode_measurement.cpp
+	../../sources/library/displaymode_speedometer.cpp
+	../../sources/library/dll_main.cpp
+	../../sources/library/globals.cpp
+	../../sources/library/hooks.cpp
+	../../sources/library/stdafx.cpp
+	../../sources/library/util.cpp
+	../../sources/library/library.rc
 )
 
-add_subdirectory(../../external/polyhook ../../bin)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "../../sources/library/stdafx.h")
-cotire(${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME} PRIVATE PolyHook_2 opengl32)
-set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "/wd4005")
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "gsm-library")
 target_include_directories(${PROJECT_NAME} PRIVATE
 	../../external/polyhook
 	../../external/polyhook/asmjit
@@ -56,6 +50,43 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	../../external/hlsdk/public
 	../../external/hlsdk/cl_dll	
 	../../sources
-	../../sources
 	../../sources/library
 )
+
+# Configure & add PolyHook library target
+set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
+set (POLYHOOK_DISASM_CAPSTONE OFF CACHE BOOL "")
+set (POLYHOOK_FEATURE_PE OFF CACHE BOOL "")
+set (POLYHOOK_FEATURE_VIRTUALS OFF CACHE BOOL "")
+set (POLYHOOK_FEATURE_EXCEPTION OFF CACHE BOOL "")
+
+add_subdirectory(../../external/polyhook polyhook)
+set_compiler_runtime(PolyHook_2 STATIC)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+	OUTPUT_NAME "gsm-library"
+	CXX_STANDARD 17
+	CXX_STANDARD_REQUIRED YES
+	CXX_EXTENSIONS NO
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "../../sources/library/stdafx.h")
+cotire(${PROJECT_NAME})
+
+if (MSVC)
+	target_compile_definitions(${PROJECT_NAME} PRIVATE
+		_CRT_SECURE_NO_WARNINGS=1 # disable CRT warnings
+		PSAPI_VERSION=1 # for WinXP compatibility
+	)
+	
+	enable_winxp_support(${PROJECT_NAME})
+	set_compiler_runtime(${PROJECT_NAME} STATIC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /Ob1) # disable force function inlining, to prevent segfault in release mode
+	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
+	target_link_libraries(${PROJECT_NAME} PRIVATE 
+		PolyHook_2
+		opengl32
+		psapi
+		libvcruntime
+	)
+endif()
