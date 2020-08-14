@@ -22,11 +22,11 @@ if (NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-add_subdirectory(loader)
-add_subdirectory(library)
+add_subdirectory(cmake/loader)
+add_subdirectory(cmake/library)
 
 set_target_properties(goldsrc-monitor-loader goldsrc-monitor-library PROPERTIES 
-	ARCHIVE_OUTPUT_DIRECTORY ../bin
-	LIBRARY_OUTPUT_DIRECTORY ../bin
-	RUNTIME_OUTPUT_DIRECTORY ../bin
+	ARCHIVE_OUTPUT_DIRECTORY ../../bin
+	LIBRARY_OUTPUT_DIRECTORY ../../bin
+	RUNTIME_OUTPUT_DIRECTORY ../../bin
 )
