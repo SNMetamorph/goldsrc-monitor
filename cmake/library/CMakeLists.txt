@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.3)
 project(goldsrc-monitor-library CXX)
 include("../cotire.cmake")
 include("../compiler_runtime.cmake")
-include("../msvc_winxp_support.cmake")
 
 if (POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
@@ -79,10 +78,10 @@ if (MSVC)
 		PSAPI_VERSION=1 # for WinXP compatibility
 	)
 	
-	enable_winxp_support(${PROJECT_NAME})
 	set_compiler_runtime(${PROJECT_NAME} STATIC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /Ob1) # disable force function inlining, to prevent segfault in release mode
 	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
+	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:threadSafeInit-) # for WinXP compatibility (to avoid LoadLibrary error #998)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
 		PolyHook_2
 		opengl32

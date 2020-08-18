@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 
 project(goldsrc-monitor)
+include("cmake/msvc_winxp_support.cmake")
 
 if (POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
@@ -25,6 +26,7 @@ endif()
 add_subdirectory(cmake/loader)
 add_subdirectory(cmake/library)
 
+enable_winxp_support()
 set_target_properties(goldsrc-monitor-loader goldsrc-monitor-library PROPERTIES 
 	ARCHIVE_OUTPUT_DIRECTORY ../../bin
 	LIBRARY_OUTPUT_DIRECTORY ../../bin

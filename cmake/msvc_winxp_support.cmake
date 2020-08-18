@@ -12,7 +12,6 @@ macro (enable_winxp_support)
 		if (MSVC)
 			if ("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([0-9]+)")
 				add_definitions (/D_USING_V110_SDK71_)
-				add_compile_options (/Zi /FS /Zc:threadSafeInit-)
 
 				if (${CMAKE_MATCH_1} LESS 11)
 					# Nothing. Older VS does support XP by default.

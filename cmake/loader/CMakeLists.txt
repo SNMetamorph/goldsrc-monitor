@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.3)
 
 project(goldsrc-monitor-loader CXX)
 include("../compiler_runtime.cmake")
-include("../msvc_winxp_support.cmake")
 
 if (POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
@@ -40,7 +39,6 @@ if (MSVC)
 		PSAPI_VERSION=1 # for WinXP compatibility
 	)
 
-	enable_winxp_support()
 	set_compiler_runtime(${PROJECT_NAME} STATIC)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
 		psapi 
