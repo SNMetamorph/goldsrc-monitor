@@ -142,7 +142,7 @@ static void InjectLibrary(HANDLE procHandle)
         EXCEPT("library injection thread timed out");
 
     int exitCode = GetFuncReturnCode(threadHandle);
-    if (exitCode)
+    if (exitCode && exitCode != 0xC0000005)
         cout << "Injected library base address: 0x" << hex << exitCode << endl;
     else
         EXCEPT("remote thread failed to load library");

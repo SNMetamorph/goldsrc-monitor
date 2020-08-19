@@ -1,7 +1,10 @@
 #include "buildinfo.h"
 #include "util.h"
 
-static int (*pfnGetBuildNumber)();
+static int (*g_pfnGetBuildNumber)();
+static int g_iBuildNumber;
+static char *g_szMonNames[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+static char g_iMonDaysCount[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 static const buildinfo_entry_t g_aBuildInfo[] =
 {
     {
@@ -23,6 +26,64 @@ static const buildinfo_entry_t g_aBuildInfo[] =
         }
     }
 };
+
+
+const char *FindDateString(uint8_t *startAddr, int maxLen)
+{
+    const int dateStringLen = 11;
+    maxLen -= dateStringLen;
+
+    for (int i = 0; i < maxLen; ++i)
+    { 
+        int index = 0;
+        const char *text = reinterpret_cast<const char*>(startAddr + i);
+        if (IsSymbolAlpha(text[index++]) &&
+            IsSymbolAlpha(text[index++]) &&
+            IsSymbolAlpha(text[index++]) &&
+            IsSymbolSpace(text[index++]))
+        {
+            if (IsSymbolDigit(text[index]) || IsSymbolSpace(text[index]))
+            {
+                ++index;
+                if (IsSymbolDigit(text[index++]) &&
+                    IsSymbolSpace(text[index++]) &&
+                    IsSymbolDigit(text[index++]) &&
+                    IsSymbolDigit(text[index++]) &&
+                    IsSymbolDigit(text[index++]))
+                        return text;
+            }
+        }
+    }
+    return nullptr;
+}
+
+int GetBuildNumberByDate(const char *date)
+{
+    int m = 0, d = 0, y = 0;
+    static int b = 0;
+
+    if (b != 0) 
+        return b;
+
+    for (m = 0; m < 11; m++)
+    {
+        if (!strnicmp(&date[0], g_szMonNames[m], 3))
+            break;
+        d += g_iMonDaysCount[m];
+    }
+
+    d += atoi(&date[4]) - 1;
+    y = atoi(&date[7]) - 1900;
+    b = d + (int)((y - 1) * 365.25f);
+
+    if((y % 4 == 0) && m > 1)
+    {
+        b += 1;
+    }
+    b -= 34995;
+
+    return b;
+}
 
 void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr)
 {
@@ -56,7 +117,7 @@ void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr)
     );
 }
 
-bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
+static bool FindFuncBySignature(const moduleinfo_t &engineModule)
 {
     uint8_t *moduleStartAddr = engineModule.baseAddr;
     uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
@@ -75,24 +136,69 @@ bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
 
     for (int i = 0; i < signatureCount; ++i)
     {
-        pfnGetBuildNumber = (int(*)())FindPatternAddress(
+        g_pfnGetBuildNumber = (int(*)())FindPatternAddress(
             moduleStartAddr,
             moduleEndAddr,
             signatureArray[i],
             maskArray[i]
         );
 
-        if (pfnGetBuildNumber && pfnGetBuildNumber() > 0)
+        if (g_pfnGetBuildNumber && g_pfnGetBuildNumber() > 0)
             return true;
     }
 
     return false;
 }
 
+static bool FindFuncByDateString(const moduleinfo_t &engineModule)
+{
+    const char *patternStr = "Jan";
+    uint8_t *moduleStartAddr = engineModule.baseAddr;
+    uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
+    uint8_t *scanStartAddr = moduleStartAddr;
+
+    while (true)
+    {
+        uint8_t *stringAddr = (uint8_t*)FindPatternAddress(
+            scanStartAddr, moduleEndAddr,
+            patternStr, "xxxx"
+        );
+
+        if (stringAddr)
+        {
+            const int scanOffset = 64; // offset for finding date string
+            uint8_t *probeAddr = stringAddr - scanOffset;
+            const char *dateString = FindDateString(probeAddr, scanOffset);
+            if (dateString)
+            {
+                g_iBuildNumber = GetBuildNumberByDate(dateString);
+                return true;
+            }
+            else
+            {
+                scanStartAddr = stringAddr + 1;
+                continue;
+            }
+        }
+        else
+            return false;
+    }
+}
+
+bool FindBuildNumberFunc(const moduleinfo_t &engineModule)
+{
+    if (FindFuncBySignature(engineModule))
+        return true;
+    else
+        return FindFuncByDateString(engineModule);
+}
+
 int GetBuildNumber()
 {
-    if (pfnGetBuildNumber)
-        return pfnGetBuildNumber();
+    if (g_pfnGetBuildNumber)
+        return g_pfnGetBuildNumber();
+    else if (g_iBuildNumber)
+        return g_iBuildNumber;
     else
         return 0;
 }

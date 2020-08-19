@@ -14,3 +14,6 @@ float TraceBBoxLine(
     const vec3_t &lineStart, const vec3_t &lineEnd
 );
 float GetCurrentSysTime();
+inline bool IsSymbolAlpha(char symbol)      { return (symbol >= 'A' && symbol <= 'Z') || (symbol >= 'a' && symbol <= 'z'); };
+inline bool IsSymbolDigit(char symbol)      { return (symbol >= '0' && symbol <= '9'); };
+inline bool IsSymbolSpace(char symbol)      { return (symbol == ' '); };
