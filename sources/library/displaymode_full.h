@@ -16,6 +16,7 @@ private:
     CModeFull& operator=(const CModeFull&) = delete;
 
     float GetSmoothFrameTime();
+    const char *GetMovetypeName(int moveType);
 };
 
 extern CModeFull &g_ModeFull;

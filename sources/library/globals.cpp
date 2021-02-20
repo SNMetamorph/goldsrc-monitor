@@ -1,7 +1,7 @@
 #pragma once
 #include "globals.h"
 
-#define STRING_COUNT		20	
+#define STRING_COUNT		32	
 #define STRING_LENGTH		128
 static char g_aStrings[STRING_COUNT][STRING_LENGTH];
 CStringStack g_ScreenText(&g_aStrings[0][0], STRING_LENGTH, STRING_COUNT);

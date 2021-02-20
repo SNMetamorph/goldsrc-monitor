@@ -31,17 +31,18 @@ void CModeFull::Render2D(int scrWidth, int scrHeight)
     g_ScreenText.PushPrintf("Origin: (%.2f, %.2f, %.2f)", origin.x, origin.y, origin.z);
     g_ScreenText.PushPrintf("Angles: (%.2f, %.2f, %.2f)", angles.x, angles.y, angles.z);
     g_ScreenText.PushPrintf("Base Velocity: (%.2f, %.2f, %.2f)", baseVelocity.x, baseVelocity.y, baseVelocity.z);
-    g_ScreenText.PushPrintf("Max Velocity: %.2f (client %.2f)\n", g_pPlayerMove->maxspeed, g_pPlayerMove->clientmaxspeed);
+    g_ScreenText.PushPrintf("Max Velocity: %.2f (client %.2f)", g_pPlayerMove->maxspeed, g_pPlayerMove->clientmaxspeed);
+    g_ScreenText.PushPrintf("Movetype: %s\n", GetMovetypeName(g_pPlayerMove->movetype));
 
     g_ScreenText.PushPrintf("View Offset: (%.2f, %.2f, %.2f)", viewOffset.x, viewOffset.y, viewOffset.z);
     g_ScreenText.PushPrintf("Punch Angle: (%.2f, %.2f, %.2f)", punchAngle.x, punchAngle.y, punchAngle.z);
     g_ScreenText.PushPrintf("Duck Time: %.2f", g_pPlayerMove->flDuckTime);
-    g_ScreenText.PushPrintf("In Duck Process: %c", g_pPlayerMove->bInDuck ? '+' : '-');
+    g_ScreenText.PushPrintf("In Duck Process: %s", g_pPlayerMove->bInDuck ? "yes" : "no");
     g_ScreenText.PushPrintf("Player Flags: %d", g_pPlayerMove->flags);
     g_ScreenText.PushPrintf("Hull Type: %d", g_pPlayerMove->usehull);
     g_ScreenText.PushPrintf("Gravity: %.2f", g_pPlayerMove->gravity);
     g_ScreenText.PushPrintf("Friction: %.2f", g_pPlayerMove->friction);
-    g_ScreenText.PushPrintf("On Ground: %c", g_pPlayerMove->onground != -1 ? '+' : '-');
+    g_ScreenText.PushPrintf("On Ground: %s", g_pPlayerMove->onground != -1 ? "yes" : "no");
     g_ScreenText.PushPrintf("Texture Name: %s", g_pPlayerMove->sztexturename);
     g_ScreenText.PushPrintf("fuserX: %.2f / %.2f / %.2f / %.2f", 
         g_pPlayerMove->fuser1, 
@@ -76,4 +77,37 @@ float CModeFull::GetSmoothFrameTime()
     lastFrameTime   = frameTime;
     lastSysTime     = currSysTime;
     return frameTime;
+}
+
+const char *CModeFull::GetMovetypeName(int moveType)
+{
+    switch (moveType)
+    {
+    case MOVETYPE_BOUNCE:
+        return "Bounce";
+    case MOVETYPE_BOUNCEMISSILE:
+        return "Bounce-missle";
+    case MOVETYPE_FLY:
+        return "Fly";
+    case MOVETYPE_FLYMISSILE:
+        return "Fly-missle";
+    case MOVETYPE_FOLLOW:
+        return "Follow";
+    case MOVETYPE_NOCLIP:
+        return "Noclip";
+    case MOVETYPE_NONE:
+        return "None";
+    case MOVETYPE_PUSH:
+        return "Push";
+    case MOVETYPE_PUSHSTEP:
+        return "Push-step";
+    case MOVETYPE_STEP:
+        return "Step";
+    case MOVETYPE_TOSS:
+        return "Toss";
+    case MOVETYPE_WALK:
+        return "Walk";
+    default:
+        return "Unknown";
+    }
 }
