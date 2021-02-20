@@ -14,10 +14,13 @@ private:
     ~CApplication() {};
 
     void ReportError(const char *msg);
-    void OpenGameProcess(HANDLE &processHandle);
+    HANDLE OpenGameProcess();
     bool FindLibraryPath(std::wstring &libPath);
     wchar_t *WritePathString(HANDLE procHandle, const std::wstring &libPath);
     int GetFuncReturnCode(HANDLE threadHandle);
     void InjectLibrary(HANDLE procHandle);
     void PrintTitleText();
+
+    std::wstring m_szProcessName = L"hl.exe";
+    std::wstring m_szLibraryName = L"gsm-library.dll";
 };

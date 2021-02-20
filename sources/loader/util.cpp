@@ -56,7 +56,7 @@ HMODULE FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
 
     for (size_t i = 0; i < modulesCount; ++i)
     {
-        GetModuleFileNameEx(procHandle, modulesList[i], modulePath, pathLength);
+        GetModuleFileNameExW(procHandle, modulesList[i], modulePath, pathLength);
         wchar_t *fileName = wcsrchr(modulePath, '\\') + 1;
 
         // case insensetive comparing routine

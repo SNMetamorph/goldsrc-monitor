@@ -4,8 +4,6 @@
 #include "app_version.h"
 #include <iostream>
 
-#define PROCESS_NAME L"hl.exe"
-#define LIBRARY_NAME L"gsm-library.dll"
 
 CApplication &CApplication::GetInstance()
 {
@@ -15,19 +13,22 @@ CApplication &CApplication::GetInstance()
 
 int CApplication::Run(int argc, char *argv[])
 {
+    HANDLE processHandle;
     while (true)
     {
-        HANDLE gameProcess;
         PrintTitleText();
-
         try
         {
-            gameProcess = NULL;
-            OpenGameProcess(gameProcess);
-            if (!FindProcessModule(gameProcess, LIBRARY_NAME))
+            std::wcout << L"Target process name: " << m_szProcessName.c_str() << std::endl;
+            std::cout << "Waiting for starting game..." << std::endl;
+            processHandle = OpenGameProcess();
+            std::cout << "Game process found. Waiting for game loading..." << std::endl;
+            Sleep(3000);
+
+            if (!FindProcessModule(processHandle, m_szLibraryName.c_str()))
             {
-                InjectLibrary(gameProcess);
-                if (FindProcessModule(gameProcess, LIBRARY_NAME))
+                InjectLibrary(processHandle);
+                if (FindProcessModule(processHandle, m_szLibraryName.c_str()))
                 {
                     std::cout << "Library successfully injected: check game console for more info" << std::endl;
                     break;
@@ -45,10 +46,10 @@ int CApplication::Run(int argc, char *argv[])
         {
             ReportError(ex.GetDescription());
         }
-        CloseHandle(gameProcess);
+        CloseHandle(processHandle);
     }
 
-    std::cout << "Program will be closed 3 seconds later" << std::endl;
+    std::cout << "Program will be closed 3 seconds later..." << std::endl;
     Sleep(3000);
     return 0;
 }
@@ -60,32 +61,37 @@ void CApplication::ReportError(const char *msg)
     std::cin.get();
 }
 
-void CApplication::OpenGameProcess(HANDLE &processHandle)
+HANDLE CApplication::OpenGameProcess()
 {
-    int processID = FindProcessID(PROCESS_NAME);
+    HANDLE processHandle;
     const DWORD accessFlags = (
         PROCESS_VM_READ |
         PROCESS_VM_WRITE |
         PROCESS_VM_OPERATION |
         PROCESS_CREATE_THREAD |
         PROCESS_QUERY_INFORMATION
-        );
+    );
 
-    if (processID > 0)
+    while (true)
     {
-        processHandle = OpenProcess(accessFlags, false, processID);
-        if (!processHandle)
-            EXCEPT("unable to open game process");
+        int processID = FindProcessID(m_szProcessName.c_str());
+        if (processID > 0)
+        {
+            processHandle = OpenProcess(accessFlags, false, processID);
+            if (processHandle)
+                return processHandle;
+            else
+                EXCEPT("unable to open game process");
+        }
+        Sleep(500);
     }
-    else
-        EXCEPT("unable to found game process, try to run game");
 }
 
 bool CApplication::FindLibraryPath(std::wstring &libPath)
 {
     libPath.reserve(MAX_PATH);
     GetFullPathNameW(
-        LIBRARY_NAME,
+        m_szLibraryName.c_str(),
         libPath.capacity(),
         libPath.data(),
         NULL
@@ -99,7 +105,7 @@ bool CApplication::FindLibraryPath(std::wstring &libPath)
 
 wchar_t *CApplication::WritePathString(HANDLE procHandle, const std::wstring &libPath)
 {
-    size_t writtenBytes;
+    size_t writtenBytes = 0;
     wchar_t *pathRemoteAddr;
 
     // allocating memory in game process for library path string
@@ -114,7 +120,6 @@ wchar_t *CApplication::WritePathString(HANDLE procHandle, const std::wstring &li
         return nullptr;
 
     // writing string to game process
-    writtenBytes = 0;
     WriteProcessMemory(
         procHandle, pathRemoteAddr,
         libPath.data(), libPath.capacity(),
