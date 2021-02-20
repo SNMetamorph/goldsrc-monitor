@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} SHARED
 	../../sources/exception.cpp
 	../../sources/string_stack.cpp
 	../../sources/library/util.cpp
+	../../sources/library/cvars.cpp
 	../../sources/library/buildinfo.cpp
 	../../sources/library/core.cpp
 	../../sources/library/display_mode.h

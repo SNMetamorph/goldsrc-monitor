@@ -2,6 +2,7 @@
 #include "core.h"
 #include "util.h"
 #include "globals.h"
+#include "cvars.h"
 
 // HLSDK
 #include "keydefs.h"

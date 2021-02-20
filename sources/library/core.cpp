@@ -2,6 +2,7 @@
 #include "util.h"
 #include "hooks.h"
 #include "globals.h"
+#include "cvars.h"
 #include "app_version.h"
 #include "exception.h"
 #include "buildinfo.h"
@@ -14,7 +15,6 @@
 #include "displaymode_entityreport.h"
 #include "displaymode_angletracking.h"
 
-static cvar_t *sys_timescale;
 
 static bool FindServerModule(HMODULE &moduleHandle)
 {
