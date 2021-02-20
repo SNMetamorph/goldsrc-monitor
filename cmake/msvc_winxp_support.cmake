@@ -31,6 +31,10 @@ macro (enable_winxp_support)
 					# Visual Studio 15 2017
 					set (CMAKE_GENERATOR_TOOLSET "v141_xp" CACHE STRING "CMAKE_GENERATOR_TOOLSET" FORCE)
 					set (CMAKE_VS_PLATFORM_TOOLSET "v141_xp" CACHE STRING "CMAKE_VS_PLATFORM_TOOLSET" FORCE)
+				elseif (${CMAKE_MATCH_1} EQUAL 16)
+					# Visual Studio 16 2019
+					set (CMAKE_GENERATOR_TOOLSET "v141_xp" CACHE STRING "CMAKE_GENERATOR_TOOLSET" FORCE)
+					set (CMAKE_VS_PLATFORM_TOOLSET "v141_xp" CACHE STRING "CMAKE_VS_PLATFORM_TOOLSET" FORCE)
 				else()
 					message (WARNING "enable_winxp_support(): unknown toolset number, skipping")
 				endif()
