@@ -247,6 +247,8 @@ static void SetupConVars(moduleinfo_t &engineLib)
     gsm_color_r = RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
     gsm_color_g = RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
     gsm_color_b = RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);
+    gsm_margin_up = RegisterConVar("gsm_margin_up", "15", FCVAR_CLIENTDLL);
+    gsm_margin_right = RegisterConVar("gsm_margin_right", "400", FCVAR_CLIENTDLL);
     gsm_mode = RegisterConVar("gsm_mode", "0", FCVAR_CLIENTDLL);
 }
 

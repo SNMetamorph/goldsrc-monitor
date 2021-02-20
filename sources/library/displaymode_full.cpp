@@ -1,6 +1,7 @@
 #include "displaymode_full.h"
 #include "globals.h"
 #include "core.h"
+#include "cvars.h"
 #include "util.h"
 
 CModeFull &g_ModeFull = CModeFull::GetInstance();
@@ -57,7 +58,7 @@ void CModeFull::Render2D(int scrWidth, int scrHeight)
         g_pPlayerMove->iuser4
     );
 
-    DrawStringStack(400, 15, g_ScreenText);
+    DrawStringStack(gsm_margin_right->value, gsm_margin_up->value, g_ScreenText);
 }
 
 float CModeFull::GetSmoothFrameTime()

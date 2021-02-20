@@ -1,5 +1,6 @@
 #include "displaymode_entityreport.h"
 #include "globals.h"
+#include "cvars.h"
 #include "util.h"
 #include "core.h"
 #include "studio.h"
@@ -81,7 +82,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
     else
         g_ScreenText.Push("Entity not found");
 
-    DrawStringStack(400, 15, g_ScreenText);
+    DrawStringStack(gsm_margin_right->value, gsm_margin_up->value, g_ScreenText);
 }
 
 void CModeEntityReport::Render3D()
