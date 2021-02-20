@@ -13,6 +13,44 @@ CApplication &CApplication::GetInstance()
 
 int CApplication::Run(int argc, char *argv[])
 {
+    LPWSTR commandLine = GetCommandLineW();
+    LPWSTR *argvArray = CommandLineToArgvW(commandLine, &argc);
+    ParseParameters(argc, argvArray);
+
+    StartMainLoop();
+    std::cout << "Program will be closed 3 seconds later..." << std::endl;
+    Sleep(m_iInjectDelay);
+    return 0;
+}
+
+void CApplication::ParseParameters(int argc, wchar_t *argv[])
+{
+    for (int i = 1; i < argc; ++i)
+    {
+        std::wstring parameter = argv[i];
+        if (parameter.compare(L"+process_name") == 0)
+        {
+            std::wstring argument = argv[++i];
+            m_szProcessName = argument;
+            continue;
+        }
+        else if (parameter.compare(L"+library_name") == 0)
+        {
+            std::wstring argument = argv[++i];
+            m_szLibraryName = argument;
+            continue;
+        }
+        else if (parameter.compare(L"+inject_delay") == 0)
+        {
+            std::wstring argument = argv[++i];
+            m_iInjectDelay = std::stoi(argument);
+            continue;
+        }
+    }
+}
+
+void CApplication::StartMainLoop()
+{
     HANDLE processHandle;
     while (true)
     {
@@ -25,10 +63,10 @@ int CApplication::Run(int argc, char *argv[])
             std::cout << "Game process found. Waiting for game loading..." << std::endl;
             Sleep(3000);
 
-            if (!FindProcessModule(processHandle, m_szLibraryName.c_str()))
+            if (!IsLibraryInjected(processHandle))
             {
                 InjectLibrary(processHandle);
-                if (FindProcessModule(processHandle, m_szLibraryName.c_str()))
+                if (IsLibraryInjected(processHandle))
                 {
                     std::cout << "Library successfully injected: check game console for more info" << std::endl;
                     break;
@@ -48,10 +86,6 @@ int CApplication::Run(int argc, char *argv[])
         }
         CloseHandle(processHandle);
     }
-
-    std::cout << "Program will be closed 3 seconds later..." << std::endl;
-    Sleep(3000);
-    return 0;
 }
 
 void CApplication::ReportError(const char *msg)
@@ -59,6 +93,11 @@ void CApplication::ReportError(const char *msg)
     std::cout << "ERROR: " << msg << std::endl;
     std::cout << "Press Enter to try again" << std::endl;
     std::cin.get();
+}
+
+bool CApplication::IsLibraryInjected(HANDLE procHandle)
+{
+    return FindProcessModule(procHandle, m_szLibraryName.c_str()) != NULL;
 }
 
 HANDLE CApplication::OpenGameProcess()
@@ -142,13 +181,13 @@ int CApplication::GetFuncReturnCode(HANDLE threadHandle)
 void CApplication::InjectLibrary(HANDLE procHandle)
 {
     std::wstring    libraryPath;
-    wchar_t *pathStrRemote;
+    wchar_t         *pathStrRemote;
     HMODULE         k32LocalHandle;
     HMODULE			k32RemoteHandle;
     moduleinfo_t	k32Info;
     HANDLE          threadHandle;
     size_t			funcOffset;
-    uint8_t *funcRemote;
+    uint8_t         *funcRemote;
 
     if (!FindLibraryPath(libraryPath))
         EXCEPT("library file not found, make sure that you unpacked program from archive");
@@ -198,15 +237,15 @@ void CApplication::InjectLibrary(HANDLE procHandle)
 
 void CApplication::PrintTitleText()
 {
-    system("cls");
-    system("color 02");
-    printf(
-        "\n"
-        " GoldSrc Monitor | version %d.%d\n"
-        " ------------------------------\n"
+    std::system("cls");
+    std::system("color 02");
+    std::cout << std::endl;
+    std::cout << " GoldSrc Monitor | version " << APP_VERSION_MAJOR << "." << APP_VERSION_MINOR;
+    std::cout << std::endl;
+    std::cout << 
+        (" ------------------------------\n"
         " WARNING: This stuff is untested on VAC-secured\n"
         " servers, therefore there is a risk to get VAC ban\n"
-        " while using it on VAC-secured servers.\n"
-        "\n", APP_VERSION_MAJOR, APP_VERSION_MINOR
-    );
+        " while using it on VAC-secured servers.\n");
+    std::cout << std::endl;
 }
