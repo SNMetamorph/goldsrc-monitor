@@ -97,6 +97,7 @@ void CApplication::ReportError(const char *msg)
 
 bool CApplication::IsLibraryInjected(HANDLE procHandle)
 {
+    // TODO truncate library path and keep only library file name
     return FindProcessModule(procHandle, m_szLibraryName.c_str()) != NULL;
 }
 

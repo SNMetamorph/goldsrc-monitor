@@ -1,6 +1,7 @@
 #pragma once
 #include "hlsdk.h"
 
+// TODO declare console variables as public static members of class ConVars
 extern cvar_t *gsm_color_r;
 extern cvar_t *gsm_color_g;
 extern cvar_t *gsm_color_b;
