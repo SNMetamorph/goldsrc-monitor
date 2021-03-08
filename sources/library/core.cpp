@@ -182,7 +182,7 @@ static void FindTimescaleConVar(const moduleinfo_t &engineLib)
             {
                 if (strcmp(probeCvar->string, "1.0") == 0)
                 {
-                    sys_timescale = probeCvar;
+                    ConVars::sys_timescale = probeCvar;
                     return;
                 }
             }
@@ -192,7 +192,7 @@ static void FindTimescaleConVar(const moduleinfo_t &engineLib)
 
 static void CommandTimescale()
 {
-    if (!sys_timescale)
+    if (!ConVars::sys_timescale)
     {
         g_pClientEngFuncs->Con_Printf("sys_timescale address not found");
         return;
@@ -205,7 +205,7 @@ static void CommandTimescale()
             float argument = (float)atof(g_pClientEngFuncs->Cmd_Argv(1));
             if (argument > 0.f)
             {
-                sys_timescale->value = argument;
+                ConVars::sys_timescale->value = argument;
                 g_pClientEngFuncs->Con_Printf("sys_timescale value = %.1f\n", argument);
             }
             else
@@ -244,12 +244,12 @@ static void SetupConVars(moduleinfo_t &engineLib)
     g_pEngineFuncs->pfnAddServerCommand("gsm_timescale", &CommandTimescale);
 
     FindTimescaleConVar(engineLib);
-    gsm_color_r = RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
-    gsm_color_g = RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
-    gsm_color_b = RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);
-    gsm_margin_up = RegisterConVar("gsm_margin_up", "15", FCVAR_CLIENTDLL);
-    gsm_margin_right = RegisterConVar("gsm_margin_right", "400", FCVAR_CLIENTDLL);
-    gsm_mode = RegisterConVar("gsm_mode", "0", FCVAR_CLIENTDLL);
+    ConVars::gsm_color_r = RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
+    ConVars::gsm_color_g = RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
+    ConVars::gsm_color_b = RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);
+    ConVars::gsm_margin_up = RegisterConVar("gsm_margin_up", "15", FCVAR_CLIENTDLL);
+    ConVars::gsm_margin_right = RegisterConVar("gsm_margin_right", "400", FCVAR_CLIENTDLL);
+    ConVars::gsm_mode = RegisterConVar("gsm_mode", "0", FCVAR_CLIENTDLL);
 }
 
 void ProgramInit()
@@ -281,7 +281,7 @@ void ProgramInit()
 
 void AssignDisplayMode()
 {
-    int displayMode = (int)gsm_mode->value;
+    int displayMode = (int)ConVars::gsm_mode->value;
     switch (displayMode)
     {
     case DISPLAYMODE_SPEEDOMETER:
@@ -332,9 +332,9 @@ void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringSt
             g_ScreenInfo.iWidth - max(marginRight, maxStringWidth + 5),
             marginUp + (stringHeight * (i + linesSkipped)),
             textString,
-            (int)gsm_color_r->value,
-            (int)gsm_color_g->value,
-            (int)gsm_color_b->value
+            (int)ConVars::gsm_color_r->value,
+            (int)ConVars::gsm_color_g->value,
+            (int)ConVars::gsm_color_b->value
         );
 
         int lastCharIndex = strlen(textString) - 1;

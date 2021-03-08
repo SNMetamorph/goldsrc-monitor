@@ -80,7 +80,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
     else
         g_ScreenText.Push("Entity not found");
 
-    DrawStringStack(gsm_margin_right->value, gsm_margin_up->value, g_ScreenText);
+    DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, g_ScreenText);
 }
 
 void CModeEntityReport::Render3D()

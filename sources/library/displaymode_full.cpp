@@ -56,7 +56,7 @@ void CModeFull::Render2D(int scrWidth, int scrHeight)
         g_pPlayerMove->iuser4
     );
 
-    DrawStringStack(gsm_margin_right->value, gsm_margin_up->value, g_ScreenText);
+    DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, g_ScreenText);
 }
 
 float CModeFull::GetSmoothFrameTime()
