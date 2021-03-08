@@ -23,5 +23,3 @@ private:
     vec3_t m_vecBboxMin;
     vec3_t m_vecBboxMax;
 };
-
-extern CModeEntityReport &g_ModeEntityReport;

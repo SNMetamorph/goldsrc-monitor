@@ -6,8 +6,6 @@
 #include "studio.h"
 #include <gl/GL.h>
 
-CModeEntityReport &g_ModeEntityReport = CModeEntityReport::GetInstance();
-
 CModeEntityReport &CModeEntityReport::GetInstance()
 {
     static CModeEntityReport instance;

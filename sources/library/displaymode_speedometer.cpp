@@ -2,8 +2,6 @@
 #include "core.h"
 #include "globals.h"
 
-CModeSpeedometer &g_ModeSpeedometer = CModeSpeedometer::GetInstance();
-
 CModeSpeedometer &CModeSpeedometer::GetInstance()
 {
     static CModeSpeedometer instance;

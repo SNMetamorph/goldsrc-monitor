@@ -7,8 +7,6 @@
 // HLSDK
 #include "keydefs.h"
 
-CModeMeasurement &g_ModeMeasurement = CModeMeasurement::GetInstance();
-
 CModeMeasurement &CModeMeasurement::GetInstance()
 {
     static CModeMeasurement instance;

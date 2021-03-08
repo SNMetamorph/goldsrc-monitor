@@ -4,8 +4,6 @@
 #include "cvars.h"
 #include "util.h"
 
-CModeFull &g_ModeFull = CModeFull::GetInstance();
-
 CModeFull &CModeFull::GetInstance()
 {
     static CModeFull instance;

@@ -18,5 +18,3 @@ private:
     float GetSmoothFrameTime();
     const char *GetMovetypeName(int moveType);
 };
-
-extern CModeFull &g_ModeFull;

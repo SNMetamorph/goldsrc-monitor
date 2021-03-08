@@ -15,5 +15,3 @@ private:
     CModeAngleTracking(const CModeAngleTracking&) = delete;
     CModeAngleTracking& operator=(const CModeAngleTracking&) = delete;
 };
-
-extern CModeAngleTracking &g_ModeAngleTrack;

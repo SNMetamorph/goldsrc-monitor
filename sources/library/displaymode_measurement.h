@@ -47,5 +47,3 @@ private:
     HLSPRITE     m_iLineSprite;
     int          m_iSnapMode = SNAPMODE_FREE;
 };
-
-extern CModeMeasurement &g_ModeMeasurement;

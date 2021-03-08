@@ -285,19 +285,19 @@ void AssignDisplayMode()
     switch (displayMode)
     {
     case DISPLAYMODE_SPEEDOMETER:
-        g_pDisplayMode = &g_ModeSpeedometer;
+        g_pDisplayMode = &CModeSpeedometer::GetInstance();
         break;
     case DISPLAYMODE_ENTITYREPORT:
-        g_pDisplayMode = &g_ModeEntityReport;
+        g_pDisplayMode = &CModeEntityReport::GetInstance();
         break;
     case DISPLAYMODE_ANGLETRACKING:
-        g_pDisplayMode = &g_ModeAngleTrack;
+        g_pDisplayMode = &CModeAngleTracking::GetInstance();
         break;
     case DISPLAYMODE_MEASUREMENT:
-        g_pDisplayMode = &g_ModeMeasurement;
+        g_pDisplayMode = &CModeMeasurement::GetInstance();
         break;
     default:
-        g_pDisplayMode = &g_ModeFull;
+        g_pDisplayMode = &CModeFull::GetInstance();
         break;
     }
 }

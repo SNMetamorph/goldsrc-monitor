@@ -15,5 +15,3 @@ private:
     CModeSpeedometer(const CModeSpeedometer&) = delete;
     CModeSpeedometer& operator=(const CModeSpeedometer&) = delete;
 };
-
-extern CModeSpeedometer &g_ModeSpeedometer;

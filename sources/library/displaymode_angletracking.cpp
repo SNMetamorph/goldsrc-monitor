@@ -2,8 +2,6 @@
 #include "core.h"
 #include "globals.h"
 
-CModeAngleTracking &g_ModeAngleTrack = CModeAngleTracking::GetInstance();
-
 CModeAngleTracking &CModeAngleTracking::GetInstance()
 {
     static CModeAngleTracking instance;
