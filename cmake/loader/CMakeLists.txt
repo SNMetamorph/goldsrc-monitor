@@ -40,7 +40,17 @@ if (MSVC)
 		PSAPI_VERSION=1 # for WinXP compatibility
 	)
 
+	if (CMAKE_CONFIGURATION_TYPES MATCHES Debug)
+		target_compile_options(${PROJECT_NAME} PRIVATE /Od) # disable optimizing at all
+		# enable "Edit and Continue" MSVC feature
+		target_compile_options(${PROJECT_NAME} PRIVATE /ZI) 
+		target_link_options(${PROJECT_NAME} PRIVATE /INCREMENTAL /SAFESEH:NO)
+	else()
+		target_compile_options(${PROJECT_NAME} PRIVATE /Ob1) # disable force function inlining, to prevent segfault in release mode
+	endif()
+
 	set_compiler_runtime(${PROJECT_NAME} STATIC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:threadSafeInit-) # for WinXP compatibility (to avoid LoadLibrary error #998)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
 		psapi 
 		shlwapi
