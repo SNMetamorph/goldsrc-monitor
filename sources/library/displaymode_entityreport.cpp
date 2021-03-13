@@ -96,6 +96,7 @@ void CModeEntityReport::Render3D()
     if (!IsSoftwareRenderer())
     {
         g_pClientEngFuncs->pTriAPI->RenderMode(kRenderNormal);
+        glDisable(GL_DEPTH_TEST);
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_LINE_LOOP);
             glColor3f(colorR, colorG, colorB);
@@ -117,6 +118,7 @@ void CModeEntityReport::Render3D()
             glVertex3fv(boxVertices[5]); // 6
         glEnd();
         glEnable(GL_TEXTURE_2D);
+        glEnable(GL_DEPTH_TEST);
     }
 }
 
