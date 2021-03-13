@@ -5,6 +5,8 @@
 #include "core.h"
 #include "studio.h"
 #include <gl/GL.h>
+#include <algorithm>
+#include <iterator> 
 
 CModeEntityReport &CModeEntityReport::GetInstance()
 {
@@ -14,25 +16,11 @@ CModeEntityReport &CModeEntityReport::GetInstance()
 
 void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
 {
-    vec3_t viewDir;
-    vec3_t viewOrigin;
-    vec3_t viewAngles;
     vec3_t entityOrigin;
     vec3_t entityAngles;
-    pmtrace_t traceData;
-    const float lineLen = 4096.f;
 
     g_ScreenText.Clear();
-    g_pClientEngFuncs->GetViewAngles(viewAngles);
-    g_pClientEngFuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
-    viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-    TraceLine(viewOrigin, viewDir, lineLen, &traceData);
-
-    if (traceData.fraction < 1.f && traceData.ent > 0)
-        m_iEntityIndex = g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
-    else
-        m_iEntityIndex = TraceVisEnt(viewOrigin, viewDir, lineLen * traceData.fraction);
-
+    m_iEntityIndex = TraceEntity();
     if (m_iEntityIndex)
     {
         cl_entity_t *traceEntity = g_pClientEngFuncs->GetEntityByIndex(m_iEntityIndex);
@@ -43,14 +31,14 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
         else
         {
             entityOrigin = traceEntity->curstate.origin;
-            entityAngles = traceEntity->curstate.angles;
+            entityAngles = traceEntity->curstate.angles; 
         }
-
-        float entityDistance = (entityOrigin - viewOrigin).Length();        
+       
         g_ScreenText.PushPrintf("Entity Index: %d", m_iEntityIndex);
         g_ScreenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
-        g_ScreenText.PushPrintf("Distance: %.1f units", entityDistance);
+        g_ScreenText.PushPrintf("Distance: %.1f units", 
+            GetEntityDistance(m_iEntityIndex));
 
         if (entityModel->type != mod_brush)
         {
@@ -132,31 +120,80 @@ void CModeEntityReport::Render3D()
     }
 }
 
-int CModeEntityReport::TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
+int CModeEntityReport::TraceEntity()
+{
+    vec3_t viewDir;
+    vec3_t viewOrigin;
+    pmtrace_t traceData;
+    const float lineLen = 11590.0f;
+    float worldDistance = lineLen;
+
+    m_EntityIndexList.clear();
+    m_EntityDistanceList.clear();
+    viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+    viewDir = GetViewDirection();
+
+    TraceLine(viewOrigin, viewDir, lineLen, &traceData);
+    if (traceData.fraction < 1.f)
+    {
+        if (traceData.ent > 0)
+            return g_pClientEngFuncs->pEventAPI->EV_IndexFromTrace(&traceData);
+        else
+            worldDistance = lineLen * traceData.fraction;
+    }
+
+    const int listCount = 3;
+    physent_t *physEntLists[listCount] = { g_pPlayerMove->visents, g_pPlayerMove->physents, g_pPlayerMove->moveents };
+    int physEntListsLen[listCount] = { g_pPlayerMove->numvisent, g_pPlayerMove->numphysent, g_pPlayerMove->nummoveent };
+    for (int i = 0; i < listCount; ++i)
+    {
+        int physEntIndex = TracePhysEntList(physEntLists[i], physEntListsLen[i], viewOrigin, viewDir, lineLen);
+        if (physEntIndex)
+        {
+            m_EntityIndexList.push_back(physEntIndex);
+            m_EntityDistanceList.push_back(GetEntityDistance(physEntIndex));
+        }
+    }
+
+    // get nearest entity from all lists
+    // also add world for comparision
+    m_EntityIndexList.push_back(0);
+    m_EntityDistanceList.push_back(worldDistance);
+    auto &distanceList = m_EntityDistanceList;
+    if (distanceList.size() > 1)
+    {
+        auto iterNearestEnt = std::min_element(std::begin(distanceList), std::end(distanceList));
+        if (std::end(distanceList) != iterNearestEnt)
+            return m_EntityIndexList[std::distance(distanceList.begin(), iterNearestEnt)];
+    }
+    return 0;
+}
+
+float CModeEntityReport::TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
 {
     vec3_t bboxMin;
     vec3_t bboxMax;
     vec3_t lineEnd;
+
+    // skip studiomodel visents which is culled
+    GetEntityBbox(physEnt.info, bboxMin, bboxMax);
+    if (!g_pClientEngFuncs->pTriAPI->BoxInPVS(bboxMin, bboxMax))
+        return 1.0f;
+
+    // check for intersection
+    lineEnd = viewOrigin + (viewDir * lineLen);
+    return TraceBBoxLine(bboxMin, bboxMax, viewOrigin, lineEnd);
+}
+
+int CModeEntityReport::TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
+{
     int entIndex = 0;
     float minFraction = 1.0f;
     
-    for (int i = 0; i < g_pPlayerMove->numvisent; ++i)
+    for (int i = 0; i < count; ++i)
     {
-        physent_t &visEnt = g_pPlayerMove->visents[i];
-        vec3_t entDirection = (visEnt.origin - viewOrigin).Normalize();
-    
-        // skip brush visents
-        if (!visEnt.studiomodel)
-            continue;
-
-        // skip studiomodel visents which is not visible
-        GetEntityBbox(visEnt.info, bboxMin, bboxMax);
-        if (!g_pClientEngFuncs->pTriAPI->BoxInPVS(bboxMin, bboxMax))
-            continue;
-
-        // check for intersection
-        lineEnd = viewOrigin + (viewDir * lineLen);
-        float traceFraction = TraceBBoxLine(bboxMin, bboxMax, viewOrigin, lineEnd);
+        const physent_t &visEnt = list[i];
+        float traceFraction = TracePhysEnt(visEnt, viewOrigin, viewDir, lineLen);
         if (traceFraction < minFraction)
         {
             entIndex    = visEnt.info;
@@ -190,4 +227,34 @@ void CModeEntityReport::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &
         bboxMin = entTarget->curstate.mins;
         bboxMax = entTarget->curstate.maxs;
     }
+}
+
+float CModeEntityReport::GetEntityDistance(int entityIndex)
+{
+    vec3_t viewDir;
+    vec3_t viewOrigin;
+    vec3_t entityOrigin;
+    vec3_t pointOnBbox;
+    vec3_t bboxMin, bboxMax;
+    cl_entity_t *traceEntity = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+    model_t *entityModel = traceEntity->model;
+
+    viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+    if (entityModel->type == mod_brush)
+        entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;
+    else
+        entityOrigin = traceEntity->curstate.origin;
+
+    GetEntityBbox(entityIndex, bboxMin, bboxMax);
+    viewDir = entityOrigin - viewOrigin;
+    pointOnBbox = viewOrigin + viewDir * TraceBBoxLine(bboxMin, bboxMax, viewOrigin, entityOrigin);
+    return (pointOnBbox - viewOrigin).Length();
+}
+
+vec3_t CModeEntityReport::GetViewDirection()
+{
+    vec3_t viewAngles, viewDir;
+    g_pClientEngFuncs->GetViewAngles(viewAngles);
+    g_pClientEngFuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
+    return viewDir;
 }

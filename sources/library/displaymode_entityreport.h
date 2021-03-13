@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "display_mode.h"
+#include <vector>
 
 class CModeEntityReport : public IDisplayMode
 {
@@ -16,10 +17,16 @@ private:
     CModeEntityReport(const CModeEntityReport&) = delete;
     CModeEntityReport& operator=(const CModeEntityReport&) = delete;
 
-    int TraceVisEnt(vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
+    int TraceEntity();
+    float TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
+    int TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
     void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
+    float GetEntityDistance(int entityIndex);
+    vec3_t GetViewDirection();
 
     int m_iEntityIndex;
+    std::vector<int> m_EntityIndexList;
+    std::vector<float> m_EntityDistanceList;
     vec3_t m_vecBboxMin;
     vec3_t m_vecBboxMax;
 };
