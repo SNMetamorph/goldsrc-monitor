@@ -1,6 +1,7 @@
 #include "util.h"
 #include "moduleinfo.h"
 #include "globals.h" // temporary
+#include "studio.h"
 
 #include <stdint.h>
 #include <cstring>
@@ -214,6 +215,31 @@ float TraceBBoxLine(
         return 1.f;
 
     return nearDotFract / lineLength;
+}
+
+void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
+{
+    int seqIndex;
+    cl_entity_t *entTarget;
+    studiohdr_t *mdlHeader;
+    mstudioseqdesc_t *seqDesc;
+
+    entTarget = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+    if (entTarget->model && entTarget->model->type == mod_studio)
+    {
+        vec3_t &entOrigin = entTarget->curstate.origin;
+        mdlHeader = (studiohdr_t *)entTarget->model->cache.data;
+        seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
+        seqIndex = entTarget->curstate.sequence;
+
+        bboxMin = entOrigin + seqDesc[seqIndex].bbmin;
+        bboxMax = entOrigin + seqDesc[seqIndex].bbmax;
+    }
+    else
+    {
+        bboxMin = entTarget->curstate.mins;
+        bboxMax = entTarget->curstate.maxs;
+    }
 }
 
 float GetCurrentSysTime()
