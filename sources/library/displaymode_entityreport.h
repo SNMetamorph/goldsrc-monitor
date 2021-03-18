@@ -20,7 +20,6 @@ private:
     int TraceEntity();
     float TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
     int TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
-    void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
     float GetEntityDistance(int entityIndex);
     vec3_t GetViewDirection();
 

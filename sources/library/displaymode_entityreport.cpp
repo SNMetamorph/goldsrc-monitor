@@ -4,6 +4,7 @@
 #include "util.h"
 #include "core.h"
 #include "studio.h"
+#include "entity_dictionary.h"
 #include <gl/GL.h>
 #include <algorithm>
 #include <iterator> 
@@ -19,33 +20,33 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
     vec3_t entityOrigin;
     vec3_t entityAngles;
 
+    if (!g_EntityDictionary.IsInitialized())
+        g_EntityDictionary.Initialize();
+
     g_ScreenText.Clear();
     m_iEntityIndex = TraceEntity();
     if (m_iEntityIndex)
     {
+        CEntityDescription entityDesc;
         cl_entity_t *traceEntity = g_pClientEngFuncs->GetEntityByIndex(m_iEntityIndex);
         model_t *entityModel = traceEntity->model;
+        bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc);
+        entityAngles = traceEntity->curstate.angles;
 
         if (entityModel->type == mod_brush)
-            entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;
+            entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;   
         else
-        {
             entityOrigin = traceEntity->curstate.origin;
-            entityAngles = traceEntity->curstate.angles; 
-        }
-       
+
         g_ScreenText.PushPrintf("Entity Index: %d", m_iEntityIndex);
         g_ScreenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
         g_ScreenText.PushPrintf("Distance: %.1f units", 
             GetEntityDistance(m_iEntityIndex));
-
-        if (entityModel->type != mod_brush)
-        {
-            g_ScreenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
-                entityAngles.x, entityAngles.y, entityAngles.z);
-        }
-        else
+        g_ScreenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
+            entityAngles.x, entityAngles.y, entityAngles.z);
+        
+        if (entityModel->type == mod_brush)
         {
             vec3_t brushSize = entityModel->maxs - entityModel->mins;
             g_ScreenText.PushPrintf("Brush Size: (%.1f; %.1f; %.1f)",
@@ -54,6 +55,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
 
         if (entityModel->type != mod_brush)
         {
+            entityModel = g_pClientEngFuncs->hudGetModelByIndex(traceEntity->curstate.modelindex);
             g_ScreenText.PushPrintf("Model Name: %s", entityModel->name);
             g_ScreenText.PushPrintf("Anim. Frame: %.1f",
                 traceEntity->curstate.frame);
@@ -64,6 +66,19 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight)
             g_ScreenText.PushPrintf("Skin Number: %d",
                 traceEntity->curstate.skin);
         }
+
+        if (isDescFound)
+        {
+            std::string entityProp;
+            g_ScreenText.Push("Entity properties");
+            for (int i = 0; i < entityDesc.GetKeyValueCount(); ++i)
+            {
+                entityDesc.GetKeyValueString(i, entityProp);
+                g_ScreenText.PushPrintf("    %s", entityProp.c_str());
+            }
+        }
+        else
+            g_ScreenText.Push("Properties info not found");
     }
     else
         g_ScreenText.Push("Entity not found");
@@ -206,37 +221,11 @@ int CModeEntityReport::TracePhysEntList(physent_t list[], int count, vec3_t &vie
     return entIndex;
 }
 
-void CModeEntityReport::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
-{ 
-    int seqIndex;
-    cl_entity_t *entTarget;
-    studiohdr_t *mdlHeader;
-    mstudioseqdesc_t *seqDesc;
-    
-    entTarget = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
-    if (entTarget->model && entTarget->model->type == mod_studio)
-    {
-        vec3_t &entOrigin = entTarget->curstate.origin;
-        mdlHeader = (studiohdr_t *)entTarget->model->cache.data;
-        seqDesc = (mstudioseqdesc_t*)((char *)mdlHeader + mdlHeader->seqindex);
-        seqIndex = entTarget->curstate.sequence;
-
-        bboxMin = entOrigin + seqDesc[seqIndex].bbmin;
-        bboxMax = entOrigin + seqDesc[seqIndex].bbmax;
-    }
-    else
-    {
-        bboxMin = entTarget->curstate.mins;
-        bboxMax = entTarget->curstate.maxs;
-    }
-}
-
 float CModeEntityReport::GetEntityDistance(int entityIndex)
 {
-    vec3_t viewDir;
     vec3_t viewOrigin;
     vec3_t entityOrigin;
-    vec3_t pointOnBbox;
+    vec3_t pointInBbox;
     vec3_t bboxMin, bboxMax;
     cl_entity_t *traceEntity = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
     model_t *entityModel = traceEntity->model;
@@ -247,10 +236,12 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
     else
         entityOrigin = traceEntity->curstate.origin;
 
+    // get nearest bbox-to-player distance by point caged in bbox
     GetEntityBbox(entityIndex, bboxMin, bboxMax);
-    viewDir = entityOrigin - viewOrigin;
-    pointOnBbox = viewOrigin + viewDir * TraceBBoxLine(bboxMin, bboxMax, viewOrigin, entityOrigin);
-    return (pointOnBbox - viewOrigin).Length();
+    pointInBbox.x = max(min(viewOrigin.x, bboxMax.x), bboxMin.x);
+    pointInBbox.y = max(min(viewOrigin.y, bboxMax.y), bboxMin.y);
+    pointInBbox.z = max(min(viewOrigin.z, bboxMax.z), bboxMin.z);
+    return (pointInBbox - viewOrigin).Length();
 }
 
 vec3_t CModeEntityReport::GetViewDirection()

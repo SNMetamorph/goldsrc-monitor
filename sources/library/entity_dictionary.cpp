@@ -1,0 +1,97 @@
+#include "entity_dictionary.h"
+#include "util.h"
+#include "globals.h"
+
+CEntityDictionary &g_EntityDictionary = CEntityDictionary::GetInstance();
+
+CEntityDictionary &CEntityDictionary::GetInstance()
+{
+    static CEntityDictionary instance;
+    return instance;
+}
+
+void CEntityDictionary::Initialize()
+{
+    Reset();
+    ParseEntityData();
+    InitDescriptions();
+    m_isInitialized = true;
+}
+
+// should be reset and initialized after every map change
+void CEntityDictionary::Reset()
+{
+    m_EntityDescList.clear();
+    m_iParsedEntityCount = 0;
+    m_isInitialized = false;
+}
+
+bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription) const
+{
+    vec3_t entityMins;
+    vec3_t entityMaxs;
+    cl_entity_t *traceEntity = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+    for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
+    {
+        const CEntityDescription &entityDesc = *it;
+        const vec3_t &bboxMins = entityDesc.GetBboxMins();
+        const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
+        GetEntityBbox(entityIndex, entityMins, entityMaxs);
+        vec3_t diffMin = entityMins - bboxMins;
+        vec3_t diffMax = entityMaxs - bboxMaxs;
+        if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
+        {
+            destDescription = entityDesc;
+            return true;
+        }
+    }
+    return false;
+}
+
+void CEntityDictionary::ParseEntityData()
+{
+    cl_entity_t *worldEntity = g_pClientEngFuncs->GetEntityByIndex(0);
+    model_t *worldModel = worldEntity->model;
+    char *entData = worldModel->entities;
+    std::vector<char> key;
+    std::vector<char> value;
+    std::vector<char> token;
+
+    int index = 0;
+    key.reserve(1024);
+    value.reserve(1024);
+    token.reserve(1024);
+    while (true)
+    {
+        if (entData[1] == '\0')
+            break;
+
+        entData = g_pClientEngFuncs->COM_ParseFile(entData, token.data());
+        if (strcmp(token.data(), "{") == 0)
+        {
+            m_EntityDescList.emplace_back();
+            CEntityDescription &entityDesc = m_EntityDescList[index++];
+            while (true)
+            {
+                entData = g_pClientEngFuncs->COM_ParseFile(entData, token.data());
+                if (strcmp(token.data(), "}") == 0)
+                {
+                    m_iParsedEntityCount++;
+                    break;
+                }
+                else
+                {
+                    strncpy(key.data(), token.data(), sizeof(key) - 1);
+                    entData = g_pClientEngFuncs->COM_ParseFile(entData, value.data());
+                    entityDesc.AddKeyValue(std::string(key.data()), std::string(value.data()));
+                }
+            }
+        }
+    }
+}
+
+void CEntityDictionary::InitDescriptions()
+{
+    for (CEntityDescription &desc : m_EntityDescList)
+        desc.Initialize();
+}

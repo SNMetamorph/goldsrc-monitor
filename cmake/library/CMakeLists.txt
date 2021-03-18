@@ -26,6 +26,8 @@ add_library(${PROJECT_NAME} SHARED
 	../../sources/library/displaymode_full.cpp
 	../../sources/library/displaymode_measurement.cpp
 	../../sources/library/displaymode_speedometer.cpp
+	../../sources/library/entity_dictionary.cpp
+	../../sources/library/entity_description.cpp
 	../../sources/library/dll_main.cpp
 	../../sources/library/globals.cpp
 	../../sources/library/hooks.cpp
