@@ -2,43 +2,30 @@
 #include <string>
 #include <stdarg.h>
 
-CStringStack::CStringStack(char *stringArray, int stringLen, int maxStringCount)
+CStringStack::CStringStack(int stringLen)
 {
     m_iStackIndex   = 0;
     m_iStringLen    = stringLen;
-    m_iArraySize    = maxStringCount;
-    m_aStringArray  = stringArray;
+    m_StringBuffer.clear();
 }
 
-bool CStringStack::Push(const char *str)
+void CStringStack::Push(const char *str)
 {
-    char *stringAddr;
-    if (m_iStackIndex < m_iArraySize)
-    {
-        stringAddr = &m_aStringArray[m_iStackIndex * m_iStringLen];
-        strncpy(stringAddr, str, m_iStringLen);
-        ++m_iStackIndex;
-        return true;
-    }
-    return false;
+    AllocString();
+    char *stringAddr = &m_StringBuffer[m_iStackIndex * m_iStringLen];
+    strncpy(stringAddr, str, m_iStringLen);
+    ++m_iStackIndex;
 }
 
-bool CStringStack::PushPrintf(const char *format, ...)
+void CStringStack::PushPrintf(const char *format, ...)
 {
     va_list args;
-    char *stringAddr;
-
-    if (m_iStackIndex < m_iArraySize)
-    {
-        stringAddr = &m_aStringArray[m_iStackIndex * m_iStringLen];
-        va_start(args, format);
-        vsnprintf(stringAddr, m_iStringLen, format, args);
-        va_end(args);
-
-        ++m_iStackIndex;
-        return true;
-    }
-    return false;
+    AllocString();
+    char *stringAddr = &m_StringBuffer[m_iStackIndex * m_iStringLen];
+    va_start(args, format);
+    vsnprintf(stringAddr, m_iStringLen, format, args);
+    va_end(args);
+    ++m_iStackIndex;
 }
 
 void CStringStack::Pop()
@@ -54,8 +41,16 @@ void CStringStack::Clear()
 
 const char *CStringStack::StringAt(int index) const
 {
-    if (index >= 0 && index < m_iArraySize)
-        return &m_aStringArray[index * m_iStringLen];
+    if (index >= 0 && index < m_iStackIndex)
+        return &m_StringBuffer[index * m_iStringLen];
     else
         return nullptr;
+}
+
+void CStringStack::AllocString()
+{
+    int currentSize = m_StringBuffer.size();
+    int desiredSize = m_iStackIndex * m_iStringLen + m_iStringLen;
+    if (currentSize < desiredSize)
+        m_StringBuffer.resize(desiredSize);
 }

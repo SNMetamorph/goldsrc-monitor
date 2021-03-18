@@ -1,25 +1,27 @@
 #pragma once
 #include <stdio.h>
+#include <vector>
 
 class CStringStack
 {
 public:
-    CStringStack(char *stringArray, int stringLen, int maxStringCount);
+    CStringStack(int stringLen);
 
     void Pop();
     void Clear();
-    bool Push(const char *str);
-    bool PushPrintf(const char *format, ...);
+    void Push(const char *str);
+    void PushPrintf(const char *format, ...);
     
     inline int GetStringLength() const      { return m_iStringLen;  };
     inline int GetStringCount() const       { return m_iStackIndex; };
-    inline int GetStringMaxCount() const    { return m_iArraySize;  };
+    inline int GetBufferSize() const        { return m_StringBuffer.capacity(); };
     const char *StringAt(int index) const;
 
 private:
-    int m_iStackIndex;
-    int m_iStringLen;
-    int m_iArraySize;
-    char *m_aStringArray;
+    void AllocString();
+
+    int m_iStackIndex = 0;
+    int m_iStringLen = 0;
+    std::vector<char> m_StringBuffer;
 };
 
