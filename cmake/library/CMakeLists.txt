@@ -16,10 +16,13 @@ endif()
 add_library(${PROJECT_NAME} SHARED
 	../../sources/exception.cpp
 	../../sources/string_stack.cpp
-	../../sources/library/util.cpp
+	../../sources/library/application.cpp
+	../../sources/library/client_module.cpp
+	../../sources/library/server_module.cpp
+	../../sources/library/engine_module.cpp
+	../../sources/library/utils.cpp
 	../../sources/library/cvars.cpp
 	../../sources/library/buildinfo.cpp
-	../../sources/library/core.cpp
 	../../sources/library/display_mode.h
 	../../sources/library/displaymode_angletracking.cpp
 	../../sources/library/displaymode_entityreport.cpp
@@ -29,10 +32,8 @@ add_library(${PROJECT_NAME} SHARED
 	../../sources/library/entity_dictionary.cpp
 	../../sources/library/entity_description.cpp
 	../../sources/library/dll_main.cpp
-	../../sources/library/globals.cpp
 	../../sources/library/hooks.cpp
 	../../sources/library/stdafx.cpp
-	../../sources/library/util.cpp
 	../../sources/library/library.rc
 )
 

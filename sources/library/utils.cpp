@@ -1,7 +1,8 @@
-#include "util.h"
+#include "utils.h"
 #include "moduleinfo.h"
-#include "globals.h" // temporary
+#include "client_module.h"
 #include "studio.h"
+#include "application.h"
 
 #include <stdint.h>
 #include <cstring>
@@ -9,7 +10,7 @@
 #include <Windows.h>
 #include <Psapi.h>
 
-void *FindPatternAddress(
+void *Utils::FindPatternAddress(
     void *startAddr, void *endAddr, const char *pattern, const char *mask)
 {
     bool isFailed;
@@ -39,7 +40,7 @@ void *FindPatternAddress(
     return nullptr;
 }
 
-HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName)
+HMODULE Utils::FindModuleByExport(HANDLE procHandle, const char *exportName)
 {
     DWORD listSize;
     size_t modulesCount;
@@ -86,7 +87,7 @@ HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName)
     return NULL;
 }
 
-bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
+bool Utils::GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
 {
     MODULEINFO minfo;
     if (!GetModuleInformation(procHandle, moduleHandle, &minfo, sizeof(minfo)))
@@ -98,7 +99,16 @@ bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &module
     return true;
 }
 
-void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
+int Utils::GetStringWidth(const char *str)
+{
+    const SCREENINFO &screenInfo = g_Application.GetScreenInfo();
+    int totalWidth = 0;
+    for (char *i = (char *)str; *i; ++i)
+        totalWidth += screenInfo.charWidths[*i];
+    return totalWidth;
+}
+
+void *Utils::FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
 {
     void *valueAddr;
     HANDLE procHandle;
@@ -123,7 +133,49 @@ void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
     return valueAddr;
 }
 
-void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData)
+cvar_t *Utils::RegisterConVar(const char *name, const char *value, int flags)
+{
+    cvar_t *probe = g_pClientEngfuncs->pfnGetCvarPointer(name);
+    if (probe)
+        return probe;
+    return g_pClientEngfuncs->pfnRegisterVariable(name, value, flags);
+}
+
+void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack)
+{
+    int linesSkipped = 0;
+    int maxStringWidth = 0;
+    int stringCount = stringStack.GetStringCount();
+    const int stringHeight = 15;
+    const SCREENINFO &screenInfo = g_Application.GetScreenInfo();
+
+    for (int i = 0; i < stringCount; ++i)
+    {
+        const char *textString = stringStack.StringAt(i);
+        int stringWidth = GetStringWidth(textString);
+        if (stringWidth > maxStringWidth)
+            maxStringWidth = stringWidth;
+    }
+
+    for (int i = 0; i < stringCount; ++i)
+    {
+        const char *textString = stringStack.StringAt(i);
+        g_pClientEngfuncs->pfnDrawString(
+            screenInfo.iWidth - max(marginRight, maxStringWidth + 5),
+            marginUp + (stringHeight * (i + linesSkipped)),
+            textString,
+            (int)ConVars::gsm_color_r->value,
+            (int)ConVars::gsm_color_g->value,
+            (int)ConVars::gsm_color_b->value
+        );
+
+        int lastCharIndex = strlen(textString) - 1;
+        if (textString[lastCharIndex] == '\n')
+            ++linesSkipped;
+    }
+}
+
+void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData)
 {
     vec3_t lineStart;
     vec3_t lineEnd;
@@ -131,20 +183,20 @@ void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData)
 
     lineStart   = origin;
     lineEnd     = lineStart + (dir * lineLen);
-    localPlayer = g_pClientEngFuncs->GetLocalPlayer();
+    localPlayer = g_pClientEngfuncs->GetLocalPlayer();
 
-    g_pClientEngFuncs->pEventAPI->EV_SetUpPlayerPrediction(false, true);
-    g_pClientEngFuncs->pEventAPI->EV_PushPMStates();
-    g_pClientEngFuncs->pEventAPI->EV_SetSolidPlayers(localPlayer->index - 1);
-    g_pClientEngFuncs->pEventAPI->EV_SetTraceHull(2);
-    g_pClientEngFuncs->pEventAPI->EV_PlayerTrace(
+    g_pClientEngfuncs->pEventAPI->EV_SetUpPlayerPrediction(false, true);
+    g_pClientEngfuncs->pEventAPI->EV_PushPMStates();
+    g_pClientEngfuncs->pEventAPI->EV_SetSolidPlayers(localPlayer->index - 1);
+    g_pClientEngfuncs->pEventAPI->EV_SetTraceHull(2);
+    g_pClientEngfuncs->pEventAPI->EV_PlayerTrace(
         lineStart, lineEnd, PM_NORMAL,
         localPlayer->index, traceData
     );
-    g_pClientEngFuncs->pEventAPI->EV_PopPMStates();
+    g_pClientEngfuncs->pEventAPI->EV_PopPMStates();
 }
 
-float TraceBBoxLine(
+float Utils::TraceBBoxLine(
     const vec3_t &bboxMin, const vec3_t &bboxMax, 
     const vec3_t &lineStart, const vec3_t &lineEnd)
 {
@@ -217,14 +269,14 @@ float TraceBBoxLine(
     return nearDotFract / lineLength;
 }
 
-void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
+void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
 {
     int seqIndex;
     cl_entity_t *entTarget;
     studiohdr_t *mdlHeader;
     mstudioseqdesc_t *seqDesc;
 
-    entTarget = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+    entTarget = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
     if (entTarget->model && entTarget->model->type == mod_studio)
     {
         vec3_t &entOrigin = entTarget->curstate.origin;
@@ -242,7 +294,7 @@ void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
     }
 }
 
-float GetCurrentSysTime()
+float Utils::GetCurrentSysTime()
 {
     static LARGE_INTEGER	perfFreq;
     static LARGE_INTEGER	clockStart;

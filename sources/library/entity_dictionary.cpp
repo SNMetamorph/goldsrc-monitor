@@ -1,6 +1,6 @@
 #include "entity_dictionary.h"
-#include "util.h"
-#include "globals.h"
+#include "utils.h"
+#include "client_module.h"
 
 CEntityDictionary &g_EntityDictionary = CEntityDictionary::GetInstance();
 
@@ -30,13 +30,13 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
 {
     vec3_t entityMins;
     vec3_t entityMaxs;
-    cl_entity_t *traceEntity = g_pClientEngFuncs->GetEntityByIndex(entityIndex);
+    cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
     for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
     {
         const CEntityDescription &entityDesc = *it;
         const vec3_t &bboxMins = entityDesc.GetBboxMins();
         const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
-        GetEntityBbox(entityIndex, entityMins, entityMaxs);
+        Utils::GetEntityBbox(entityIndex, entityMins, entityMaxs);
         vec3_t diffMin = entityMins - bboxMins;
         vec3_t diffMax = entityMaxs - bboxMaxs;
         if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
@@ -50,7 +50,7 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
 
 void CEntityDictionary::ParseEntityData()
 {
-    cl_entity_t *worldEntity = g_pClientEngFuncs->GetEntityByIndex(0);
+    cl_entity_t *worldEntity = g_pClientEngfuncs->GetEntityByIndex(0);
     model_t *worldModel = worldEntity->model;
     char *entData = worldModel->entities;
     std::vector<char> key;
@@ -66,14 +66,14 @@ void CEntityDictionary::ParseEntityData()
         if (entData[1] == '\0')
             break;
 
-        entData = g_pClientEngFuncs->COM_ParseFile(entData, token.data());
+        entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
         if (strcmp(token.data(), "{") == 0)
         {
             m_EntityDescList.emplace_back();
             CEntityDescription &entityDesc = m_EntityDescList[index++];
             while (true)
             {
-                entData = g_pClientEngFuncs->COM_ParseFile(entData, token.data());
+                entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
                 if (strcmp(token.data(), "}") == 0)
                 {
                     m_iParsedEntityCount++;
@@ -82,7 +82,7 @@ void CEntityDictionary::ParseEntityData()
                 else
                 {
                     strncpy(key.data(), token.data(), sizeof(key) - 1);
-                    entData = g_pClientEngFuncs->COM_ParseFile(entData, value.data());
+                    entData = g_pClientEngfuncs->COM_ParseFile(entData, value.data());
                     entityDesc.AddKeyValue(std::string(key.data()), std::string(value.data()));
                 }
             }

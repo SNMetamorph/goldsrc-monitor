@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "hooks.h"
-#include "core.h"
-#include "globals.h"
+#include "application.h"
+#include "client_module.h"
 #include "exception.h"
 
 // polyhook headers
@@ -52,10 +52,10 @@ static void DisposeHookingStuff()
 
 void ApplyHooks()
 {
-    char *pfnRedraw = (char *)GetProcAddress(g_hClientModule, "HUD_Redraw");
-    char *pfnPlayerMove = (char *)GetProcAddress(g_hClientModule, "HUD_PlayerMove");
-    char *pfnKeyEvent = (char *)GetProcAddress(g_hClientModule, "HUD_Key_Event");
-    char *pfnDrawTriangles = (char *)GetProcAddress(g_hClientModule, "HUD_DrawTransparentTriangles");
+    char *pfnRedraw = (char *)GetProcAddress(g_ClientModule.GetHandle(), "HUD_Redraw");
+    char *pfnPlayerMove = (char *)GetProcAddress(g_ClientModule.GetHandle(), "HUD_PlayerMove");
+    char *pfnKeyEvent = (char *)GetProcAddress(g_ClientModule.GetHandle(), "HUD_Key_Event");
+    char *pfnDrawTriangles = (char *)GetProcAddress(g_ClientModule.GetHandle(), "HUD_DrawTransparentTriangles");
 
     char *pfnHookRedraw     = (char *)&HookRedraw;
     char *pfnHookPlayerMove = (char *)&HookPlayerMove;
@@ -87,7 +87,7 @@ void ApplyHooks()
 
     if (!g_DetourKeyEvent->hook())
     {
-        g_pClientEngFuncs->Con_Printf(
+        g_pClientEngfuncs->Con_Printf(
             "WARNING: KeyEvent() hooking failed: "
             "measurement mode will not react to keys."
         );
@@ -95,7 +95,7 @@ void ApplyHooks()
 
     if (!g_DetourDrawTriangles->hook())
     {
-        pfnDrawTriangles = (char *)GetProcAddress(g_hClientModule, "HUD_DrawNormalTriangles");
+        pfnDrawTriangles = (char *)GetProcAddress(g_ClientModule.GetHandle(), "HUD_DrawNormalTriangles");
 
         delete g_DetourDrawTriangles;
         g_DetourDrawTriangles = new detour_t(
@@ -104,7 +104,7 @@ void ApplyHooks()
 
         if (!g_DetourDrawTriangles->hook())
         {
-            g_pClientEngFuncs->Con_Printf(
+            g_pClientEngfuncs->Con_Printf(
                 "WARNING: DrawTriangles() hooking failed: entity "
                 "report mode will not draw entity hull lines."
             );
@@ -129,16 +129,11 @@ NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
     // call original function
     PLH::FnCast(g_pfnOrigRedraw, pfnRedraw())(time, intermission);
-    AssignDisplayMode();
-
     if (g_pPlayerMove)
     {
         bool isIntermission = intermission != 0;
-        g_ScreenInfo.iSize = sizeof(g_ScreenInfo);
-        g_pClientEngFuncs->pfnGetScreenInfo(&g_ScreenInfo);
-        g_pDisplayMode->Render2D(g_ScreenInfo.iWidth, g_ScreenInfo.iHeight);
+        g_Application.DisplayModeRender2D();
     }
-
     return 1;
 }
 
@@ -153,11 +148,11 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *b
     int returnCode = PLH::FnCast(g_pfnOrigKeyEvent, pfnKeyEvent())(
         keyDown, keyCode, bindName
     );
-    return returnCode && g_pDisplayMode->KeyInput(keyDown, keyCode, bindName);
+    return returnCode && g_Application.KeyInput(keyDown, keyCode, bindName);
 }
 
 NOINLINE static void __cdecl HookDrawTriangles()
 {
     PLH::FnCast(g_pfnOrigDrawTriangles, pfnDrawTriangles())();
-    g_pDisplayMode->Render3D();
+    g_Application.DisplayModeRender3D();
 }

@@ -1,6 +1,6 @@
 #include "displaymode_angletracking.h"
-#include "core.h"
-#include "globals.h"
+#include "application.h"
+#include "client_module.h"
 
 CModeAngleTracking &CModeAngleTracking::GetInstance()
 {
@@ -8,7 +8,7 @@ CModeAngleTracking &CModeAngleTracking::GetInstance()
     return instance;
 }
 
-void CModeAngleTracking::Render2D(int scrWidth, int scrHeight)
+void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     int stringWidth;
     float yawVelocity;
@@ -23,32 +23,32 @@ void CModeAngleTracking::Render2D(int scrWidth, int scrHeight)
     pitchVelocity = (currAngles.x - lastAngles.x) / g_pPlayerMove->frametime;
     yawVelocity = (currAngles.y - lastAngles.y) / g_pPlayerMove->frametime;
 
-    g_ScreenText.Clear();
-    g_ScreenText.PushPrintf("   up : %.2f deg/s", -pitchVelocity);
-    g_ScreenText.PushPrintf("right : %.2f deg/s", -yawVelocity);
-    stringWidth = GetStringWidth(g_ScreenText.StringAt(0));
+    screenText.Clear();
+    screenText.PushPrintf("   up : %.2f deg/s", -pitchVelocity);
+    screenText.PushPrintf("right : %.2f deg/s", -yawVelocity);
+    stringWidth = Utils::GetStringWidth(screenText.StringAt(0));
 
     const int marginDown = 35;
-    DrawStringStack(
+    Utils::DrawStringStack(
         (scrWidth / 2) + stringWidth / 2, 
         (scrHeight / 2) + marginDown, 
-        g_ScreenText
+        screenText
     );
 
     // check for start
     if (fabs(lastPitchVelocity) < threshold && fabs(pitchVelocity) > threshold)
-        trackStartTime = g_pClientEngFuncs->GetClientTime();
+        trackStartTime = g_pClientEngfuncs->GetClientTime();
 
     if (fabs(pitchVelocity) > threshold)
     {
-        g_pClientEngFuncs->Con_Printf("(%.5f; %.2f)\n",
-            (g_pClientEngFuncs->GetClientTime() - trackStartTime), -pitchVelocity
+        g_pClientEngfuncs->Con_Printf("(%.5f; %.2f)\n",
+            (g_pClientEngfuncs->GetClientTime() - trackStartTime), -pitchVelocity
         );
     }
 
     // check for end
     if (fabs(pitchVelocity) < threshold && fabs(lastPitchVelocity) > threshold)
-        g_pClientEngFuncs->Con_Printf("\n");
+        g_pClientEngfuncs->Con_Printf("\n");
 
     lastAngles = currAngles;
     lastPitchVelocity = pitchVelocity;

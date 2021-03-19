@@ -18,7 +18,7 @@ public:
 public:
     static CModeMeasurement &GetInstance();
 
-    void Render2D(int screenWidth, int screenHeight) override;
+    void Render2D(int screenWidth, int screenHeight, CStringStack &screenText) override;
     void Render3D() override {};
     bool KeyInput(int isKeyDown, int keyCode, const char *) override;
 

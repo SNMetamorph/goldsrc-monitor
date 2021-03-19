@@ -1,7 +1,6 @@
 #include "displaymode_measurement.h"
-#include "core.h"
-#include "util.h"
-#include "globals.h"
+#include "utils.h"
+#include "client_module.h"
 #include "cvars.h"
 
 // HLSDK
@@ -52,7 +51,7 @@ void CModeMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
     {
         float directionSign = -1.0f + 2.0f * (i % 2);
         vec3_t traceDir = planeNormal * directionSign;
-        TraceLine(traceOrigin, traceDir, traceLength, &traceData);
+        Utils::TraceLine(traceOrigin, traceDir, traceLength, &traceData);
         *pointsList[i] = traceData.endpos;
     }
 }
@@ -60,7 +59,7 @@ void CModeMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
 bool CModeMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
 {
     vec3_t screenCoords;
-    if (!g_pClientEngFuncs->pTriAPI->WorldToScreen(origin, &screenCoords.x))
+    if (!g_pClientEngfuncs->pTriAPI->WorldToScreen(origin, &screenCoords.x))
     {
         x = static_cast<int>((1.0f + screenCoords.x) * w * 0.5f);
         y = static_cast<int>((1.0f - screenCoords.y) * h * 0.5f);
@@ -118,11 +117,11 @@ bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
 
     if (keyCode >= K_MOUSE1 && keyCode <= K_MOUSE3)
     {
-        g_pClientEngFuncs->pfnPlaySoundByName("buttons/lightswitch2.wav", 1.0f);
-        g_pClientEngFuncs->GetViewAngles(viewAngles);
-        g_pClientEngFuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
+        g_pClientEngfuncs->pfnPlaySoundByName("buttons/lightswitch2.wav", 1.0f);
+        g_pClientEngfuncs->GetViewAngles(viewAngles);
+        g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
         viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-        TraceLine(viewOrigin, viewDir, traceLen, &traceData);
+        Utils::TraceLine(viewOrigin, viewDir, traceLen, &traceData);
 
         if (keyCode == K_MOUSE1)
             UpdatePointOrigin(m_vecPointA, traceData.endpos);
@@ -137,7 +136,7 @@ bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
         ++m_iSnapMode;
         if (m_iSnapMode == SNAPMODE_MAX)
             m_iSnapMode = SNAPMODE_FREE;
-        g_pClientEngFuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
+        g_pClientEngfuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
         return false;
     }
     return true;
@@ -152,7 +151,7 @@ void CModeMeasurement::DrawMeasurementLine(float lifeTime)
     const float lineColorG      = 1.0f;
     const float lineColorB      = 0.0f;
 
-    g_pClientEngFuncs->pEfxAPI->R_BeamPoints(
+    g_pClientEngfuncs->pEfxAPI->R_BeamPoints(
         m_vecPointA, m_vecPointB, m_iLineSprite,
         lifeTime * 2.f, lineWidth, 0,
         lineBrightness, lineSpeed, 0, 0,
@@ -170,13 +169,13 @@ void CModeMeasurement::DrawPointHints(int screenWidth, int screenHeight)
 
     if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, m_vecPointA))
     {
-        g_pClientEngFuncs->pfnDrawString(
+        g_pClientEngfuncs->pfnDrawString(
             screenX, screenY, "A", textColorR, textColorG, textColorB);
     }
 
     if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, m_vecPointB))
     {
-        g_pClientEngFuncs->pfnDrawString(
+        g_pClientEngfuncs->pfnDrawString(
             screenX, screenY, "B", textColorR, textColorG, textColorB);
     }
 }
@@ -202,7 +201,7 @@ void CModeMeasurement::DrawSupportLines(float lifeTime)
 
     for (int i = 0; i < 2; ++i)
     {
-        g_pClientEngFuncs->pEfxAPI->R_BeamPoints(
+        g_pClientEngfuncs->pEfxAPI->R_BeamPoints(
             *pointsList[i] + (axisVector * lineLenght),
             *pointsList[i] - (axisVector * lineLenght),
             m_iLineSprite,
@@ -216,12 +215,12 @@ void CModeMeasurement::DrawSupportLines(float lifeTime)
 void CModeMeasurement::LoadLineSprite()
 {
     const char *spritePath = "sprites/laserbeam.spr";
-    g_pClientEngFuncs->pfnSPR_Load(spritePath);
+    g_pClientEngfuncs->pfnSPR_Load(spritePath);
     m_iLineSprite = 
-        g_pClientEngFuncs->pEventAPI->EV_FindModelIndex(spritePath);
+        g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(spritePath);
 }
 
-void CModeMeasurement::Render2D(int screenWidth, int screenHeight)
+void CModeMeasurement::Render2D(int screenWidth, int screenHeight, CStringStack &screenText)
 {
     const vec3_t &originPointA = GetPointOriginA();
     const vec3_t &originPointB = GetPointOriginB();
@@ -236,25 +235,25 @@ void CModeMeasurement::Render2D(int screenWidth, int screenHeight)
     else if (fractionalPart <= roundThreshold)
         pointsDistance -= fractionalPart;
 
-    g_ScreenText.Clear();
+    screenText.Clear();
     if (originPointA.Length() < 0.0001f)
-        g_ScreenText.Push("Point A not set");
+        screenText.Push("Point A not set");
     else
-        g_ScreenText.PushPrintf("Point A origin: (%.2f, %.2f, %.2f)", 
+        screenText.PushPrintf("Point A origin: (%.2f, %.2f, %.2f)",
             originPointA.x, originPointA.y, originPointA.z);
 
     if (originPointB.Length() < 0.0001f)
-        g_ScreenText.Push("Point B not set");
+        screenText.Push("Point B not set");
     else
-        g_ScreenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)", 
+        screenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)",
             originPointB.x, originPointB.y, originPointB.z);
 
-    g_ScreenText.PushPrintf("Points Distance: %.1f (%.3f meters)",
+    screenText.PushPrintf("Points Distance: %.1f (%.3f meters)",
         pointsDistance, pointsDistance / 39.37f);
-    g_ScreenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
-    g_ScreenText.PushPrintf("Snap Mode: %s", snapModeName);
+    screenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
+    screenText.PushPrintf("Snap Mode: %s", snapModeName);
 
-    DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, g_ScreenText);
+    Utils::DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, screenText);
     if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f)
         DrawVisualization(screenWidth, screenHeight);
 }

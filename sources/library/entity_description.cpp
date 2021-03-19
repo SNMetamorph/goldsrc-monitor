@@ -1,5 +1,5 @@
 #include "entity_description.h"
-#include "globals.h"
+#include "client_module.h"
 #include "studio.h"
 #include <sstream>
 
@@ -48,7 +48,7 @@ void CEntityDescription::Reset()
 
 void CEntityDescription::RecognizeBbox()
 {
-    cl_entity_t *worldEntity = g_pClientEngFuncs->GetEntityByIndex(0);
+    cl_entity_t *worldEntity = g_pClientEngfuncs->GetEntityByIndex(0);
     model_t *worldModel = worldEntity->model;
     if (m_szModelName[0] == '*') // brush model
     {
@@ -114,7 +114,7 @@ void CEntityDescription::ParseEntityData()
 model_t *CEntityDescription::FindModelByName(const char *name)
 {
     const int maxModelCount = 512; // fixed for GoldSrc
-    model_t *modelList = g_pClientEngFuncs->hudGetModelByIndex(1);
+    model_t *modelList = g_pClientEngfuncs->hudGetModelByIndex(1);
 
     if (strlen(name) < 1)
         return nullptr;

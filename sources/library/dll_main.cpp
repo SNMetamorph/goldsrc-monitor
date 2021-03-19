@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "core.h"
+#include "application.h"
 #include "exception.h"
 #include "hooks.h"
 
@@ -11,8 +11,9 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
     if (nReason == DLL_PROCESS_ATTACH)
     {
-        try {
-            ProgramInit();
+        try 
+        {
+            g_Application.Run();
         }
         catch (CException &ex)
         {

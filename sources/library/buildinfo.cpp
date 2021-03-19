@@ -1,5 +1,5 @@
 #include "buildinfo.h"
-#include "util.h"
+#include "utils.h"
 
 static int (*g_pfnGetBuildNumber)();
 static int g_iBuildNumber;
@@ -37,19 +37,19 @@ const char *FindDateString(uint8_t *startAddr, int maxLen)
     { 
         int index = 0;
         const char *text = reinterpret_cast<const char*>(startAddr + i);
-        if (IsSymbolAlpha(text[index++]) &&
-            IsSymbolAlpha(text[index++]) &&
-            IsSymbolAlpha(text[index++]) &&
-            IsSymbolSpace(text[index++]))
+        if (Utils::IsSymbolAlpha(text[index++]) &&
+            Utils::IsSymbolAlpha(text[index++]) &&
+            Utils::IsSymbolAlpha(text[index++]) &&
+            Utils::IsSymbolSpace(text[index++]))
         {
-            if (IsSymbolDigit(text[index]) || IsSymbolSpace(text[index]))
+            if (Utils::IsSymbolDigit(text[index]) || Utils::IsSymbolSpace(text[index]))
             {
                 ++index;
-                if (IsSymbolDigit(text[index++]) &&
-                    IsSymbolSpace(text[index++]) &&
-                    IsSymbolDigit(text[index++]) &&
-                    IsSymbolDigit(text[index++]) &&
-                    IsSymbolDigit(text[index++]))
+                if (Utils::IsSymbolDigit(text[index++]) &&
+                    Utils::IsSymbolSpace(text[index++]) &&
+                    Utils::IsSymbolDigit(text[index++]) &&
+                    Utils::IsSymbolDigit(text[index++]) &&
+                    Utils::IsSymbolDigit(text[index++]))
                         return text;
             }
         }
@@ -109,7 +109,7 @@ void *FindFunctionAddress(functype_t funcType, void *startAddr, void *endAddr)
     if (!endAddr)
         endAddr = (uint8_t*)startAddr + strlen(funcData->mask);
 
-    return FindPatternAddress(
+    return Utils::FindPatternAddress(
         startAddr,
         endAddr,
         funcData->signature,
@@ -136,7 +136,7 @@ static bool FindFuncBySignature(const moduleinfo_t &engineModule)
 
     for (int i = 0; i < signatureCount; ++i)
     {
-        g_pfnGetBuildNumber = (int(*)())FindPatternAddress(
+        g_pfnGetBuildNumber = (int(*)())Utils::FindPatternAddress(
             moduleStartAddr,
             moduleEndAddr,
             signatureArray[i],
@@ -159,7 +159,7 @@ static bool FindFuncByDateString(const moduleinfo_t &engineModule)
 
     while (true)
     {
-        uint8_t *stringAddr = (uint8_t*)FindPatternAddress(
+        uint8_t *stringAddr = (uint8_t*)Utils::FindPatternAddress(
             scanStartAddr, moduleEndAddr,
             patternStr, "xxxx"
         );
