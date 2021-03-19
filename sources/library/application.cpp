@@ -46,7 +46,7 @@ void CApplication::Run()
     SetupConVars(engineDLL);
     AssignDisplayMode();
     PrintTitleText();
-    ApplyHooks();
+    Hooks::Apply();
 
     // load configuration file
     g_pClientEngfuncs->pfnClientCmd("exec gsm_config.cfg");

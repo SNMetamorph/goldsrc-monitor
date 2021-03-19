@@ -32,7 +32,6 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
     }
     else if (nReason == DLL_PROCESS_DETACH)
     {
-        RemoveHooks();
     }
 
     return TRUE;

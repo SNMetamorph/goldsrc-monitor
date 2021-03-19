@@ -1,3 +1,7 @@
 #pragma once
-void ApplyHooks();
-void RemoveHooks();
+
+namespace Hooks
+{
+    void Apply();
+    void Remove();
+}
