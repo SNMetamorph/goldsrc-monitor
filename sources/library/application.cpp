@@ -8,6 +8,7 @@
 #include "engine_module.h"
 #include "client_module.h"
 #include "server_module.h"
+#include "entity_dictionary.h"
 #include <stdint.h>
 
 #include "displaymode_full.h"
@@ -49,6 +50,12 @@ void CApplication::Run()
 
     // load configuration file
     g_pClientEngfuncs->pfnClientCmd("exec gsm_config.cfg");
+}
+
+void CApplication::HandleChangelevel()
+{
+    g_EntityDictionary.Reset();
+    CModeMeasurement::GetInstance().ResetPoints();
 }
 
 void CApplication::FindTimescaleConVar(const moduleinfo_t &engineLib)
@@ -200,6 +207,14 @@ void CApplication::DisplayModeRender3D()
 {
     AssignDisplayMode();
     m_pDisplayMode->Render3D();
+}
+
+void CApplication::CheckForChangelevel(float currTime)
+{
+    static float oldTime = 0.0f;
+    if (currTime < oldTime)
+        HandleChangelevel();
+    oldTime = currTime;
 }
 
 bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)

@@ -102,6 +102,13 @@ float CModeMeasurement::GetPointsDistance()
     return (m_vecPointB - m_vecPointA).Length();
 }
 
+void CModeMeasurement::ResetPoints()
+{
+    const vec3_t vecNull = vec3_t(0, 0, 0);
+    m_vecPointA = vecNull;
+    m_vecPointB = vecNull;
+}
+
 bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
 {
     int currentMode;

@@ -16,6 +16,7 @@ public:
     void Run();
     void DisplayModeRender2D();
     void DisplayModeRender3D();
+    void CheckForChangelevel(float currTime);
     bool KeyInput(int keyDown, int keyCode, const char *bindName);
     inline const SCREENINFO& GetScreenInfo() const { return m_ScreenInfo; };
 
@@ -23,6 +24,7 @@ private:
     CApplication() : m_StringStack(128) {};
     ~CApplication() {};
 
+    void HandleChangelevel();
     void FindTimescaleConVar(const moduleinfo_t &engineLib);
     void PrintTitleText();
     void SetupConVars(moduleinfo_t &engineLib);

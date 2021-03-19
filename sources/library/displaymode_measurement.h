@@ -20,6 +20,7 @@ public:
 
     void Render2D(int screenWidth, int screenHeight, CStringStack &screenText) override;
     void Render3D() override {};
+    void ResetPoints();
     bool KeyInput(int isKeyDown, int keyCode, const char *) override;
 
     const vec3_t&   GetPointOriginA();

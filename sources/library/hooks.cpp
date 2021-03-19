@@ -129,6 +129,7 @@ NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
     // call original function
     PLH::FnCast(g_pfnOrigRedraw, pfnRedraw())(time, intermission);
+    g_Application.CheckForChangelevel(time);
     if (g_pPlayerMove)
     {
         bool isIntermission = intermission != 0;
