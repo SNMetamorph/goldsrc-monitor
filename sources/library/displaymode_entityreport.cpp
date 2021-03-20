@@ -9,12 +9,6 @@
 #include <algorithm>
 #include <iterator> 
 
-CModeEntityReport &CModeEntityReport::GetInstance()
-{
-    static CModeEntityReport instance;
-    return instance;
-}
-
 void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     vec3_t entityOrigin;
@@ -143,6 +137,11 @@ void CModeEntityReport::Render3D()
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_DEPTH_TEST);
     }
+}
+
+void CModeEntityReport::HandleChangelevel()
+{
+    g_EntityDictionary.Reset();
 }
 
 int CModeEntityReport::TraceEntity()

@@ -3,12 +3,6 @@
 #include "cvars.h"
 #include "utils.h"
 
-CModeFull &CModeFull::GetInstance()
-{
-    static CModeFull instance;
-    return instance;
-}
-
 void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     float frameTime             = GetSmoothFrameTime();

@@ -6,12 +6,6 @@
 // HLSDK
 #include "keydefs.h"
 
-CModeMeasurement &CModeMeasurement::GetInstance()
-{
-    static CModeMeasurement instance;
-    return instance;
-}
-
 void CModeMeasurement::UpdatePointOrigin(vec3_t &linePoint, const vec3_t &targetPoint)
 {
     if (m_iSnapMode != SNAPMODE_ALONGLINE)
@@ -87,26 +81,19 @@ void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
         DrawSupportLines(lifeTime);
 }
 
-const vec3_t& CModeMeasurement::GetPointOriginA()
+const vec3_t& CModeMeasurement::GetPointOriginA() const
 {
     return m_vecPointA;
 }
 
-const vec3_t& CModeMeasurement::GetPointOriginB()
+const vec3_t& CModeMeasurement::GetPointOriginB() const
 {
     return m_vecPointB;
 }
 
-float CModeMeasurement::GetPointsDistance()
+float CModeMeasurement::GetPointsDistance() const
 {
     return (m_vecPointB - m_vecPointA).Length();
-}
-
-void CModeMeasurement::ResetPoints()
-{
-    const vec3_t vecNull = vec3_t(0, 0, 0);
-    m_vecPointA = vecNull;
-    m_vecPointB = vecNull;
 }
 
 bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
@@ -147,6 +134,14 @@ bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
         return false;
     }
     return true;
+}
+
+void CModeMeasurement::HandleChangelevel()
+{
+    const vec3_t vecNull = vec3_t(0, 0, 0);
+    m_vecPointA = vecNull;
+    m_vecPointB = vecNull;
+    m_iLineSprite = NULL;
 }
 
 void CModeMeasurement::DrawMeasurementLine(float lifeTime)
@@ -265,7 +260,7 @@ void CModeMeasurement::Render2D(int screenWidth, int screenHeight, CStringStack 
         DrawVisualization(screenWidth, screenHeight);
 }
 
-const char *CModeMeasurement::GetSnapModeName()
+const char *CModeMeasurement::GetSnapModeName() const
 {
     switch (m_iSnapMode)
     {
@@ -288,7 +283,7 @@ const char *CModeMeasurement::GetSnapModeName()
     return "";
 }
 
-float CModeMeasurement::GetLineElevationAngle()
+float CModeMeasurement::GetLineElevationAngle() const
 {
     vec3_t lineDirection;
     const vec3_t *highPoint;

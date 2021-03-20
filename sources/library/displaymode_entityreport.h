@@ -6,17 +6,15 @@
 class CModeEntityReport : public IDisplayMode
 {
 public: 
-    static CModeEntityReport &GetInstance();
+    CModeEntityReport() {};
+    virtual ~CModeEntityReport() {};
 
     void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
     void Render3D() override;
     bool KeyInput(int, int, const char *) override { return true; };
+    void HandleChangelevel() override;
 
 private:
-    CModeEntityReport() {};
-    CModeEntityReport(const CModeEntityReport&) = delete;
-    CModeEntityReport& operator=(const CModeEntityReport&) = delete;
-
     int TraceEntity();
     float TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
     int TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);

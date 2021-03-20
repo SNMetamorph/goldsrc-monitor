@@ -2,12 +2,6 @@
 #include "client_module.h"
 #include "utils.h"
 
-CModeSpeedometer &CModeSpeedometer::GetInstance()
-{
-    static CModeSpeedometer instance;
-    return instance;
-}
-
 void CModeSpeedometer::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     int stringWidth;

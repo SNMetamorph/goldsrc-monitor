@@ -2,12 +2,6 @@
 #include "application.h"
 #include "client_module.h"
 
-CModeAngleTracking &CModeAngleTracking::GetInstance()
-{
-    static CModeAngleTracking instance;
-    return instance;
-}
-
 void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     int stringWidth;

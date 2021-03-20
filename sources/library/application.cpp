@@ -8,14 +8,7 @@
 #include "engine_module.h"
 #include "client_module.h"
 #include "server_module.h"
-#include "entity_dictionary.h"
 #include <stdint.h>
-
-#include "displaymode_full.h"
-#include "displaymode_measurement.h"
-#include "displaymode_speedometer.h"
-#include "displaymode_entityreport.h"
-#include "displaymode_angletracking.h"
 
 CApplication &g_Application = CApplication::GetInstance();
 CApplication &CApplication::GetInstance()
@@ -54,8 +47,12 @@ void CApplication::Run()
 
 void CApplication::HandleChangelevel()
 {
-    g_EntityDictionary.Reset();
-    CModeMeasurement::GetInstance().ResetPoints();
+    // all display modes should be handled here
+    m_ModeFull.HandleChangelevel();
+    m_ModeSpeedometer.HandleChangelevel();
+    m_ModeEntityReport.HandleChangelevel();
+    m_ModeMeasurement.HandleChangelevel();
+    m_ModeAngleTracking.HandleChangelevel();
 }
 
 void CApplication::FindTimescaleConVar(const moduleinfo_t &engineLib)
@@ -173,19 +170,19 @@ void CApplication::AssignDisplayMode()
     switch (displayMode)
     {
     case DISPLAYMODE_SPEEDOMETER:
-        m_pDisplayMode = &CModeSpeedometer::GetInstance();
+        m_pDisplayMode = &m_ModeSpeedometer;
         break;
     case DISPLAYMODE_ENTITYREPORT:
-        m_pDisplayMode = &CModeEntityReport::GetInstance();
-        break;
-    case DISPLAYMODE_ANGLETRACKING:
-        m_pDisplayMode = &CModeAngleTracking::GetInstance();
+        m_pDisplayMode = &m_ModeEntityReport;
         break;
     case DISPLAYMODE_MEASUREMENT:
-        m_pDisplayMode = &CModeMeasurement::GetInstance();
+        m_pDisplayMode = &m_ModeMeasurement;
+        break;
+    case DISPLAYMODE_ANGLETRACKING:
+        m_pDisplayMode = &m_ModeAngleTracking;
         break;
     default:
-        m_pDisplayMode = &CModeFull::GetInstance();
+        m_pDisplayMode = &m_ModeFull;
         break;
     }
 }

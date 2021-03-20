@@ -4,14 +4,11 @@
 class CModeAngleTracking : public IDisplayMode
 {
 public: 
-    static CModeAngleTracking &GetInstance();
+    CModeAngleTracking() {};
+    virtual ~CModeAngleTracking() {};
 
     void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
     void Render3D() override {};
     bool KeyInput(int, int, const char *) override { return true; };
-
-private:
-    CModeAngleTracking() {};
-    CModeAngleTracking(const CModeAngleTracking&) = delete;
-    CModeAngleTracking& operator=(const CModeAngleTracking&) = delete;
+    void HandleChangelevel() override {}; 
 };
