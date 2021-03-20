@@ -14,7 +14,6 @@ void CEntityDictionary::Initialize()
 {
     Reset();
     ParseEntityData();
-    InitDescriptions();
     m_isInitialized = true;
 }
 
@@ -75,6 +74,7 @@ void CEntityDictionary::ParseEntityData()
                 entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
                 if (strcmp(token.data(), "}") == 0)
                 {
+                    entityDesc.Initialize();
                     m_EntityDescList.push_back(entityDesc);
                     m_iParsedEntityCount++;
                     break;
@@ -88,10 +88,4 @@ void CEntityDictionary::ParseEntityData()
             }
         }
     }
-}
-
-void CEntityDictionary::InitDescriptions()
-{
-    for (CEntityDescription &desc : m_EntityDescList)
-        desc.Initialize();
 }

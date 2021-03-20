@@ -18,7 +18,6 @@ private:
     CEntityDictionary &operator=(const CEntityDictionary &) = delete;
 
     void ParseEntityData();
-    void InitDescriptions();
 
     int m_iParsedEntityCount = 0;
     bool m_isInitialized = false;
