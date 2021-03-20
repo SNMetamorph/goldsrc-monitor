@@ -63,7 +63,7 @@ void CEntityDictionary::ParseEntityData()
     token.resize(bufferSize, '\0');
     while (true)
     {
-        if (entData[1] == '\0')
+        if (!entData || entData[1] == '\0')
             break;
 
         entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
