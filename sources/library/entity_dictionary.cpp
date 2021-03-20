@@ -56,11 +56,11 @@ void CEntityDictionary::ParseEntityData()
     std::vector<char> key;
     std::vector<char> value;
     std::vector<char> token;
+    const int bufferSize = 1024;
 
-    int index = 0;
-    key.reserve(1024);
-    value.reserve(1024);
-    token.reserve(1024);
+    key.resize(bufferSize, '\0');
+    value.resize(bufferSize, '\0');
+    token.resize(bufferSize, '\0');
     while (true)
     {
         if (entData[1] == '\0')
@@ -69,13 +69,13 @@ void CEntityDictionary::ParseEntityData()
         entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
         if (strcmp(token.data(), "{") == 0)
         {
-            m_EntityDescList.emplace_back();
-            CEntityDescription &entityDesc = m_EntityDescList[index++];
+            CEntityDescription entityDesc;
             while (true)
             {
                 entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
                 if (strcmp(token.data(), "}") == 0)
                 {
+                    m_EntityDescList.push_back(entityDesc);
                     m_iParsedEntityCount++;
                     break;
                 }
