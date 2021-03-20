@@ -46,14 +46,22 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
             entityAngles.x, entityAngles.y, entityAngles.z);
         
+        if (isDescFound)
+        {
+            const std::string &classname = entityDesc.GetClassname();
+            const std::string &targetname = entityDesc.GetTargetname();
+            screenText.PushPrintf("Classname: %s", classname.c_str()); 
+            if (targetname.length() > 0)
+                screenText.PushPrintf("Targetname: %s", targetname.c_str()); 
+        }
+
         if (entityModel->type == mod_brush)
         {
             vec3_t brushSize = entityModel->maxs - entityModel->mins;
             screenText.PushPrintf("Brush Size: (%.1f; %.1f; %.1f)",
                 brushSize.x, brushSize.y, brushSize.z);
         }
-
-        if (entityModel->type != mod_brush)
+        else
         {
             entityModel = g_pClientEngfuncs->hudGetModelByIndex(traceEntity->curstate.modelindex);
             screenText.PushPrintf("Model Name: %s", entityModel->name);
@@ -70,7 +78,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         if (isDescFound)
         {
             std::string entityProp;
-            screenText.Push("Entity properties");
+            screenText.Push("Entity Properties");
             for (int i = 0; i < entityDesc.GetKeyValueCount(); ++i)
             {
                 entityDesc.GetKeyValueString(i, entityProp);

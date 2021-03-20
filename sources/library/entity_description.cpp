@@ -88,10 +88,11 @@ void CEntityDescription::RecognizeBbox()
 
 void CEntityDescription::ParseEntityData()
 {
-    for (auto it = m_EntityData.begin(); it != m_EntityData.end(); ++it)
+    for (auto it = m_EntityData.begin(); it != m_EntityData.end();)
     {
         const std::string &key = it->first;
         const std::string &value = it->second;
+
         if (key.compare("classname") == 0)
             m_szClassname.assign(value);
         else if (key.compare("targetname") == 0)
@@ -108,6 +109,12 @@ void CEntityDescription::ParseEntityData()
             std::istringstream angles_str(value);
             angles_str >> m_vecAngles.x >> m_vecAngles.y >> m_vecAngles.z;
         }
+        else {
+            ++it;
+            continue; // keep unhandled parameters
+        };
+        // erase parameters which already parsed
+        it = m_EntityData.erase(it);
     }
 }
 
