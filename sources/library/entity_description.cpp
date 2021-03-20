@@ -66,23 +66,27 @@ void CEntityDescription::RecognizeBbox()
     }
     else if (m_vecOrigin.Length() > 0.01f) // is origin != (0, 0, 0)
     {
-        if (m_szModelName.length() < 1 || m_szModelName.find(".mdl") == std::string::npos) // point entity
-        {
-            const vec3_t pointEntityHull = vec3_t(32, 32, 32) / 2;
-            m_vecBboxMins = m_vecOrigin - pointEntityHull;
-            m_vecBboxMaxs = m_vecOrigin + pointEntityHull;
-        }
-        else // studio model entity
+        // studio model entity
+        if (m_szModelName.length() >= 1 && m_szModelName.find(".mdl") != std::string::npos)
         {
             model_t *model = FindModelByName(m_szModelName.c_str());
             if (model && model->type == mod_studio)
             {
                 studiohdr_t *mdlHeader = (studiohdr_t *)model->cache.data;
-                mstudioseqdesc_t *seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
-                m_vecBboxMins = m_vecOrigin + seqDesc[0].bbmin;
-                m_vecBboxMaxs = m_vecOrigin + seqDesc[0].bbmax;
+                if (mdlHeader)
+                {
+                    mstudioseqdesc_t *seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
+                    m_vecBboxMins = m_vecOrigin + seqDesc[0].bbmin;
+                    m_vecBboxMaxs = m_vecOrigin + seqDesc[0].bbmax;
+                    return;
+                }
             }
         }
+        
+        // otherwise just use fixed-size hull for point entities
+        const vec3_t pointEntityHull = vec3_t(32, 32, 32) / 2;
+        m_vecBboxMins = m_vecOrigin - pointEntityHull;
+        m_vecBboxMaxs = m_vecOrigin + pointEntityHull;
     }
 }
 
