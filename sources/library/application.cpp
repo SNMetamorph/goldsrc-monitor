@@ -154,14 +154,16 @@ static void CommandTimescale()
 
 void CApplication::SetupConVars(moduleinfo_t &engineLib)
 {
-    g_pServerEngfuncs->pfnAddServerCommand("gsm_timescale", &CommandTimescale);
     FindTimescaleConVar(engineLib);
+    g_pServerEngfuncs->pfnAddServerCommand("gsm_timescale", &CommandTimescale);
     ConVars::gsm_color_r = Utils::RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
     ConVars::gsm_color_g = Utils::RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
     ConVars::gsm_color_b = Utils::RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);
     ConVars::gsm_margin_up = Utils::RegisterConVar("gsm_margin_up", "15", FCVAR_CLIENTDLL);
     ConVars::gsm_margin_right = Utils::RegisterConVar("gsm_margin_right", "400", FCVAR_CLIENTDLL);
     ConVars::gsm_mode = Utils::RegisterConVar("gsm_mode", "0", FCVAR_CLIENTDLL);
+    ConVars::gsm_thirdperson = Utils::RegisterConVar("gsm_thirdperson", "0", FCVAR_CLIENTDLL);
+    ConVars::gsm_thirdperson_dist = Utils::RegisterConVar("gsm_thirdperson_dist", "64", FCVAR_CLIENTDLL);
 }
 
 void CApplication::AssignDisplayMode()
@@ -217,4 +219,9 @@ void CApplication::CheckForChangelevel(float currTime)
 bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)
 {
     return m_pDisplayMode->KeyInput(keyDown, keyCode, bindName);
+}
+
+bool CApplication::IsThirdPersonForced() const
+{
+    return ConVars::gsm_thirdperson->value > 0.0f;
 }
