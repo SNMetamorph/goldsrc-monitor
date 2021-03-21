@@ -25,6 +25,7 @@ public:
     void CheckForChangelevel(float currTime);
     bool KeyInput(int keyDown, int keyCode, const char *bindName);
     bool IsThirdPersonForced() const;
+    float GetThirdPersonCameraDist() const;
     inline const SCREENINFO& GetScreenInfo() const { return m_ScreenInfo; };
 
 private:

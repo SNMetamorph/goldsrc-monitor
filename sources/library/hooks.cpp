@@ -65,7 +65,7 @@ NOINLINE static void __cdecl HookCameraOffset(float *cameraOffset)
     if (g_Application.IsThirdPersonForced())
     {
         g_pClientEngfuncs->GetViewAngles(cameraOffset);
-        cameraOffset[2] = ConVars::gsm_thirdperson_dist->value;
+        cameraOffset[2] = g_Application.GetThirdPersonCameraDist();
     }
 }
 
