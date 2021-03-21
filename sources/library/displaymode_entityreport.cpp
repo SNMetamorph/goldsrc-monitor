@@ -155,7 +155,7 @@ int CModeEntityReport::TraceEntity()
     m_EntityIndexList.clear();
     m_EntityDistanceList.clear();
     viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-    viewDir = GetViewDirection();
+    viewDir = Utils::GetViewDirection();
 
     Utils::TraceLine(viewOrigin, viewDir, lineLen, &traceData);
     if (traceData.fraction < 1.f)
@@ -249,12 +249,4 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
     pointInBbox.y = max(min(viewOrigin.y, bboxMax.y), bboxMin.y);
     pointInBbox.z = max(min(viewOrigin.z, bboxMax.z), bboxMin.z);
     return (pointInBbox - viewOrigin).Length();
-}
-
-vec3_t CModeEntityReport::GetViewDirection()
-{
-    vec3_t viewAngles, viewDir;
-    g_pClientEngfuncs->GetViewAngles(viewAngles);
-    g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
-    return viewDir;
 }

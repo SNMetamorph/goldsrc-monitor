@@ -269,6 +269,14 @@ float Utils::TraceBBoxLine(
     return nearDotFract / lineLength;
 }
 
+vec3_t Utils::GetViewDirection()
+{
+    vec3_t viewAngles, viewDir;
+    g_pClientEngfuncs->GetViewAngles(viewAngles);
+    g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
+    return viewDir;
+}
+
 void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
 {
     int seqIndex;
