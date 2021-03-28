@@ -71,6 +71,10 @@ void CEntityDictionary::ParseEntityData()
             CEntityDescription entityDesc;
             while (true)
             {
+                // unexpected ending of entity data
+                if (!entData || entData[0] == '\0')
+                    break;
+
                 entData = g_pClientEngfuncs->COM_ParseFile(entData, token.data());
                 if (strcmp(token.data(), "}") == 0)
                 {
@@ -80,7 +84,10 @@ void CEntityDictionary::ParseEntityData()
                     break;
                 }
                 else
-                {
+                {   
+                    if (!entData || entData[0] == '\0')
+                        break;
+
                     strncpy(key.data(), token.data(), sizeof(key) - 1);
                     entData = g_pClientEngfuncs->COM_ParseFile(entData, value.data());
                     entityDesc.AddKeyValue(std::string(key.data()), std::string(value.data()));
