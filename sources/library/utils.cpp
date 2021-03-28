@@ -175,6 +175,22 @@ void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &s
     }
 }
 
+void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
+{
+    if (entityIndex > 0 && entityIndex <= 32) // is entity player
+    {
+        hud_player_info_t playerInfo;
+        g_pClientEngfuncs->pfnGetPlayerInfo(entityIndex, &playerInfo);
+        modelName = "models/player/" + std::string(playerInfo.model) + ".mdl";
+    }
+    else
+    {
+        cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+        model_t *entityModel = g_pClientEngfuncs->hudGetModelByIndex(traceEntity->curstate.modelindex);
+        modelName = entityModel->name;
+    }
+}
+
 void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData)
 {
     vec3_t lineStart;

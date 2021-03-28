@@ -57,8 +57,9 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         }
         else
         {
-            entityModel = g_pClientEngfuncs->hudGetModelByIndex(traceEntity->curstate.modelindex);
-            screenText.PushPrintf("Model Name: %s", entityModel->name);
+            std::string modelName;
+            Utils::GetEntityModelName(m_iEntityIndex, modelName);
+            screenText.PushPrintf("Model Name: %s", modelName.c_str());
             screenText.PushPrintf("Anim. Frame: %.1f",
                 traceEntity->curstate.frame);
             screenText.PushPrintf("Anim. Sequence: %d",

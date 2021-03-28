@@ -3,6 +3,7 @@
 #include "string_stack.h"
 #include "stdafx.h"
 #include <stdint.h>
+#include <string>
 #include <Windows.h>
 
 namespace Utils
@@ -20,6 +21,7 @@ namespace Utils
     cvar_t *RegisterConVar(const char *name, const char *value, int flags);
     int GetStringWidth(const char *str);
     void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
+    void GetEntityModelName(int entityIndex, std::string &modelName);
 
     vec3_t GetViewDirection();
     void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
