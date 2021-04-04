@@ -19,7 +19,7 @@ public:
     vec3_t GetViewOrigin() const;
     vec3_t GetViewDirection() const;
 
-    bool IsUserSpectate() const;
+    bool IsSpectate() const;
     int GetSpectateTargetIndex() const;
     bool IsThirdPersonForced() const;
     float GetThirdPersonCameraDist() const;

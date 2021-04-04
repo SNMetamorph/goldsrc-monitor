@@ -83,7 +83,7 @@ float CLocalPlayer::GetThirdPersonCameraDist() const
     return maxDist * traceInfo.fraction;
 }
 
-bool CLocalPlayer::IsUserSpectate() const
+bool CLocalPlayer::IsSpectate() const
 {
     /*
     assume that it's valid only for cs 1.6/hl1
@@ -96,7 +96,7 @@ bool CLocalPlayer::IsUserSpectate() const
 
 int CLocalPlayer::GetSpectateTargetIndex() const
 {
-    if (IsUserSpectate())
+    if (IsSpectate())
     {
         return m_pPlayerMove->iuser2;
     }

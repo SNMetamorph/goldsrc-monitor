@@ -11,4 +11,7 @@ public:
     void Render3D() override {};
     bool KeyInput(int, int, const char *) override { return true; };
     void HandleChangelevel() override {};
+
+private:
+    void DrawVelocityBar(int scrWidth, int scrHeight, float velocity);
 };
