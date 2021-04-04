@@ -156,7 +156,7 @@ int CModeEntityReport::TraceEntity()
 
     m_EntityIndexList.clear();
     m_EntityDistanceList.clear();
-    viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+    viewOrigin = g_LocalPlayer.GetViewOrigin();
     viewDir = g_LocalPlayer.GetViewDirection();
 
     Utils::TraceLine(viewOrigin, viewDir, lineLen, &traceData);
@@ -239,7 +239,7 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
     cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
     model_t *entityModel = traceEntity->model;
 
-    viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+    viewOrigin = g_LocalPlayer.GetViewOrigin();
     if (entityModel->type == mod_brush)
         entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;
     else

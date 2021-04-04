@@ -3,6 +3,7 @@
 #include "client_module.h"
 
 CLocalPlayer &g_LocalPlayer = CLocalPlayer::GetInstance();
+playermove_t *&g_pPlayerMove = g_LocalPlayer.GetPlayerMove();
 CLocalPlayer &CLocalPlayer::GetInstance()
 {
     static CLocalPlayer instance;
@@ -12,6 +13,11 @@ CLocalPlayer &CLocalPlayer::GetInstance()
 void CLocalPlayer::Setup(playermove_t *pmove)
 {
     m_pPlayerMove = pmove;
+}
+
+playermove_t* &CLocalPlayer::GetPlayerMove()
+{
+    return m_pPlayerMove;
 }
 
 const vec3_t &CLocalPlayer::GetOrigin() const
@@ -54,6 +60,14 @@ vec3_t CLocalPlayer::GetViewOrigin() const
     return m_pPlayerMove->origin + m_pPlayerMove->view_ofs;
 }
 
+vec3_t CLocalPlayer::GetViewDirection() const
+{
+    vec3_t viewAngles, viewDir;
+    g_pClientEngfuncs->GetViewAngles(viewAngles);
+    g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
+    return viewDir;
+}
+
 bool CLocalPlayer::IsThirdPersonForced() const
 {
     return ConVars::gsm_thirdperson->value > 0.0f && !m_pPlayerMove->dead;
@@ -72,7 +86,7 @@ float CLocalPlayer::GetThirdPersonCameraDist() const
 bool CLocalPlayer::IsUserSpectate() const
 {
     /*
-    assume that it's valid only for cs1.6/hl1
+    assume that it's valid only for cs 1.6/hl1
     because other mods can use iuser variables for other purposes
     */
     int specMode = m_pPlayerMove->iuser1;
@@ -80,10 +94,11 @@ bool CLocalPlayer::IsUserSpectate() const
     return specMode != 0 && targetIndex != 0;
 }
 
-vec3_t CLocalPlayer::GetViewDirection() const
+int CLocalPlayer::GetSpectateTargetIndex() const
 {
-    vec3_t viewAngles, viewDir;
-    g_pClientEngfuncs->GetViewAngles(viewAngles);
-    g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
-    return viewDir;
+    if (IsUserSpectate())
+    {
+        return m_pPlayerMove->iuser2;
+    }
+    return -1;
 }

@@ -2,17 +2,18 @@
 #include "client_module.h"
 #include "cvars.h"
 #include "utils.h"
+#include "local_player.h"
 
 void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     float frameTime             = GetSmoothFrameTime();
-    float velocityNum           = g_pPlayerMove->velocity.Length2D();
-    const vec3_t &origin        = g_pPlayerMove->origin;
-    const vec3_t &velocity      = g_pPlayerMove->velocity;
-    const vec3_t &angles        = g_pPlayerMove->angles;
-    const vec3_t &baseVelocity  = g_pPlayerMove->basevelocity;
-    const vec3_t &punchAngle    = g_pPlayerMove->punchangle;
-    const vec3_t &viewOffset    = g_pPlayerMove->view_ofs;
+    float velocityNum           = g_LocalPlayer.GetVelocityHorz();
+    const vec3_t &origin        = g_LocalPlayer.GetOrigin();
+    const vec3_t &velocity      = g_LocalPlayer.GetVelocity();
+    const vec3_t &angles        = g_LocalPlayer.GetAngles();
+    const vec3_t &baseVelocity  = g_LocalPlayer.GetBaseVelocity();
+    const vec3_t &punchAngle    = g_LocalPlayer.GetPunchAngles();
+    const vec3_t &viewOffset    = g_LocalPlayer.GetViewOffset();
 
     screenText.Clear();
     screenText.PushPrintf("FPS: %.1f", 1.f / frameTime);

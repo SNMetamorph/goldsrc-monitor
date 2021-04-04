@@ -1,6 +1,7 @@
 #include "displaymode_angletracking.h"
 #include "application.h"
 #include "client_module.h"
+#include "local_player.h"
 
 void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
@@ -12,7 +13,7 @@ void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &scr
     static float trackStartTime;
     static float lastYawVelocity;
     static float lastPitchVelocity;
-    vec3_t &currAngles = g_pPlayerMove->angles;
+    const vec3_t &currAngles = g_LocalPlayer.GetAngles();
 
     pitchVelocity = (currAngles.x - lastAngles.x) / g_pPlayerMove->frametime;
     yawVelocity = (currAngles.y - lastAngles.y) / g_pPlayerMove->frametime;

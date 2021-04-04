@@ -210,7 +210,7 @@ void CApplication::DisplayModeRender3D()
 
 void CApplication::CheckForChangelevel(float currTime)
 {
-    static float oldTime = 0.0f;
+    static float oldTime = 3600.0f;
     if (currTime < oldTime)
         HandleChangelevel();
     oldTime = currTime;

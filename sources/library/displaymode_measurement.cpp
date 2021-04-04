@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "client_module.h"
 #include "cvars.h"
+#include "local_player.h"
 
 // HLSDK
 #include "keydefs.h"
@@ -64,15 +65,7 @@ bool CModeMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origi
 
 void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
 {
-    float lifeTime;
-    static float lastTime;
-
-    if (!m_iLineSprite || g_pPlayerMove->time < lastTime)
-        LoadLineSprite();
-
-    lastTime = g_pPlayerMove->time;
-    lifeTime = min(0.05f, g_pPlayerMove->frametime);
-
+    float lifeTime = min(0.05f, g_pPlayerMove->frametime);
     DrawMeasurementLine(lifeTime);
     DrawPointHints(screenWidth, screenHeight);
 
@@ -114,7 +107,7 @@ bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
         g_pClientEngfuncs->pfnPlaySoundByName("buttons/lightswitch2.wav", 1.0f);
         g_pClientEngfuncs->GetViewAngles(viewAngles);
         g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
-        viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
+        viewOrigin = g_LocalPlayer.GetViewOrigin();
         Utils::TraceLine(viewOrigin, viewDir, traceLen, &traceData);
 
         if (keyCode == K_MOUSE1)
@@ -141,7 +134,7 @@ void CModeMeasurement::HandleChangelevel()
     const vec3_t vecNull = vec3_t(0, 0, 0);
     m_vecPointA = vecNull;
     m_vecPointB = vecNull;
-    m_iLineSprite = NULL;
+    LoadLineSprite();
 }
 
 void CModeMeasurement::DrawMeasurementLine(float lifeTime)

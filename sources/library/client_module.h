@@ -28,7 +28,6 @@ private:
 
 extern CClientModule& g_ClientModule;
 extern cl_enginefunc_t *g_pClientEngfuncs;
-extern playermove_t *g_pPlayerMove;
 
 inline uint8_t *GetAddrCL(uint32_t offset)
 {

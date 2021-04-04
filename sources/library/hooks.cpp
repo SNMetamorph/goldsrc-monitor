@@ -37,7 +37,7 @@ NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 NOINLINE static void __cdecl HookPlayerMove(playermove_t *pmove, int server)
 {
     PLH::FnCast(hookPlayerMove.GetTrampolineAddr(), pfnPlayerMove_t())(pmove, server);
-    g_pPlayerMove = pmove;
+    g_LocalPlayer.Setup(pmove);
 }
 
 NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *bindName)

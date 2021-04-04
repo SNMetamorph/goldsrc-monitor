@@ -4,7 +4,6 @@
 #include "exception.h"
 #include "utils.h"
 
-playermove_t *g_pPlayerMove;
 cl_enginefunc_t *g_pClientEngfuncs;
 CClientModule& g_ClientModule = CClientModule::GetInstance();
 
