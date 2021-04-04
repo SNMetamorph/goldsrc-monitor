@@ -5,6 +5,7 @@
 #include "engine_module.h"
 #include "studio.h"
 #include "entity_dictionary.h"
+#include "local_player.h"
 #include <gl/GL.h>
 #include <algorithm>
 #include <iterator> 
@@ -156,7 +157,7 @@ int CModeEntityReport::TraceEntity()
     m_EntityIndexList.clear();
     m_EntityDistanceList.clear();
     viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-    viewDir = Utils::GetViewDirection();
+    viewDir = g_LocalPlayer.GetViewDirection();
 
     Utils::TraceLine(viewOrigin, viewDir, lineLen, &traceData);
     if (traceData.fraction < 1.f)

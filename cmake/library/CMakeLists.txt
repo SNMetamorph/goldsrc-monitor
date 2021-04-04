@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} SHARED
 	../../sources/exception.cpp
 	../../sources/string_stack.cpp
 	../../sources/library/application.cpp
+	../../sources/library/local_player.cpp
 	../../sources/library/client_module.cpp
 	../../sources/library/server_module.cpp
 	../../sources/library/engine_module.cpp

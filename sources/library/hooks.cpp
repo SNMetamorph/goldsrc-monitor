@@ -4,6 +4,7 @@
 #include "client_module.h"
 #include "exception.h"
 #include "function_hook.h"
+#include "local_player.h"
 
 // hooking stuff
 typedef int (__cdecl *pfnRedraw_t)(float, int);
@@ -56,16 +57,16 @@ NOINLINE static void __cdecl HookDrawTriangles()
 NOINLINE static int __cdecl HookIsThirdPerson()
 {
     int returnCode = PLH::FnCast(hookIsThirdPerson.GetTrampolineAddr(), pfnIsThirdPerson_t())();
-    return returnCode || g_Application.IsThirdPersonForced();
+    return returnCode || g_LocalPlayer.IsThirdPersonForced();
 }
 
 NOINLINE static void __cdecl HookCameraOffset(float *cameraOffset)
 {
     PLH::FnCast(hookCameraOffset.GetTrampolineAddr(), pfnCameraOffset_t())(cameraOffset);
-    if (g_Application.IsThirdPersonForced())
+    if (g_LocalPlayer.IsThirdPersonForced())
     {
         g_pClientEngfuncs->GetViewAngles(cameraOffset);
-        cameraOffset[2] = g_Application.GetThirdPersonCameraDist();
+        cameraOffset[2] = g_LocalPlayer.GetThirdPersonCameraDist();
     }
 }
 

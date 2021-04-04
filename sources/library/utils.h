@@ -23,7 +23,6 @@ namespace Utils
     void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
     void GetEntityModelName(int entityIndex, std::string &modelName);
 
-    vec3_t GetViewDirection();
     void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
     void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData);
     float TraceBBoxLine(

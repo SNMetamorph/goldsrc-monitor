@@ -220,18 +220,3 @@ bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)
 {
     return m_pDisplayMode->KeyInput(keyDown, keyCode, bindName);
 }
-
-bool CApplication::IsThirdPersonForced() const
-{
-    return ConVars::gsm_thirdperson->value > 0.0f && !g_pPlayerMove->dead;
-}
-
-float CApplication::GetThirdPersonCameraDist() const
-{
-    pmtrace_t traceInfo;
-    vec3_t viewDir = Utils::GetViewDirection();
-    vec3_t viewOrigin = g_pPlayerMove->origin + g_pPlayerMove->view_ofs;
-    float maxDist = ConVars::gsm_thirdperson_dist->value;
-    Utils::TraceLine(viewOrigin, -viewDir, maxDist, &traceInfo);
-    return maxDist * traceInfo.fraction;
-}
