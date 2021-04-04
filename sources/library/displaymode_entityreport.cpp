@@ -20,7 +20,17 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
     screenText.Clear();
     m_iEntityIndex = TraceEntity();
-    if (m_iEntityIndex)
+    if (!m_iEntityIndex)
+    {
+        screenText.Push("Entity not found");
+    }
+    else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_pPlayerMove->iuser3 != 3)
+    {
+        // disable print in non free-look spectating modes
+        screenText.Push("Print enabled only in free look mode");
+        m_iEntityIndex = 0;
+    }
+    else
     {
         CEntityDescription entityDesc;
         cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
@@ -84,9 +94,6 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         else
             screenText.Push("Properties info not found");
     }
-    else
-        screenText.Push("Entity not found");
-
     Utils::DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, screenText);
 }
 
@@ -153,13 +160,17 @@ int CModeEntityReport::TraceEntity()
     pmtrace_t traceData;
     const float lineLen = 11590.0f;
     float worldDistance = lineLen;
+    int ignoredEnt = -1;
 
     m_EntityIndexList.clear();
     m_EntityDistanceList.clear();
     viewOrigin = g_LocalPlayer.GetViewOrigin();
     viewDir = g_LocalPlayer.GetViewDirection();
 
-    Utils::TraceLine(viewOrigin, viewDir, lineLen, &traceData);
+    if (g_LocalPlayer.IsSpectate())
+        ignoredEnt = g_LocalPlayer.GetSpectateTargetIndex();  
+
+    Utils::TraceLine(viewOrigin, viewDir, lineLen, &traceData, ignoredEnt);
     if (traceData.fraction < 1.f)
     {
         if (traceData.ent > 0)

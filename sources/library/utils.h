@@ -22,9 +22,10 @@ namespace Utils
     int GetStringWidth(const char *str);
     void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
     void GetEntityModelName(int entityIndex, std::string &modelName);
+    bool IsGameDirEquals(const char *gameDir);
 
     void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
-    void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData);
+    void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData, int ignoredEnt = -1);
     float TraceBBoxLine(
         const vec3_t &bboxMin, const vec3_t &bboxMax,
         const vec3_t &lineStart, const vec3_t &lineEnd

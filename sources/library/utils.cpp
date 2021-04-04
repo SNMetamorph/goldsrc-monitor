@@ -191,7 +191,13 @@ void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
     }
 }
 
-void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData)
+bool Utils::IsGameDirEquals(const char *gameDir)
+{
+    const char *gameDirReal = g_pClientEngfuncs->pfnGetGameDirectory();
+    return strcmp(gameDirReal, gameDir) == 0;
+}
+
+void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData, int ignoredEnt)
 {
     vec3_t lineStart;
     vec3_t lineEnd;
@@ -201,13 +207,16 @@ void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *tra
     lineEnd     = lineStart + (dir * lineLen);
     localPlayer = g_pClientEngfuncs->GetLocalPlayer();
 
+    if (ignoredEnt < 0)
+        ignoredEnt = localPlayer->index;
+
     g_pClientEngfuncs->pEventAPI->EV_SetUpPlayerPrediction(false, true);
     g_pClientEngfuncs->pEventAPI->EV_PushPMStates();
     g_pClientEngfuncs->pEventAPI->EV_SetSolidPlayers(localPlayer->index - 1);
     g_pClientEngfuncs->pEventAPI->EV_SetTraceHull(2);
     g_pClientEngfuncs->pEventAPI->EV_PlayerTrace(
         lineStart, lineEnd, PM_NORMAL,
-        localPlayer->index, traceData
+        ignoredEnt, traceData
     );
     g_pClientEngfuncs->pEventAPI->EV_PopPMStates();
 }
