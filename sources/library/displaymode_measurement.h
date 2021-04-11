@@ -33,7 +33,6 @@ private:
 
     void UpdatePointOrigin(vec3_t &linePoint, const vec3_t &targetPoint);
     void TraceAlongNormal(pmtrace_t &traceData, float traceLength);
-    bool WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin);
     void DrawVisualization(int screenWidth, int screenHeight);
     void DrawMeasurementLine(float lifeTime);
     void DrawPointHints(int screenWidth, int screenHeight);

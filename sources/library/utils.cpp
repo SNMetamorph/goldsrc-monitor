@@ -9,6 +9,7 @@
 #include <vector>
 #include <Windows.h>
 #include <Psapi.h>
+#include <gl/GL.h>
 
 void *Utils::FindPatternAddress(
     void *startAddr, void *endAddr, const char *pattern, const char *mask)
@@ -108,6 +109,18 @@ int Utils::GetStringWidth(const char *str)
     return totalWidth;
 }
 
+bool Utils::WorldToScreen(int w, int h, int &x, int &y, const vec3_t &origin)
+{
+    vec3_t screenCoords;
+    if (!g_pClientEngfuncs->pTriAPI->WorldToScreen((float*)&origin.x, &screenCoords.x))
+    {
+        x = static_cast<int>((1.0f + screenCoords.x) * w * 0.5f);
+        y = static_cast<int>((1.0f - screenCoords.y) * h * 0.5f);
+        return true;
+    }
+    return false;
+}
+
 void *Utils::FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
 {
     void *valueAddr;
@@ -172,6 +185,101 @@ void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &s
         int lastCharIndex = strlen(textString) - 1;
         if (textString[lastCharIndex] == '\n')
             ++linesSkipped;
+    }
+}
+
+void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &angles, const vec3_t &size)
+{
+    const float colorR = 0.0f;
+    const float colorG = 1.0f;
+    const float colorB = 0.0f;
+    const bool drawFaces = false;
+    const bool drawEdges = true;
+    const vec3_t bboxMin = origin - size / 2;
+
+    vec3_t boxVertices[8] = {
+        {bboxMin.x, bboxMin.y, bboxMin.z},
+        {bboxMin.x + size.x, bboxMin.y, bboxMin.z},
+        {bboxMin.x + size.x, bboxMin.y, bboxMin.z + size.z},
+        {bboxMin.x + size.x, bboxMin.y + size.y, bboxMin.z + size.z},
+        {bboxMin.x + size.x, bboxMin.y + size.y, bboxMin.z},
+        {bboxMin.x, bboxMin.y + size.y, bboxMin.z},
+        {bboxMin.x, bboxMin.y + size.y, bboxMin.z + size.z},
+        {bboxMin.x, bboxMin.y, bboxMin.z + size.z}
+    };
+
+    g_pClientEngfuncs->pTriAPI->RenderMode(kRenderTransColor);
+    g_pClientEngfuncs->pTriAPI->CullFace(TRI_NONE);
+    glDisable(GL_TEXTURE_2D);
+
+    if (drawFaces)
+    {
+        glBegin(GL_QUADS);
+        glColor4f(colorR, colorG, colorB, 0.3f);
+        glVertex3fv(boxVertices[7]); // 1
+        glVertex3fv(boxVertices[2]);
+        glVertex3fv(boxVertices[1]);
+        glVertex3fv(boxVertices[0]);
+        glVertex3fv(boxVertices[0]); // 2
+        glVertex3fv(boxVertices[5]);
+        glVertex3fv(boxVertices[6]);
+        glVertex3fv(boxVertices[7]);
+        glVertex3fv(boxVertices[5]); // 3
+        glVertex3fv(boxVertices[4]);
+        glVertex3fv(boxVertices[3]);
+        glVertex3fv(boxVertices[6]);
+        glVertex3fv(boxVertices[2]); // 4
+        glVertex3fv(boxVertices[3]);
+        glVertex3fv(boxVertices[4]);
+        glVertex3fv(boxVertices[1]);
+        glVertex3fv(boxVertices[7]); // 5
+        glVertex3fv(boxVertices[6]);
+        glVertex3fv(boxVertices[3]);
+        glVertex3fv(boxVertices[2]);
+        glVertex3fv(boxVertices[1]); // 6
+        glVertex3fv(boxVertices[4]);
+        glVertex3fv(boxVertices[5]);
+        glVertex3fv(boxVertices[0]);
+        glEnd();
+    }
+    
+    if (drawEdges)
+    {
+        glDisable(GL_DEPTH_TEST);
+        glBegin(GL_LINE_LOOP);
+        glColor4f(colorR, colorG, colorB, 1.0f);
+        glVertex3fv(boxVertices[0]); // 1
+        glVertex3fv(boxVertices[1]); // 2
+        glVertex3fv(boxVertices[2]); // 3
+        glVertex3fv(boxVertices[3]); // 4
+        glVertex3fv(boxVertices[4]); // 5
+        glVertex3fv(boxVertices[5]); // 6
+        glVertex3fv(boxVertices[6]); // 7
+        glVertex3fv(boxVertices[7]); // 8
+        glVertex3fv(boxVertices[0]); // 1
+        glVertex3fv(boxVertices[7]); // 8
+        glVertex3fv(boxVertices[2]); // 3
+        glVertex3fv(boxVertices[1]); // 2
+        glVertex3fv(boxVertices[4]); // 5
+        glVertex3fv(boxVertices[3]); // 4
+        glVertex3fv(boxVertices[6]); // 7
+        glVertex3fv(boxVertices[5]); // 6
+        glEnd();
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    g_pClientEngfuncs->pTriAPI->RenderMode(kRenderNormal);
+    g_pClientEngfuncs->pTriAPI->CullFace(TRI_FRONT);
+    glEnable(GL_TEXTURE_2D);
+}
+
+void Utils::DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b)
+{
+    int screenX, screenY;
+    const SCREENINFO &screenInfo = g_Application.GetScreenInfo();
+    if (Utils::WorldToScreen(screenInfo.iWidth, screenInfo.iHeight, screenX, screenY, origin))
+    {
+        g_pClientEngfuncs->pfnDrawString(screenX, screenY, text, r, g, b);
     }
 }
 
@@ -304,7 +412,7 @@ void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
     entTarget = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
     if (entTarget->model && entTarget->model->type == mod_studio)
     {
-        vec3_t &entOrigin = entTarget->curstate.origin;
+        vec3_t &entOrigin = entTarget->origin;
         mdlHeader = (studiohdr_t *)entTarget->model->cache.data;
         seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
         seqIndex = entTarget->curstate.sequence;

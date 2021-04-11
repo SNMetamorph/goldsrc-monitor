@@ -20,7 +20,10 @@ namespace Utils
 
     cvar_t *RegisterConVar(const char *name, const char *value, int flags);
     int GetStringWidth(const char *str);
+    bool WorldToScreen(int w, int h, int &x, int &y, const vec3_t &origin);
     void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
+    void DrawEntityHull(const vec3_t &origin, const vec3_t &angles, const vec3_t &size);
+    void DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b);
     void GetEntityModelName(int entityIndex, std::string &modelName);
     bool IsGameDirEquals(const char *gameDir);
 

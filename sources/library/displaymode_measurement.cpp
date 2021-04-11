@@ -51,18 +51,6 @@ void CModeMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
     }
 }
 
-bool CModeMeasurement::WorldToScreen(int w, int h, int &x, int &y, vec3_t &origin)
-{
-    vec3_t screenCoords;
-    if (!g_pClientEngfuncs->pTriAPI->WorldToScreen(origin, &screenCoords.x))
-    {
-        x = static_cast<int>((1.0f + screenCoords.x) * w * 0.5f);
-        y = static_cast<int>((1.0f - screenCoords.y) * h * 0.5f);
-        return true;
-    }
-    return false;
-}
-
 void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
 {
     float lifeTime = min(0.05f, g_pPlayerMove->frametime);
@@ -156,23 +144,11 @@ void CModeMeasurement::DrawMeasurementLine(float lifeTime)
 
 void CModeMeasurement::DrawPointHints(int screenWidth, int screenHeight)
 {
-    int screenX;
-    int screenY;
     const int textColorR = 0;
     const int textColorG = 255;
     const int textColorB = 255;
-
-    if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, m_vecPointA))
-    {
-        g_pClientEngfuncs->pfnDrawString(
-            screenX, screenY, "A", textColorR, textColorG, textColorB);
-    }
-
-    if (WorldToScreen(screenWidth, screenHeight, screenX, screenY, m_vecPointB))
-    {
-        g_pClientEngfuncs->pfnDrawString(
-            screenX, screenY, "B", textColorR, textColorG, textColorB);
-    }
+    Utils::DrawString3D(m_vecPointA, "A", textColorR, textColorG, textColorB);
+    Utils::DrawString3D(m_vecPointB, "B", textColorR, textColorG, textColorB);
 }
 
 void CModeMeasurement::DrawSupportLines(float lifeTime)
