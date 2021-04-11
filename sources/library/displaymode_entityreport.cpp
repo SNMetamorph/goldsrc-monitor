@@ -6,7 +6,6 @@
 #include "studio.h"
 #include "entity_dictionary.h"
 #include "local_player.h"
-#include <gl/GL.h>
 #include <algorithm>
 #include <iterator> 
 
@@ -14,6 +13,9 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 {
     vec3_t entityOrigin;
     vec3_t entityAngles;
+    vec3_t hullSize;
+    vec3_t hullMins;
+    vec3_t hullMaxs;
 
     if (!g_EntityDictionary.IsInitialized())
         g_EntityDictionary.Initialize();
@@ -38,8 +40,10 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc);
         entityAngles = traceEntity->curstate.angles;
 
+        Utils::GetEntityBbox(m_iEntityIndex, hullMins, hullMaxs);
+        hullSize = hullMaxs - hullMins;
         if (entityModel->type == mod_brush)
-            entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;   
+            entityOrigin = (traceEntity->curstate.mins + traceEntity->curstate.maxs) / 2.f;
         else
             entityOrigin = traceEntity->curstate.origin;
 
@@ -50,7 +54,9 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             GetEntityDistance(m_iEntityIndex));
         screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
             entityAngles.x, entityAngles.y, entityAngles.z);
-        
+        screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
+            hullSize.x, hullSize.y, hullSize.z);
+
         if (isDescFound)
         {
             const std::string &classname = entityDesc.GetClassname();
@@ -60,13 +66,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
                 screenText.PushPrintf("Targetname: %s", targetname.c_str()); 
         }
 
-        if (entityModel->type == mod_brush)
-        {
-            vec3_t brushSize = entityModel->maxs - entityModel->mins;
-            screenText.PushPrintf("Brush Size: (%.1f; %.1f; %.1f)",
-                brushSize.x, brushSize.y, brushSize.z);
-        }
-        else
+        if (entityModel->type == mod_studio)
         {
             std::string modelName;
             Utils::GetEntityModelName(m_iEntityIndex, modelName);
@@ -99,6 +99,9 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
 void CModeEntityReport::Render3D()
 {
+    vec3_t hullMins;
+    vec3_t hullMaxs;
+    cl_entity_t *entity;
     const float colorR = 0.0f;
     const float colorG = 1.0f;
     const float colorB = 0.0f;
@@ -106,45 +109,13 @@ void CModeEntityReport::Render3D()
     if (m_iEntityIndex <= 0) 
         return;
 
-    Utils::GetEntityBbox(m_iEntityIndex, m_vecBboxMin, m_vecBboxMax);
-    vec3_t bboxSize = m_vecBboxMax - m_vecBboxMin;
-    vec3_t boxVertices[8] = {
-        {m_vecBboxMin.x, m_vecBboxMin.y, m_vecBboxMin.z},
-        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y, m_vecBboxMin.z},
-        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y, m_vecBboxMin.z + bboxSize.z},
-        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z + bboxSize.z},
-        {m_vecBboxMin.x + bboxSize.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z},
-        {m_vecBboxMin.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z},
-        {m_vecBboxMin.x, m_vecBboxMin.y + bboxSize.y, m_vecBboxMin.z + bboxSize.z},
-        {m_vecBboxMin.x, m_vecBboxMin.y, m_vecBboxMin.z + bboxSize.z}
-    };
-
     if (!g_EngineModule.IsSoftwareRenderer())
     {
-        g_pClientEngfuncs->pTriAPI->RenderMode(kRenderNormal);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_TEXTURE_2D);
-        glBegin(GL_LINE_LOOP);
-            glColor3f(colorR, colorG, colorB);
-            glVertex3fv(boxVertices[0]); // 1
-            glVertex3fv(boxVertices[1]); // 2
-            glVertex3fv(boxVertices[2]); // 3
-            glVertex3fv(boxVertices[3]); // 4
-            glVertex3fv(boxVertices[4]); // 5
-            glVertex3fv(boxVertices[5]); // 6
-            glVertex3fv(boxVertices[6]); // 7
-            glVertex3fv(boxVertices[7]); // 8
-            glVertex3fv(boxVertices[0]); // 1
-            glVertex3fv(boxVertices[7]); // 8
-            glVertex3fv(boxVertices[2]); // 3
-            glVertex3fv(boxVertices[1]); // 2
-            glVertex3fv(boxVertices[4]); // 5
-            glVertex3fv(boxVertices[3]); // 4
-            glVertex3fv(boxVertices[6]); // 7
-            glVertex3fv(boxVertices[5]); // 6
-        glEnd();
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_DEPTH_TEST);
+        entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
+        Utils::GetEntityBbox(m_iEntityIndex, hullMins, hullMaxs);
+        vec3_t bboxSize = (hullMaxs - hullMins);
+        vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
+        Utils::DrawEntityHull(entity->origin + centerOffset, entity->angles, bboxSize);
     }
 }
 

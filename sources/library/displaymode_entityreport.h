@@ -19,10 +19,8 @@ private:
     float TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
     int TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
     float GetEntityDistance(int entityIndex);
-    
+
     int m_iEntityIndex;
     std::vector<int> m_EntityIndexList;
     std::vector<float> m_EntityDistanceList;
-    vec3_t m_vecBboxMin;
-    vec3_t m_vecBboxMax;
 };
