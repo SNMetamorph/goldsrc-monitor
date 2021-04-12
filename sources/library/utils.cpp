@@ -299,7 +299,8 @@ void Utils::DrawString3D(const vec3_t &origin, const char *text, int r, int g, i
 
 void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
 {
-    if (entityIndex > 0 && entityIndex <= 32) // is entity player
+    const int maxClients = g_pClientEngfuncs->GetMaxClients();
+    if (entityIndex > 0 && entityIndex <= maxClients) // is entity player
     {
         hud_player_info_t playerInfo;
         g_pClientEngfuncs->pfnGetPlayerInfo(entityIndex, &playerInfo);
