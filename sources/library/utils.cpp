@@ -3,6 +3,7 @@
 #include "client_module.h"
 #include "studio.h"
 #include "application.h"
+#include "matrix.h"
 
 #include <stdint.h>
 #include <cstring>
@@ -188,15 +189,17 @@ void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &s
     }
 }
 
-void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &angles, const vec3_t &size)
+void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size)
 {
     const float colorR = 0.0f;
     const float colorG = 1.0f;
     const float colorB = 0.0f;
     const bool drawFaces = false;
     const bool drawEdges = true;
-    const vec3_t bboxMin = origin - size / 2;
-
+    const vec3_t bboxMin = vec3_t(0, 0, 0) - size / 2;
+    Matrix<vec_t> transformMat(4, 4);
+    
+    // assumed that point (0, 0, 0) located in center of bbox
     vec3_t boxVertices[8] = {
         {bboxMin.x, bboxMin.y, bboxMin.z},
         {bboxMin.x + size.x, bboxMin.y, bboxMin.z},
@@ -207,6 +210,17 @@ void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &angles, const vec
         {bboxMin.x, bboxMin.y + size.y, bboxMin.z + size.z},
         {bboxMin.x, bboxMin.y, bboxMin.z + size.z}
     };
+
+    // transform all vertices
+    transformMat = Matrix<vec_t>::CreateTranslate(centerOffset.x, centerOffset.y, centerOffset.z);
+    transformMat = Matrix<vec_t>::CreateRotateX(angles[2]) * transformMat; // roll
+    transformMat = Matrix<vec_t>::CreateRotateY(-angles[0]) * transformMat; // pitch (inverted because of stupid quake bug)
+    transformMat = Matrix<vec_t>::CreateRotateZ(angles[1]) * transformMat; // yaw
+    transformMat = Matrix<vec_t>::CreateTranslate(origin.x, origin.y, origin.z) * transformMat;
+
+    for (int i = 0; i < 8; ++i) {
+        boxVertices[i] = transformMat.MultiplyVector(boxVertices[i]);
+    }
 
     g_pClientEngfuncs->pTriAPI->RenderMode(kRenderTransColor);
     g_pClientEngfuncs->pTriAPI->CullFace(TRI_NONE);

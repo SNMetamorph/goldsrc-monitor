@@ -115,7 +115,7 @@ void CModeEntityReport::Render3D()
         Utils::GetEntityBbox(m_iEntityIndex, hullMins, hullMaxs);
         vec3_t bboxSize = (hullMaxs - hullMins);
         vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
-        Utils::DrawEntityHull(entity->origin + centerOffset, entity->angles, bboxSize);
+        Utils::DrawEntityHull(entity->origin, centerOffset, entity->angles, bboxSize);
     }
 }
 
