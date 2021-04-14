@@ -197,7 +197,7 @@ void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, con
     const bool drawFaces = false;
     const bool drawEdges = true;
     const vec3_t bboxMin = vec3_t(0, 0, 0) - size / 2;
-    Matrix<vec_t> transformMat(4, 4);
+    Matrix4x4<vec_t> transformMat;
     
     // assumed that point (0, 0, 0) located in center of bbox
     vec3_t boxVertices[8] = {
@@ -212,11 +212,14 @@ void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, con
     };
 
     // transform all vertices
-    transformMat = Matrix<vec_t>::CreateTranslate(centerOffset.x, centerOffset.y, centerOffset.z);
-    transformMat = Matrix<vec_t>::CreateRotateX(angles[2]) * transformMat; // roll
-    transformMat = Matrix<vec_t>::CreateRotateY(-angles[0]) * transformMat; // pitch (inverted because of stupid quake bug)
-    transformMat = Matrix<vec_t>::CreateRotateZ(angles[1]) * transformMat; // yaw
-    transformMat = Matrix<vec_t>::CreateTranslate(origin.x, origin.y, origin.z) * transformMat;
+    transformMat = Matrix4x4<vec_t>::CreateTranslate(centerOffset.x, centerOffset.y, centerOffset.z);
+    if (angles.Length() >= 0.001f) // just little optimization
+    {
+        transformMat = Matrix4x4<vec_t>::CreateRotateX(angles[2]) * transformMat; // roll
+        transformMat = Matrix4x4<vec_t>::CreateRotateY(-angles[0]) * transformMat; // pitch (inverted because of stupid quake bug)
+        transformMat = Matrix4x4<vec_t>::CreateRotateZ(angles[1]) * transformMat; // yaw
+    }
+    transformMat = Matrix4x4<vec_t>::CreateTranslate(origin.x, origin.y, origin.z) * transformMat;
 
     for (int i = 0; i < 8; ++i) {
         boxVertices[i] = transformMat.MultiplyVector(boxVertices[i]);
