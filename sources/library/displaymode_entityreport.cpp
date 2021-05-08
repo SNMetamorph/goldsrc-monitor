@@ -35,17 +35,15 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
     else
     {
         CEntityDescription entityDesc;
-        cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
-        model_t *entityModel = traceEntity->model;
+        cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
+        model_t *entityModel = entity->model;
         bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc);
-        entityAngles = traceEntity->curstate.angles;
+        const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
 
+        entityAngles = entity->curstate.angles;
+        entityOrigin = entity->origin + centerOffset;
         Utils::GetEntityBbox(m_iEntityIndex, hullMins, hullMaxs);
         hullSize = hullMaxs - hullMins;
-        if (entityModel->type == mod_brush)
-            entityOrigin = (traceEntity->curstate.mins + traceEntity->curstate.maxs) / 2.f;
-        else
-            entityOrigin = traceEntity->curstate.origin;
 
         screenText.PushPrintf("Entity Index: %d", m_iEntityIndex);
         screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
@@ -56,7 +54,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             entityAngles.x, entityAngles.y, entityAngles.z);
         screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
             hullSize.x, hullSize.y, hullSize.z);
-        screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(traceEntity->curstate.movetype));
+        screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
 
         if (isDescFound)
         {
@@ -73,13 +71,13 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             Utils::GetEntityModelName(m_iEntityIndex, modelName);
             screenText.PushPrintf("Model Name: %s", modelName.c_str());
             screenText.PushPrintf("Anim. Frame: %.1f",
-                traceEntity->curstate.frame);
+                entity->curstate.frame);
             screenText.PushPrintf("Anim. Sequence: %d",
-                traceEntity->curstate.sequence);
+                entity->curstate.sequence);
             screenText.PushPrintf("Bodygroup Number: %d",
-                traceEntity->curstate.body);
+                entity->curstate.body);
             screenText.PushPrintf("Skin Number: %d",
-                traceEntity->curstate.skin);
+                entity->curstate.skin);
         }
 
         if (isDescFound)
