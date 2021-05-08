@@ -317,6 +317,39 @@ void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
     }
 }
 
+const char *Utils::GetMovetypeName(int moveType)
+{
+    switch (moveType)
+    {
+    case MOVETYPE_BOUNCE:
+        return "Bounce";
+    case MOVETYPE_BOUNCEMISSILE:
+        return "Bounce-missle";
+    case MOVETYPE_FLY:
+        return "Fly";
+    case MOVETYPE_FLYMISSILE:
+        return "Fly-missle";
+    case MOVETYPE_FOLLOW:
+        return "Follow";
+    case MOVETYPE_NOCLIP:
+        return "Noclip";
+    case MOVETYPE_NONE:
+        return "None";
+    case MOVETYPE_PUSH:
+        return "Push";
+    case MOVETYPE_PUSHSTEP:
+        return "Push-step";
+    case MOVETYPE_STEP:
+        return "Step";
+    case MOVETYPE_TOSS:
+        return "Toss";
+    case MOVETYPE_WALK:
+        return "Walk";
+    default:
+        return "Unknown";
+    }
+}
+
 bool Utils::IsGameDirEquals(const char *gameDir)
 {
     const char *gameDirReal = g_pClientEngfuncs->pfnGetGameDirectory();

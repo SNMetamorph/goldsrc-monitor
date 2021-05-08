@@ -14,5 +14,4 @@ public:
 
 private:
     float GetSmoothFrameTime();
-    const char *GetMovetypeName(int moveType);
 };

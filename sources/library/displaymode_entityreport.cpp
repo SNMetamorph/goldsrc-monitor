@@ -56,6 +56,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             entityAngles.x, entityAngles.y, entityAngles.z);
         screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
             hullSize.x, hullSize.y, hullSize.z);
+        screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(traceEntity->curstate.movetype));
 
         if (isDescFound)
         {

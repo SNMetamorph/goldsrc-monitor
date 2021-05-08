@@ -25,7 +25,7 @@ void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
     screenText.PushPrintf("Angles: (%.2f, %.2f, %.2f)", angles.x, angles.y, angles.z);
     screenText.PushPrintf("Base Velocity: (%.2f, %.2f, %.2f)", baseVelocity.x, baseVelocity.y, baseVelocity.z);
     screenText.PushPrintf("Max Velocity: %.2f (client %.2f)", g_pPlayerMove->maxspeed, g_pPlayerMove->clientmaxspeed);
-    screenText.PushPrintf("Movetype: %s\n", GetMovetypeName(g_pPlayerMove->movetype));
+    screenText.PushPrintf("Movetype: %s\n", Utils::GetMovetypeName(g_pPlayerMove->movetype));
 
     screenText.PushPrintf("View Offset: (%.2f, %.2f, %.2f)", viewOffset.x, viewOffset.y, viewOffset.z);
     screenText.PushPrintf("Punch Angle: (%.2f, %.2f, %.2f)", punchAngle.x, punchAngle.y, punchAngle.z);
@@ -70,37 +70,4 @@ float CModeFull::GetSmoothFrameTime()
     lastFrameTime   = frameTime;
     lastSysTime     = currSysTime;
     return frameTime;
-}
-
-const char *CModeFull::GetMovetypeName(int moveType)
-{
-    switch (moveType)
-    {
-    case MOVETYPE_BOUNCE:
-        return "Bounce";
-    case MOVETYPE_BOUNCEMISSILE:
-        return "Bounce-missle";
-    case MOVETYPE_FLY:
-        return "Fly";
-    case MOVETYPE_FLYMISSILE:
-        return "Fly-missle";
-    case MOVETYPE_FOLLOW:
-        return "Follow";
-    case MOVETYPE_NOCLIP:
-        return "Noclip";
-    case MOVETYPE_NONE:
-        return "None";
-    case MOVETYPE_PUSH:
-        return "Push";
-    case MOVETYPE_PUSHSTEP:
-        return "Push-step";
-    case MOVETYPE_STEP:
-        return "Step";
-    case MOVETYPE_TOSS:
-        return "Toss";
-    case MOVETYPE_WALK:
-        return "Walk";
-    default:
-        return "Unknown";
-    }
 }

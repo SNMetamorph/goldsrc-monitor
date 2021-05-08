@@ -25,6 +25,7 @@ namespace Utils
     void DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size);
     void DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b);
     void GetEntityModelName(int entityIndex, std::string &modelName);
+    const char *GetMovetypeName(int moveType);
     bool IsGameDirEquals(const char *gameDir);
 
     void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
