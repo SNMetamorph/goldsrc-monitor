@@ -46,6 +46,7 @@ if (MSVC)
 		target_link_options(${PROJECT_NAME} PRIVATE /INCREMENTAL /SAFESEH:NO)
 	else()
 		target_compile_options(${PROJECT_NAME} PRIVATE /Ob1) # disable force function inlining, to prevent segfault in release mode
+		target_compile_options(${PROJECT_NAME} PRIVATE /O1) # enable optimizing to minimize size
 	endif()
 
 	set_compiler_runtime(${PROJECT_NAME} STATIC)
