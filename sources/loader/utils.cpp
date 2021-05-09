@@ -1,10 +1,9 @@
-#include "util.h"
+#include "utils.h"
 #include <TlHelp32.h>
 #include <Psapi.h>
-#include <stdint.h>
-#include <vector>
+#include <shlwapi.h>
 
-int FindProcessID(const wchar_t *processName)
+int Utils::FindProcessID(const wchar_t *processName)
 {
     int             processID;
     HANDLE			processSnap;
@@ -31,7 +30,7 @@ int FindProcessID(const wchar_t *processName)
     return processID;
 }
 
-HMODULE FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
+HMODULE Utils::FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
 {
     DWORD	listSize;
     size_t  modulesCount;
@@ -70,13 +69,36 @@ HMODULE FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
     return moduleHandle;
 }
 
-size_t GetFunctionOffset(HMODULE moduleHandle, const char *funcName)
+int Utils::GetThreadExitCode(HANDLE threadHandle)
+{
+    DWORD exitCode;
+    GetExitCodeThread(threadHandle, &exitCode);
+    return exitCode;
+}
+
+bool Utils::FindLibraryPath(const std::wstring &libraryName, std::wstring &libPath)
+{
+    libPath.reserve(MAX_PATH);
+    GetFullPathNameW(
+        libraryName.c_str(),
+        libPath.capacity(),
+        libPath.data(),
+        NULL
+    );
+
+    if (PathFileExistsW(libPath.data()))
+        return true;
+    else
+        return false;
+}
+
+size_t Utils::GetFunctionOffset(HMODULE moduleHandle, const char *funcName)
 {
     uint8_t *funcAddr = (uint8_t *)GetProcAddress(moduleHandle, funcName);
     return (size_t)(funcAddr - (uint8_t*)moduleHandle);
 }
 
-bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
+bool Utils::GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
 {
     MODULEINFO targetInfo;
     const int dataSize = sizeof(targetInfo);
@@ -90,4 +112,19 @@ bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &module
     }
     else
         return false;
+}
+
+void Utils::GetProcessWindowList(DWORD processID, std::vector<HWND> &windowList)
+{
+    HWND window = NULL;
+    windowList.clear();
+    do {
+        DWORD checkProcessID;
+        window = FindWindowEx(NULL, window, NULL, NULL);
+        GetWindowThreadProcessId(window, &checkProcessID);
+        if (processID == checkProcessID) {
+            windowList.push_back(window);
+        }
+    } 
+    while (window != NULL);
 }

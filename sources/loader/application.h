@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <string>
 #include <Windows.h>
-#include <shlwapi.h>
 
 class CApplication
 {
@@ -18,10 +17,10 @@ private:
     void StartMainLoop();
     void ReportError(const char *msg);
     bool IsLibraryInjected(HANDLE procHandle);
+    bool IsGameLoaded(HWND windowHandle, int timeout);
+    HWND FindGameWindow(HANDLE procHandle);
     HANDLE OpenGameProcess();
-    bool FindLibraryPath(std::wstring &libPath);
     wchar_t *WritePathString(HANDLE procHandle, const std::wstring &libPath);
-    int GetFuncReturnCode(HANDLE threadHandle);
     void InjectLibrary(HANDLE procHandle);
     void PrintTitleText();
 
