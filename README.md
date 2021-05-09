@@ -2,7 +2,7 @@
 Simple utility for mapping/scripting or researching games based on GoldSrc engine<br>
 Download this program and read description you can on [Gamebanana Page](https://gamebanana.com/gamefiles/8977)
 <br>
-![Gamebanana Page](https://gamebanana.com/gamefiles/embeddables/8977?type=large)
+![Gamebanana Page](https://gamebanana.com/mods/embeddables/39429?variant=large)
 
 # Building
 1) Clone this repository, following the instructions given above.
@@ -13,8 +13,9 @@ git submodule update --init --recursive
 ```
 2) Open CMakeLists.txt using Visual Studio
 3) Select desired debug/release build type
-4) Build entire project.
+4) Build entire project
 5) Result compiled files will be located in `build\bin\Debug` or `build\bin\Release`
 
 # External libraries
-This project uses [PolyHook 2.0](https://github.com/stevemk14ebr/PolyHook_2_0) library - Copyright (c) 2019, Stephen Eckels - MIT license
+[PolyHook 2.0](https://github.com/stevemk14ebr/PolyHook_2_0) - Copyright (c) 2019, Stephen Eckels - MIT license<br>
+[Half Life 1 SDK](https://github.com/ValveSoftware/halflife) - Copyright (c) Valve Corp. - [License](https://github.com/ValveSoftware/halflife/blob/master/LICENSE)
