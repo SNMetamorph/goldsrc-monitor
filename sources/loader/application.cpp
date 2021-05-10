@@ -62,7 +62,19 @@ void CApplication::StartMainLoop()
             std::cout << "Waiting for starting game..." << std::endl;
             processHandle = OpenGameProcess();
             std::cout << "Game process found. Waiting for game loading..." << std::endl;
-            gameWindow = FindGameWindow(processHandle);
+
+            // try to find game window ten times
+            for (int i = 0; i < 10; ++i)
+            {
+                gameWindow = FindGameWindow(processHandle);
+                if (!gameWindow) {
+                    Sleep(500);
+                }
+                else {
+                    break;
+                }
+            }
+
             if (gameWindow)
             {
                 // wait until game being loaded
@@ -70,7 +82,9 @@ void CApplication::StartMainLoop()
                 {
                 }
             }
-            else {
+            else 
+            {
+                std::cout << "Failed to find game window, waiting " << m_iInjectDelay << " ms";
                 Sleep(m_iInjectDelay);
             }
 
