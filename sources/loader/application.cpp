@@ -258,13 +258,15 @@ void CApplication::PrintTitleText()
 {
     std::system("cls");
     std::system("color 02");
-    std::cout << std::endl;
-    std::cout << " GoldSrc Monitor | version " << APP_VERSION_MAJOR << "." << APP_VERSION_MINOR;
-    std::cout << std::endl;
-    std::cout << 
-        (" ------------------------------\n"
-        " WARNING: This stuff is untested on VAC-secured\n"
-        " servers, therefore there is a risk to get VAC ban\n"
-        " while using it on VAC-secured servers.\n");
-    std::cout << std::endl;
+    std::printf(
+        "\n"
+        "  GoldSrc Monitor - utility for mapping/scripting/researching games on GoldSrc engine\n"
+        "  Version : %d.%d\n"
+        "  Link    : https://github.com/SNMetamorph/goldsrc-monitor\n"
+        "\n"
+        "  WARNING: This stuff is untested on VAC-secured\n"
+        "  servers, therefore there is a risk to get VAC ban\n"
+        "  while using it on VAC-secured servers.\n"
+        "\n", APP_VERSION_MAJOR, APP_VERSION_MINOR
+    );
 }
