@@ -216,23 +216,21 @@ int CModeEntityReport::TracePhysEntList(physent_t list[], int count, vec3_t &vie
 
 float CModeEntityReport::GetEntityDistance(int entityIndex)
 {
-    vec3_t viewOrigin;
-    vec3_t entityOrigin;
     vec3_t pointInBbox;
     vec3_t bboxMin, bboxMax;
-    cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-    model_t *entityModel = traceEntity->model;
+    cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
 
-    viewOrigin = g_LocalPlayer.GetViewOrigin();
-    if (entityModel->type == mod_brush)
-        entityOrigin = (entityModel->mins + entityModel->maxs) / 2.f;
-    else
-        entityOrigin = traceEntity->curstate.origin;
+    if (entity)
+    {
+        model_t *entityModel = entity->model;
+        vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
 
-    // get nearest bbox-to-player distance by point caged in bbox
-    Utils::GetEntityBbox(entityIndex, bboxMin, bboxMax);
-    pointInBbox.x = max(min(viewOrigin.x, bboxMax.x), bboxMin.x);
-    pointInBbox.y = max(min(viewOrigin.y, bboxMax.y), bboxMin.y);
-    pointInBbox.z = max(min(viewOrigin.z, bboxMax.z), bboxMin.z);
-    return (pointInBbox - viewOrigin).Length();
+        // get nearest bbox-to-player distance by point caged in bbox
+        Utils::GetEntityBbox(entityIndex, bboxMin, bboxMax);
+        pointInBbox.x = max(min(viewOrigin.x, bboxMax.x), bboxMin.x);
+        pointInBbox.y = max(min(viewOrigin.y, bboxMax.y), bboxMin.y);
+        pointInBbox.z = max(min(viewOrigin.z, bboxMax.z), bboxMin.z);
+        return (pointInBbox - viewOrigin).Length();
+    }
+    return 0.0f;
 }

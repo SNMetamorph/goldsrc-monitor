@@ -471,25 +471,33 @@ vec3_t Utils::GetEntityVelocityApprox(int entityIndex, int approxStep)
 void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
 {
     int seqIndex;
-    cl_entity_t *entTarget;
+    vec3_t hullSize;
     studiohdr_t *mdlHeader;
     mstudioseqdesc_t *seqDesc;
+    cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
 
-    entTarget = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-    if (entTarget->model && entTarget->model->type == mod_studio)
+    if (!entity)
     {
-        vec3_t &entOrigin = entTarget->origin;
-        mdlHeader = (studiohdr_t *)entTarget->model->cache.data;
-        seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
-        seqIndex = entTarget->curstate.sequence;
-
-        bboxMin = entOrigin + seqDesc[seqIndex].bbmin;
-        bboxMax = entOrigin + seqDesc[seqIndex].bbmax;
+        bboxMin = vec3_t(0, 0, 0);
+        bboxMax = vec3_t(0, 0, 0);
+        return;
     }
     else
     {
-        bboxMin = entTarget->curstate.mins;
-        bboxMax = entTarget->curstate.maxs;
+        const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
+        const vec3_t entityOrigin = entity->origin + centerOffset;
+        if (entity->model && entity->model->type == mod_studio)
+        {
+            mdlHeader = (studiohdr_t *)entity->model->cache.data;
+            seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
+            seqIndex = entity->curstate.sequence;
+            hullSize = seqDesc[seqIndex].bbmax - seqDesc[seqIndex].bbmin;
+        }
+        else {
+            hullSize = entity->curstate.maxs - entity->curstate.mins;
+        }
+        bboxMin = entityOrigin - hullSize / 2;
+        bboxMax = entityOrigin + hullSize / 2;
     }
 }
 
