@@ -37,6 +37,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         CEntityDescription entityDesc;
         cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
         model_t *entityModel = entity->model;
+        vec3_t entityVelocity = Utils::GetEntityVelocityApprox(m_iEntityIndex);
         bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc);
         const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
 
@@ -50,6 +51,8 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             entityOrigin.x, entityOrigin.y, entityOrigin.z);
         screenText.PushPrintf("Distance: %.1f units",
             GetEntityDistance(m_iEntityIndex));
+        screenText.PushPrintf("Velocity: %.2f u/s (%.1f; %.1f; %.1f)", 
+            entityVelocity.Length2D(), entityVelocity.x, entityVelocity.y, entityVelocity.z);
         screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
             entityAngles.x, entityAngles.y, entityAngles.z);
         screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
