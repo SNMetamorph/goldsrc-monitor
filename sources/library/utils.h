@@ -28,6 +28,7 @@ namespace Utils
     const char *GetMovetypeName(int moveType);
     bool IsGameDirEquals(const char *gameDir);
 
+    vec3_t GetEntityVelocityApprox(int entityIndex, int approxStep = 22);
     void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
     void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData, int ignoredEnt = -1);
     float TraceBBoxLine(

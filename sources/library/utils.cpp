@@ -453,6 +453,21 @@ float Utils::TraceBBoxLine(
     return nearDotFract / lineLength;
 }
 
+vec3_t Utils::GetEntityVelocityApprox(int entityIndex, int approxStep)
+{
+    cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+    if (entity)
+    {
+        const int currIndex = entity->current_position;
+        position_history_t &currState = entity->ph[currIndex & HISTORY_MASK];
+        position_history_t &prevState = entity->ph[(currIndex - approxStep) & HISTORY_MASK];
+        float timeDelta = currState.animtime - prevState.animtime;
+        vec3_t originDelta = currState.origin - prevState.origin;
+        return originDelta / timeDelta;
+    }
+    return vec3_t(0, 0, 0);
+}
+
 void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
 {
     int seqIndex;

@@ -9,22 +9,15 @@ void CModeSpeedometer::Render2D(int scrWidth, int scrHeight, CStringStack &scree
     const int centerX = scrWidth / 2;
     const int centerY = scrHeight / 2;
     const int speedometerMargin = 35;
-    const int stateOffset = 22; // higher - more smooth velocity
     float velocity;
 
     screenText.Clear();
     if (g_LocalPlayer.IsSpectate())
     {
         int targetIndex = g_LocalPlayer.GetSpectateTargetIndex();
-        cl_entity_t *targetEnt = g_pClientEngfuncs->GetEntityByIndex(targetIndex);
-        if (targetEnt)
+        if (g_pClientEngfuncs->GetEntityByIndex(targetIndex) != nullptr)
         {
-            const int currIndex = targetEnt->current_position;
-            position_history_t &currState = targetEnt->ph[currIndex & HISTORY_MASK];
-            position_history_t &prevState = targetEnt->ph[(currIndex - stateOffset) & HISTORY_MASK];
-            float timeDelta = currState.animtime - prevState.animtime;
-            vec3_t originDelta = currState.origin - prevState.origin;
-            velocity = (originDelta / timeDelta).Length2D(); 
+            velocity = Utils::GetEntityVelocityApprox(targetIndex).Length2D(); 
             //DrawVelocityBar(centerX, centerY, velocity);
         }
         else
