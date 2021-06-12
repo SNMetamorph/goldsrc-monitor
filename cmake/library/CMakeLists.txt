@@ -45,6 +45,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	../../external/polyhook/zydis/include
 	../../external/polyhook/zydis/dependencies/zycore/include
 	../../external/polyhook
+	../../external/rapidjson/include
 	../../external/hlsdk/common
 	../../external/hlsdk/pm_shared
 	../../external/hlsdk/engine

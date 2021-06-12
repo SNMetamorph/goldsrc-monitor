@@ -4,3 +4,6 @@
 [submodule "external/hlsdk"]
 	path = external/hlsdk
 	url = https://github.com/alliedmodders/hlsdk.git
+[submodule "external/rapidjson"]
+	path = external/rapidjson
+	url = https://github.com/Tencent/rapidjson
