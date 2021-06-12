@@ -1,4 +1,5 @@
 #pragma once
+#include "app_version.h"
 #include <stdint.h>
 #include <string>
 #include <Windows.h>
@@ -25,6 +26,6 @@ private:
     void PrintTitleText();
 
     size_t m_iInjectDelay = 3000;
-    std::wstring m_szProcessName = L"hl.exe";
-    std::wstring m_szLibraryName = L"gsm-library.dll";
+    std::wstring m_szProcessName = DEFAULT_PROCESS_NAME;
+    std::wstring m_szLibraryName = DEFAULT_LIBRARY_NAME;
 };

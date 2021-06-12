@@ -1,6 +1,7 @@
 #pragma once
 #include "moduleinfo.h"
 #include "string_stack.h"
+#include "memory_pattern.h"
 #include "stdafx.h"
 #include <stdint.h>
 #include <string>
@@ -12,10 +13,11 @@ namespace Utils
     inline bool IsSymbolDigit(char symbol) { return (symbol >= '0' && symbol <= '9'); };
     inline bool IsSymbolSpace(char symbol) { return (symbol == ' '); };
 
+    bool GetLibraryDirectory(std::wstring &workingDir);
     HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName);
     bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo);
     void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t value);
-    void *FindPatternAddress(void *startAddr, void *endAddr, const char *pattern, const char *mask);
+    void *FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern);
     float GetCurrentSysTime();
 
     cvar_t *RegisterConVar(const char *name, const char *value, int flags);

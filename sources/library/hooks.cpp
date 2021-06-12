@@ -80,7 +80,7 @@ static void DisposeHooks()
     hookCameraOffset.Unhook();
 }
 
-void Hooks::Apply()
+void ÑHooks::Apply()
 {
     pfnRedraw_t pfnRedraw = (pfnRedraw_t)g_ClientModule.GetFuncAddress("HUD_Redraw");
     pfnPlayerMove_t pfnPlayerMove = (pfnPlayerMove_t)g_ClientModule.GetFuncAddress("HUD_PlayerMove");
@@ -88,7 +88,6 @@ void Hooks::Apply()
     pfnDrawTriangles_t pfnDrawTriangles = (pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawTransparentTriangles");
     pfnIsThirdPerson_t pfnIsThirdPerson = (pfnIsThirdPerson_t)g_ClientModule.GetFuncAddress("CL_IsThirdPerson");
     pfnCameraOffset_t pfnCameraOffset = (pfnCameraOffset_t)g_ClientModule.GetFuncAddress("CL_CameraOffset");
-
 
     hookRedraw.Hook(pfnRedraw, &HookRedraw);
     hookPlayerMove.Hook(pfnPlayerMove, &HookPlayerMove);
@@ -135,7 +134,7 @@ void Hooks::Apply()
     }
 }
 
-void Hooks::Remove()
+void ÑHooks::Remove()
 {
     // check for client.dll not already unloaded from process
     if (GetModuleHandle("client.dll"))

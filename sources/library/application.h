@@ -4,7 +4,7 @@
 #include "cvars.h"
 #include "app_version.h"
 #include "exception.h"
-#include "buildinfo.h"
+#include "build_info.h"
 #include "display_mode.h"
 #include "string_stack.h"
 #include <stdint.h>
@@ -37,6 +37,8 @@ private:
     void AssignDisplayMode();
     void UpdateScreenInfo();
 
+    ÑHooks m_Hooks;
+    CBuildInfo m_BuildInfo;
     SCREENINFO m_ScreenInfo;
     CStringStack m_StringStack;
     IDisplayMode *m_pDisplayMode;

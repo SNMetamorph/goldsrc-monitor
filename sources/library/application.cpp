@@ -4,7 +4,7 @@
 #include "cvars.h"
 #include "app_version.h"
 #include "exception.h"
-#include "buildinfo.h"
+#include "memory_pattern.h"
 #include "engine_module.h"
 #include "client_module.h"
 #include "server_module.h"
@@ -25,21 +25,19 @@ void CApplication::Run()
     if (!g_ClientModule.FindHandle())
         EXCEPT("failed to get client module handle");
 
-    // try to find GetBuildNumber() address
     moduleinfo_t engineDLL;
     Utils::GetModuleInfo(GetCurrentProcess(), g_EngineModule.GetHandle(), engineDLL);
-    if (!FindBuildNumberFunc(engineDLL))
-        EXCEPT("GetBuildNumber() address not found");
+    m_BuildInfo.Initialize(engineDLL);
 
     // find engine functions pointer arrays
-    g_ClientModule.FindEngfuncs();
-    g_ServerModule.FindEngfuncs();
+    g_ClientModule.FindEngfuncs(m_BuildInfo);
+    g_ServerModule.FindEngfuncs(m_BuildInfo);
     g_ServerModule.FindHandle();
     
     SetupConVars(engineDLL);
     AssignDisplayMode();
     PrintTitleText();
-    Hooks::Apply();
+    m_Hooks.Apply();
 
     // load configuration file
     g_pClientEngfuncs->pfnClientCmd("exec gsm_config.cfg");
@@ -62,18 +60,13 @@ void CApplication::FindTimescaleConVar(const moduleinfo_t &engineLib)
     uint8_t *scanStartAddr;
     uint8_t *moduleStartAddr;
     uint8_t *moduleEndAddr;
-    const char *scanMask;
-    size_t maskLength;
+    CMemoryPattern scanPattern("sys_timescale", 14);
 
     moduleStartAddr = engineLib.baseAddr;
     moduleEndAddr = moduleStartAddr + engineLib.imageSize;
     scanStartAddr = moduleStartAddr;
-    scanMask = "xxxxxxxxxxxxx";
-    maskLength = strlen(scanMask);
-
     stringAddr = (uint8_t *)Utils::FindPatternAddress(
-        scanStartAddr, moduleEndAddr,
-        "sys_timescale", scanMask
+        scanStartAddr, moduleEndAddr, scanPattern
     );
     if (!stringAddr)
         return;

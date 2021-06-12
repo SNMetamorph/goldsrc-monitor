@@ -1,6 +1,7 @@
 #pragma once
 #include "hlsdk.h"
 #include "moduleinfo.h"
+#include "build_info.h"
 #include <windows.h>
 #include <stdint.h>
 
@@ -10,7 +11,7 @@ public:
     static CServerModule& GetInstance();
 
     bool FindHandle();
-    bool FindEngfuncs();
+    bool FindEngfuncs(const CBuildInfo &buildInfo);
     uint8_t *GetFuncAddress(const char *funcName);
     inline HMODULE  GetHandle() const       { return m_hModule;  }
     inline uint8_t *GetBaseAddress() const  { return m_ModuleInfo.baseAddr; }

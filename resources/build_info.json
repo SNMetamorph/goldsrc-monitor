@@ -1,0 +1,26 @@
+{
+    "build_number_signatures": [
+        "A1 ?? ?? ?? ?? 83 EC 08 ?? 33 ?? 85 C0",
+        "55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 56 33 F6 85 C0 0F 85"
+    ],
+    "engine_builds_info": [
+        {
+            "number": 4554,
+            "signatures": {
+                "SPR_Load": "56 8D 44 24 08 57 50 FF 15 ?? ?? ?? ?? 8B 44 24 10",
+                "SPR_Frames": "8D 44 24 04 50 FF 15 ?? ?? ?? ?? 8B 4C 24 08",
+                "PrecacheModel": "53 55 8B 6C 24 0C 33 DB 56 57 85 ED 75 14 68",
+                "PrecacheSound": "53 8B 5C 24 08 56 57 85 DB 75 13 68"
+            }
+        },
+        {
+            "number": 8196,
+            "signatures": {
+                "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45 08 83 C4 04 85 C0 0F 84",
+                "SPR_Frames": "55 8B EC 8D 45 08 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8",
+                "PrecacheModel": "55 8B EC 53 56 57 8B 7D 08 33 DB 85 FF 75 14 68 ?? ?? ?? ?? E8",
+                "PrecacheSound": "55 8B EC 56 57 8B 7D 08 85 FF 75 13 68 ?? ?? ?? ?? E8"
+            }
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 #include "server_module.h"
 #include "engine_module.h"
-#include "buildinfo.h"
+#include "build_info.h"
 #include "exception.h"
 #include "utils.h"
 
@@ -21,7 +21,7 @@ bool CServerModule::FindHandle()
     return m_hModule != NULL;
 }
 
-bool CServerModule::FindEngfuncs()
+bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
 {
     void *pfnPrecacheModel;
     void *pfnPrecacheSound;
@@ -33,7 +33,7 @@ bool CServerModule::FindEngfuncs()
 
     moduleAddr = g_EngineModule.GetAddress();
     moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
-    pfnPrecacheModel = FindFunctionAddress(
+    pfnPrecacheModel = buildInfo.FindFunctionAddress(
         FUNCTYPE_PRECACHE_MODEL,
         moduleAddr,
         moduleEndAddr
@@ -57,7 +57,7 @@ bool CServerModule::FindEngfuncs()
         probeAddr = *(uint8_t **)(coincidenceAddr + sizeof(uint32_t));
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
-            pfnPrecacheSound = FindFunctionAddress(
+            pfnPrecacheSound = buildInfo.FindFunctionAddress(
                 FUNCTYPE_PRECACHE_SOUND, probeAddr
             );
             if (pfnPrecacheSound)

@@ -23,7 +23,8 @@ add_library(${PROJECT_NAME} SHARED
 	../../sources/library/engine_module.cpp
 	../../sources/library/utils.cpp
 	../../sources/library/cvars.cpp
-	../../sources/library/buildinfo.cpp
+	../../sources/library/build_info.cpp
+	../../sources/library/memory_pattern.cpp
 	../../sources/library/display_mode.h
 	../../sources/library/displaymode_angletracking.cpp
 	../../sources/library/displaymode_entityreport.cpp

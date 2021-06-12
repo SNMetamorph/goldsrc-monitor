@@ -1,6 +1,6 @@
 #include "client_module.h"
 #include "engine_module.h"
-#include "buildinfo.h"
+#include "build_info.h"
 #include "exception.h"
 #include "utils.h"
 
@@ -21,7 +21,7 @@ bool CClientModule::FindHandle()
     return m_hModule != NULL;
 }
 
-bool CClientModule::FindEngfuncs()
+bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
 {
     void *pfnSPR_Load;
     void *pfnSPR_Frames;
@@ -33,7 +33,7 @@ bool CClientModule::FindEngfuncs()
     size_t moduleSize = g_EngineModule.GetSize();
 
     moduleEndAddr = moduleAddr + moduleSize;
-    pfnSPR_Load = FindFunctionAddress(
+    pfnSPR_Load = buildInfo.FindFunctionAddress(
         FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
     );
     if (!pfnSPR_Load)
@@ -56,7 +56,7 @@ bool CClientModule::FindEngfuncs()
         // check for module range to avoid segfault
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
-            pfnSPR_Frames = FindFunctionAddress(FUNCTYPE_SPR_FRAMES, probeAddr);
+            pfnSPR_Frames = buildInfo.FindFunctionAddress(FUNCTYPE_SPR_FRAMES, probeAddr);
             if (pfnSPR_Frames)
             {
                 g_pClientEngfuncs = (cl_enginefunc_t *)coincidenceAddr;

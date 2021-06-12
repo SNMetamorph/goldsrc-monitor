@@ -12,25 +12,21 @@
 #include <Psapi.h>
 #include <gl/GL.h>
 
-void *Utils::FindPatternAddress(
-    void *startAddr, void *endAddr, const char *pattern, const char *mask)
+void *Utils::FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern)
 {
-    bool isFailed;
-    size_t maskLen;
-    uint8_t *totalEndAddr;
-
-    maskLen = strlen(mask);
-    totalEndAddr = (uint8_t*)endAddr - maskLen;
+    size_t patternLen = pattern.GetLength();
+    uint8_t *totalEndAddr = (uint8_t*)endAddr - patternLen;
+    const uint8_t *patternStart = pattern.GetSignatureAddress();
+    const int *maskStart = pattern.GetMaskAddress();
     for (uint8_t *i = (uint8_t*)startAddr; i <= totalEndAddr; ++i)
     {
-        isFailed = false;
-        for (size_t j = 0; j < maskLen; ++j)
+        bool isFailed = false;
+        for (size_t j = 0; j < patternLen; ++j)
         {
-            uint8_t maskByte = mask[j];
-            uint8_t scanByte = *(i + j);
-            uint8_t patternByte = pattern[j];
-
-            if (maskByte != '?' && patternByte != scanByte)
+            const uint8_t scanByte = *(i + j);
+            const uint8_t patternByte = *(patternStart + j);
+            const bool shouldCheckByte = *(maskStart + j) != 0;
+            if (shouldCheckByte && patternByte != scanByte)
             {
                 isFailed = true;
                 break;
@@ -40,6 +36,25 @@ void *Utils::FindPatternAddress(
             return i;
     }
     return nullptr;
+}
+
+bool Utils::GetLibraryDirectory(std::wstring &workingDir)
+{
+    workingDir.resize(MAX_PATH);
+    GetModuleFileNameW(
+        GetModuleHandleW(DEFAULT_LIBRARY_NAME), // TODO use module handle from DllMain here
+        workingDir.data(),
+        workingDir.capacity()
+    );
+
+    if (std::wcslen(workingDir.c_str()) > 1)
+    {
+        // remove file name
+        workingDir.erase(workingDir.find_last_of(L"/\\") + 1);
+        return true;
+    }
+    else
+        return false;
 }
 
 HMODULE Utils::FindModuleByExport(HANDLE procHandle, const char *exportName)

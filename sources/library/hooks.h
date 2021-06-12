@@ -1,7 +1,8 @@
 #pragma once
 
-namespace Hooks
+class ÑHooks
 {
+public:
     void Apply();
     void Remove();
-}
+};
