@@ -16,7 +16,7 @@ void CEntityDescription::AddKeyValue(const std::string &key, const std::string &
 void CEntityDescription::Initialize()
 {
     ParseEntityData();
-    RecognizeBbox();
+    EstimateBoundingBox();
 }
 
 void CEntityDescription::GetKeyValueString(int index, std::string &buffer) const
@@ -46,7 +46,7 @@ void CEntityDescription::Reset()
     m_vecBboxMaxs = vecNull;
 }
 
-void CEntityDescription::RecognizeBbox()
+void CEntityDescription::EstimateBoundingBox()
 {
     cl_entity_t *worldEntity = g_pClientEngfuncs->GetEntityByIndex(0);
     model_t *worldModel = worldEntity->model;
@@ -124,20 +124,9 @@ void CEntityDescription::ParseEntityData()
 
 model_t *CEntityDescription::FindModelByName(const char *name)
 {
-    const int maxModelCount = 512; // fixed for GoldSrc
-    model_t *modelList = g_pClientEngfuncs->hudGetModelByIndex(1);
-
-    if (strlen(name) < 1)
-        return nullptr;
-
-    for (int i = 0; i < maxModelCount; ++i)
-    {
-        model_t *currModel = &modelList[i];
-        if (currModel)
-        {
-            if (strncmp(currModel->name, name, MAX_MODEL_NAME) == 0)
-                return currModel;
-        }
+    const int modelIndex = g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(name);
+    if (modelIndex > 0) {
+        return g_pClientEngfuncs->hudGetModelByIndex(modelIndex);
     }
     return nullptr;
 }

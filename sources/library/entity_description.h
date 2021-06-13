@@ -22,7 +22,7 @@ public:
 
 private:
     void Reset();
-    void RecognizeBbox();
+    void EstimateBoundingBox();
     void ParseEntityData();
     model_t *FindModelByName(const char *name);
 
