@@ -33,6 +33,13 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
 
     moduleAddr = g_EngineModule.GetAddress();
     moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+
+    const CBuildInfoEntry &buildInfoEntry = buildInfo.GetInfoEntry();
+    if (buildInfoEntry.HasServerEngfuncsOffset()) {
+        g_pServerEngfuncs = (enginefuncs_t *)(moduleAddr + buildInfoEntry.GetServerEngfuncsOffset());
+        return true;
+    }
+
     pfnPrecacheModel = buildInfo.FindFunctionAddress(
         FUNCTYPE_PRECACHE_MODEL,
         moduleAddr,

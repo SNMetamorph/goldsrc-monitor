@@ -32,6 +32,12 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
     uint8_t *moduleAddr = g_EngineModule.GetAddress();
     size_t moduleSize = g_EngineModule.GetSize();
 
+    const CBuildInfoEntry &buildInfoEntry = buildInfo.GetInfoEntry();
+    if (buildInfoEntry.HasClientEngfuncsOffset()) {
+        g_pClientEngfuncs = (cl_enginefunc_t *)(moduleAddr + buildInfoEntry.GetClientEngfuncsOffset());
+        return true;
+    }
+
     moduleEndAddr = moduleAddr + moduleSize;
     pfnSPR_Load = buildInfo.FindFunctionAddress(
         FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
