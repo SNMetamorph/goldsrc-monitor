@@ -29,15 +29,14 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
 {
     vec3_t entityMins;
     vec3_t entityMaxs;
-    cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+    Utils::GetEntityBbox(entityIndex, entityMins, entityMaxs);
     for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
     {
         const CEntityDescription &entityDesc = *it;
         const vec3_t &bboxMins = entityDesc.GetBboxMins();
         const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
-        Utils::GetEntityBbox(entityIndex, entityMins, entityMaxs);
-        vec3_t diffMin = entityMins - bboxMins;
-        vec3_t diffMax = entityMaxs - bboxMaxs;
+        const vec3_t diffMin = entityMins - bboxMins;
+        const vec3_t diffMax = entityMaxs - bboxMaxs;
         if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
         {
             destDescription = entityDesc;
