@@ -25,6 +25,8 @@ public:
     inline uint64_t GetServerEngfuncsOffset() const { return m_iServerEngfuncsOffset; }
     inline void SetClientEngfuncsOffset(uint64_t offset) { m_iClientEngfuncsOffset = offset; }
     inline void SetServerEngfuncsOffset(uint64_t offset) { m_iServerEngfuncsOffset = offset; }
+    inline const std::string &GetGameProcessName() const { return m_szGameProcessName; }
+    inline void SetGameProcessName(const char *value) { m_szGameProcessName.assign(value); }
     inline void SetFunctionPattern(FunctionType type, CMemoryPattern pattern) { 
         m_FunctionPatterns[type] = pattern; 
     }
@@ -37,6 +39,7 @@ public:
 
 private:
     int m_iBuildNumber = 0;
+    std::string m_szGameProcessName;
     uint64_t m_iClientEngfuncsOffset = 0x0;
     uint64_t m_iServerEngfuncsOffset = 0x0;
     CMemoryPattern m_FunctionPatterns[FUNCTYPE_COUNT];

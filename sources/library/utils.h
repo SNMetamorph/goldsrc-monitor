@@ -14,6 +14,7 @@ namespace Utils
     inline bool IsSymbolSpace(char symbol) { return (symbol == ' '); };
 
     bool GetLibraryDirectory(std::wstring &workingDir);
+    void GetGameProcessName(std::string &processName);
     HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName);
     bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo);
     void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t value);

@@ -50,11 +50,22 @@ bool Utils::GetLibraryDirectory(std::wstring &workingDir)
     if (std::wcslen(workingDir.c_str()) > 1)
     {
         // remove file name
+        workingDir.assign(workingDir.c_str());
         workingDir.erase(workingDir.find_last_of(L"/\\") + 1);
+        workingDir.shrink_to_fit();
         return true;
     }
     else
         return false;
+}
+
+void Utils::GetGameProcessName(std::string &processName)
+{
+    processName.resize(MAX_PATH);
+    GetModuleFileName(NULL, processName.data(), processName.capacity());
+    processName.assign(processName.c_str());
+    processName.erase(0, processName.find_last_of("/\\") + 1);
+    processName.shrink_to_fit();
 }
 
 HMODULE Utils::FindModuleByExport(HANDLE procHandle, const char *exportName)

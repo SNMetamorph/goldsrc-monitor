@@ -1,11 +1,9 @@
 #include "build_info.h"
 #include "exception.h"
 #include "utils.h"
+#include <string>
 #include <fstream>
 #include <filesystem>
-#include "rapidjson/rapidjson.h"
-#include "rapidjson/document.h"
-#include <assert.h>
 
 void CBuildInfo::Initialize(const moduleinfo_t &engineModule)
 {
@@ -169,29 +167,52 @@ void CBuildInfo::ParseBuildInfo(std::vector<uint8_t> &fileContents)
     for (size_t i = 0; i < engineBuilds.Size(); ++i)
     {
         CBuildInfoEntry infoEntry;
-        const rapidjson::Value &entryObject = engineBuilds[i];
-
-        infoEntry.SetBuildNumber(entryObject["number"].GetInt());
-        if (entryObject.HasMember("cl_engfuncs_offset")) {
-            infoEntry.SetClientEngfuncsOffset(entryObject["cl_engfuncs_offset"].GetUint64());
-        }
-        if (entryObject.HasMember("sv_engfuncs_offset")) {
-            infoEntry.SetServerEngfuncsOffset(entryObject["sv_engfuncs_offset"].GetUint64());
-        }
-        if (entryObject.HasMember("signatures")) 
-        {
-            const rapidjson::Value &signatures = entryObject["signatures"];
-            infoEntry.SetFunctionPattern(FUNCTYPE_SPR_LOAD, CMemoryPattern(signatures["SPR_Load"].GetString()));
-            infoEntry.SetFunctionPattern(FUNCTYPE_SPR_FRAMES, CMemoryPattern(signatures["SPR_Frames"].GetString()));
-            infoEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
-            infoEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
-        }
-
-        if (!infoEntry.Validate()) {
-            EXCEPT("JSON: parsed empty build info entry, check if signatures/offsets are set");
-        }
-
+        ParseBuildInfoEntry(infoEntry, engineBuilds[i]);
         m_InfoEntries.push_back(infoEntry);
+    }
+
+    if (doc.HasMember("game_specific_builds_info"))
+    {
+        const rapidjson::Value &gameSpecificBuilds = doc["game_specific_builds_info"];
+        for (size_t i = 0; i < gameSpecificBuilds.Size(); ++i)
+        {
+            CBuildInfoEntry infoEntry;
+            const rapidjson::Value &entryObject = gameSpecificBuilds[i];
+            if (entryObject.HasMember("process_name")) 
+            {
+                ParseBuildInfoEntry(infoEntry, entryObject);
+                infoEntry.SetGameProcessName(entryObject["process_name"].GetString());
+                m_InfoEntries.push_back(infoEntry);
+            }
+            else {
+                EXCEPT("JSON: parsed game specific build info without process name");
+            }
+        }
+    }
+}
+
+void CBuildInfo::ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rapidjson::Value &jsonObject)
+{
+    if (jsonObject.HasMember("number")) {
+        destEntry.SetBuildNumber(jsonObject["number"].GetInt());
+    }
+    if (jsonObject.HasMember("cl_engfuncs_offset")) {
+        destEntry.SetClientEngfuncsOffset(jsonObject["cl_engfuncs_offset"].GetUint64());
+    }
+    if (jsonObject.HasMember("sv_engfuncs_offset")) {
+        destEntry.SetServerEngfuncsOffset(jsonObject["sv_engfuncs_offset"].GetUint64());
+    }
+    if (jsonObject.HasMember("signatures"))
+    {
+        const rapidjson::Value &signatures = jsonObject["signatures"];
+        destEntry.SetFunctionPattern(FUNCTYPE_SPR_LOAD, CMemoryPattern(signatures["SPR_Load"].GetString()));
+        destEntry.SetFunctionPattern(FUNCTYPE_SPR_FRAMES, CMemoryPattern(signatures["SPR_Frames"].GetString()));
+        destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
+        destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
+    }
+
+    if (!destEntry.Validate()) {
+        EXCEPT("JSON: parsed empty build info entry, check if signatures/offsets are set");
     }
 }
 
@@ -253,9 +274,23 @@ int CBuildInfo::FindActualInfoEntry()
     }
     else
     {
+        std::string processName;
         int currBuildNumber = GetBuildNumber();
         const int lastEntryIndex = m_InfoEntries.size() - 1;
         int actualEntryIndex = lastEntryIndex;
+        
+        // first check among game-specific builds
+        Utils::GetGameProcessName(processName);
+        for (size_t i = 0; i < m_InfoEntries.size(); ++i)
+        {
+            const CBuildInfoEntry &buildInfo = m_InfoEntries[i];
+            const std::string &targetName = buildInfo.GetGameProcessName();
+            if (targetName.length() > 0 && targetName.compare(processName) == 0) {
+                return i;
+            }
+        }
+
+        // and then among engine builds
         std::sort(m_InfoEntries.begin(), m_InfoEntries.end());
         for (int i = 0; i < lastEntryIndex; ++i)
         {

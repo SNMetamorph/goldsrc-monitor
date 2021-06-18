@@ -5,21 +5,37 @@
     ],
     "engine_builds_info": [
         {
+            "number": 8196,
+            "description": "GoldSrc Engine Build #8196 (Steam)",
+            "signatures": {
+                "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45 08 83 C4 04 85 C0 0F 84",
+                "SPR_Frames": "55 8B EC 8D 45 08 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8",
+                "PrecacheModel": "55 8B EC 53 56 57 8B 7D 08 33 DB 85 FF 75 14 68 ?? ?? ?? ?? E8",
+                "PrecacheSound": "55 8B EC 56 57 8B 7D 08 85 FF 75 13 68 ?? ?? ?? ?? E8"
+            }
+        },
+        {
             "number": 4554,
+            "description": "GoldSrc Engine Build #4554",
             "signatures": {
                 "SPR_Load": "56 8D 44 24 08 57 50 FF 15 ?? ?? ?? ?? 8B 44 24 10",
                 "SPR_Frames": "8D 44 24 04 50 FF 15 ?? ?? ?? ?? 8B 4C 24 08",
                 "PrecacheModel": "53 55 8B 6C 24 0C 33 DB 56 57 85 ED 75 14 68",
                 "PrecacheSound": "53 8B 5C 24 08 56 57 85 DB 75 13 68"
             }
-        },
+        }
+    ],
+    "game_specific_builds_info": [
         {
-            "number": 8196,
+            "process_name": "svencoop.exe",
+            "description": "Sven Co-op (build 8832, 10:50:19 Jan 9 2021)",
+            "cl_engfuncs_offset": 1928064,
+            "sv_engfuncs_offset": 1925512,
             "signatures": {
-                "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45 08 83 C4 04 85 C0 0F 84",
-                "SPR_Frames": "55 8B EC 8D 45 08 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8",
-                "PrecacheModel": "55 8B EC 53 56 57 8B 7D 08 33 DB 85 FF 75 14 68 ?? ?? ?? ?? E8",
-                "PrecacheSound": "55 8B EC 56 57 8B 7D 08 85 FF 75 13 68 ?? ?? ?? ?? E8"
+                "SPR_Load": "53 8B 5C 24 08 55 56 57 85 DB 0F 84 ?? ?? ?? ?? A1",
+                "SPR_Frames": "8B 44 24 04 83 C0 FF 78 1B",
+                "PrecacheModel": "57 8B 7C 24 08 85 FF 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 33 C0 5F C3 8A 07 88 44 24 08 3C 20 7F ?? 57",
+                "PrecacheSound": "57 8B 7C 24 08 85 FF 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 33 C0 5F C3 8A 07 3C 20 7F ?? 57 68"
             }
         }
     ]

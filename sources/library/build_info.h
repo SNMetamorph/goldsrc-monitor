@@ -3,6 +3,8 @@
 #include "moduleinfo.h"
 #include "memory_pattern.h"
 #include <vector>
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
 
 class CBuildInfo
 {
@@ -20,6 +22,7 @@ private:
 
     bool LoadBuildInfoFile(std::vector<uint8_t> &fileContents);
     void ParseBuildInfo(std::vector<uint8_t> &fileContents);
+    void ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rapidjson::Value &jsonObject);
     bool ApproxBuildNumber(const moduleinfo_t &engineModule);
     bool FindBuildNumberFunc(const moduleinfo_t &engineModule);
     int FindActualInfoEntry();
