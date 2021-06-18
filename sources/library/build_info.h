@@ -24,8 +24,8 @@ private:
     bool FindBuildNumberFunc(const moduleinfo_t &engineModule);
     int FindActualInfoEntry();
 
-    int m_iBuildNumber = 0;
-    int m_iActualEntryIndex = 0;
+    int m_iBuildNumber = -1;
+    int m_iActualEntryIndex = -1;
     int (*m_pfnGetBuildNumber)() = nullptr;
     std::vector<CBuildInfoEntry> m_InfoEntries;
     std::vector<CMemoryPattern> m_BuildNumberSignatures;

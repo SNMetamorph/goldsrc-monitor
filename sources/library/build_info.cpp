@@ -16,7 +16,6 @@ void CBuildInfo::Initialize(const moduleinfo_t &engineModule)
     else {
         EXCEPT("failed to load build info file");
     }
-
     if (!FindBuildNumberFunc(engineModule))
     {
         if (!ApproxBuildNumber(engineModule)) {
@@ -24,8 +23,10 @@ void CBuildInfo::Initialize(const moduleinfo_t &engineModule)
         }
     }
     m_iActualEntryIndex = FindActualInfoEntry();
+    if (m_iActualEntryIndex < 0) {
+        EXCEPT("no one build info entries parsed");
+    }
 }
-
 
 void *CBuildInfo::FindFunctionAddress(FunctionType funcType, void *startAddr, void *endAddr) const
 {
@@ -50,13 +51,21 @@ int CBuildInfo::GetBuildNumber() const
         return 0;
 }
 
-
 int CBuildInfo::DateToBuildNumber(const char *date) const
 {
     int m = 0, d = 0, y = 0;
     static int b = 0;
-    static int monthDaysCount[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    static const char *monthNames[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    static int monthDaysCount[12] = { 
+        31, 28, 31, 30, 
+        31, 30, 31, 31, 
+        30, 31, 30, 31 
+    };
+    static const char *monthNames[12] = { 
+        "Jan", "Feb", "Mar", 
+        "Apr", "May", "Jun", 
+        "Jul", "Aug", "Sep", 
+        "Oct", "Nov", "Dec" 
+    };
 
     if (b != 0)
         return b;
@@ -161,20 +170,27 @@ void CBuildInfo::ParseBuildInfo(std::vector<uint8_t> &fileContents)
     {
         CBuildInfoEntry infoEntry;
         const rapidjson::Value &entryObject = engineBuilds[i];
-        const rapidjson::Value &signatures = entryObject["signatures"];
 
+        infoEntry.SetBuildNumber(entryObject["number"].GetInt());
         if (entryObject.HasMember("cl_engfuncs_offset")) {
             infoEntry.SetClientEngfuncsOffset(entryObject["cl_engfuncs_offset"].GetUint64());
         }
         if (entryObject.HasMember("sv_engfuncs_offset")) {
             infoEntry.SetServerEngfuncsOffset(entryObject["sv_engfuncs_offset"].GetUint64());
         }
+        if (entryObject.HasMember("signatures")) 
+        {
+            const rapidjson::Value &signatures = entryObject["signatures"];
+            infoEntry.SetFunctionPattern(FUNCTYPE_SPR_LOAD, CMemoryPattern(signatures["SPR_Load"].GetString()));
+            infoEntry.SetFunctionPattern(FUNCTYPE_SPR_FRAMES, CMemoryPattern(signatures["SPR_Frames"].GetString()));
+            infoEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
+            infoEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
+        }
 
-        infoEntry.SetBuildNumber(entryObject["number"].GetInt());
-        infoEntry.SetFunctionPattern(FUNCTYPE_SPR_LOAD, CMemoryPattern(signatures["SPR_Load"].GetString()));
-        infoEntry.SetFunctionPattern(FUNCTYPE_SPR_FRAMES, CMemoryPattern(signatures["SPR_Frames"].GetString()));
-        infoEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
-        infoEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
+        if (!infoEntry.Validate()) {
+            EXCEPT("JSON: parsed empty build info entry, check if signatures/offsets are set");
+        }
+
         m_InfoEntries.push_back(infoEntry);
     }
 }
@@ -232,21 +248,26 @@ bool CBuildInfo::FindBuildNumberFunc(const moduleinfo_t &engineModule)
 
 int CBuildInfo::FindActualInfoEntry()
 {
-    int currBuildNumber = GetBuildNumber();
-    const int buildInfoLen = m_InfoEntries.size();
-    const int lastEntryIndex = buildInfoLen - 1;
-    int actualEntryIndex = lastEntryIndex;
-    for (int i = 0; i < lastEntryIndex; ++i)
-    {
-        const CBuildInfoEntry &buildInfo = m_InfoEntries[i];
-        const CBuildInfoEntry &nextBuildInfo = m_InfoEntries[i + 1];
-
-        // valid only if build info entries sorted ascending
-        if (nextBuildInfo.GetBuildNumber() > currBuildNumber)
-        {
-            actualEntryIndex = i;
-            break;
-        }
+    if (m_InfoEntries.size() < 1) {
+        return -1;
     }
-    return actualEntryIndex;
+    else
+    {
+        int currBuildNumber = GetBuildNumber();
+        const int lastEntryIndex = m_InfoEntries.size() - 1;
+        int actualEntryIndex = lastEntryIndex;
+        std::sort(m_InfoEntries.begin(), m_InfoEntries.end());
+        for (int i = 0; i < lastEntryIndex; ++i)
+        {
+            const CBuildInfoEntry &buildInfo = m_InfoEntries[i];
+            const CBuildInfoEntry &nextBuildInfo = m_InfoEntries[i + 1];
+            const int nextBuildNumber = nextBuildInfo.GetBuildNumber();
+            if (nextBuildNumber > currBuildNumber) // valid only if build info entries sorted ascending
+            {
+                actualEntryIndex = i;
+                break;
+            }
+        }
+        return actualEntryIndex;
+    }
 }

@@ -12,6 +12,7 @@ public:
     void AddByte(uint8_t value, bool shouldCheck = true);
     void InitFromBytes(uint8_t *pattern, int byteCount, uint8_t wildmark = 0xCC);
     void InitFromString(const std::string &pattern);
+    bool IsInitialized() const;
 
     inline int GetLength() const { return m_Signature.size(); };
     inline uint8_t GetByteAt(int offset) const { return m_Signature[offset]; };
@@ -21,7 +22,7 @@ public:
     inline const uint8_t *GetSignatureAddress() const { return m_Signature.data(); };
     
 private:
-    void Initialize();
+    void Allocate();
     void Reset();
 
     std::vector<int> m_Mask;

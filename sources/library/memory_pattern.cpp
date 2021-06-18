@@ -3,17 +3,17 @@
 
 CMemoryPattern::CMemoryPattern(const std::string &pattern)
 {
-    Initialize();
+    Allocate();
     InitFromString(pattern);
 }
 
 CMemoryPattern::CMemoryPattern(const char *pattern, int byteCount, uint8_t wildmark)
 {
-    Initialize();
+    Allocate();
     InitFromBytes((uint8_t*)pattern, byteCount, wildmark);
 }
 
-void CMemoryPattern::Initialize()
+void CMemoryPattern::Allocate()
 {
     // to avoid extra allocations
     const int approxSize = 32;
@@ -71,4 +71,12 @@ void CMemoryPattern::InitFromString(const std::string &pattern)
             AddByte(0x0, false);
         }
     }
+}
+
+bool CMemoryPattern::IsInitialized() const
+{
+    if (m_Mask.size() < 1 || m_Signature.size() < 1) {
+        return false;
+    }
+    return true;
 }

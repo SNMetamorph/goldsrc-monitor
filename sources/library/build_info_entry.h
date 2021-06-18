@@ -16,6 +16,7 @@ class CBuildInfoEntry
 {
 public:
     CBuildInfoEntry() {};
+    bool Validate() const;
     inline int GetBuildNumber() const { return m_iBuildNumber; }
     inline void SetBuildNumber(int value) { m_iBuildNumber = value; }
     inline bool HasClientEngfuncsOffset() const { return m_iClientEngfuncsOffset != 0; }
@@ -30,9 +31,12 @@ public:
     inline const CMemoryPattern &GetFunctionPattern(FunctionType type) const {
         return m_FunctionPatterns[type];
     }
+    inline bool operator<(const CBuildInfoEntry &operand) const {
+        return m_iBuildNumber < operand.GetBuildNumber();
+    }
 
 private:
-    int m_iBuildNumber;
+    int m_iBuildNumber = 0;
     uint64_t m_iClientEngfuncsOffset = 0x0;
     uint64_t m_iServerEngfuncsOffset = 0x0;
     CMemoryPattern m_FunctionPatterns[FUNCTYPE_COUNT];
