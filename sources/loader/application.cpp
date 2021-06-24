@@ -78,13 +78,11 @@ void CApplication::StartMainLoop()
             if (gameWindow)
             {
                 // wait until game being loaded
-                while (!IsGameLoaded(gameWindow, 500))
-                {
-                }
+                while (!IsGameLoaded(gameWindow, 500));
             }
             else 
             {
-                std::cout << "Failed to find game window, waiting " << m_iInjectDelay << " ms";
+                std::cout << "Failed to find game window, waiting " << m_iInjectDelay << " ms" << std::endl;
                 Sleep(m_iInjectDelay);
             }
 

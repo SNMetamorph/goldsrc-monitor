@@ -37,7 +37,7 @@ private:
     void AssignDisplayMode();
     void UpdateScreenInfo();
 
-    ÑHooks m_Hooks;
+    CHooks m_Hooks;
     CBuildInfo m_BuildInfo;
     SCREENINFO m_ScreenInfo;
     CStringStack m_StringStack;
