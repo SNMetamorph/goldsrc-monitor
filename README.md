@@ -18,4 +18,5 @@ git submodule update --init --recursive
 
 # External libraries
 [PolyHook 2.0](https://github.com/stevemk14ebr/PolyHook_2_0) - Copyright (c) 2019, Stephen Eckels - MIT license<br>
-[Half Life 1 SDK](https://github.com/ValveSoftware/halflife) - Copyright (c) Valve Corp. - [License](https://github.com/ValveSoftware/halflife/blob/master/LICENSE)
+[Half Life 1 SDK](https://github.com/ValveSoftware/halflife) - Copyright (c) Valve Corp. - [License](https://github.com/ValveSoftware/halflife/blob/master/LICENSE)<br>
+[RapidJSON](https://github.com/Tencent/rapidjson) - Copyrigth (c) 2015 THL A29 Limited, a Tencent company, and Milo Yip - [License](https://github.com/Tencent/rapidjson/blob/master/license.txt)
