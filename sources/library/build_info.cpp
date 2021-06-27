@@ -207,8 +207,12 @@ void CBuildInfo::ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rapidjson
         const rapidjson::Value &signatures = jsonObject["signatures"];
         destEntry.SetFunctionPattern(FUNCTYPE_SPR_LOAD, CMemoryPattern(signatures["SPR_Load"].GetString()));
         destEntry.SetFunctionPattern(FUNCTYPE_SPR_FRAMES, CMemoryPattern(signatures["SPR_Frames"].GetString()));
-        destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
-        destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
+        if (signatures.HasMember("PrecacheModel")) {
+            destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
+        }
+        if (signatures.HasMember("PrecacheSound")) {
+            destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
+        }
     }
 
     if (!destEntry.Validate()) {

@@ -5,8 +5,10 @@
 
 enum FunctionType
 {
+    // client-side
     FUNCTYPE_SPR_LOAD,
     FUNCTYPE_SPR_FRAMES,
+    // server-side
     FUNCTYPE_PRECACHE_MODEL,
     FUNCTYPE_PRECACHE_SOUND,
     FUNCTYPE_COUNT, // keep this last

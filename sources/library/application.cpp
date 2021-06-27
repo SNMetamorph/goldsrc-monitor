@@ -148,7 +148,7 @@ static void CommandTimescale()
 void CApplication::SetupConVars(moduleinfo_t &engineLib)
 {
     FindTimescaleConVar(engineLib);
-    g_pServerEngfuncs->pfnAddServerCommand("gsm_timescale", &CommandTimescale);
+    g_pClientEngfuncs->pfnAddCommand("gsm_timescale", &CommandTimescale);
     ConVars::gsm_color_r = Utils::RegisterConVar("gsm_color_r", "0", FCVAR_CLIENTDLL);
     ConVars::gsm_color_g = Utils::RegisterConVar("gsm_color_g", "220", FCVAR_CLIENTDLL);
     ConVars::gsm_color_b = Utils::RegisterConVar("gsm_color_b", "220", FCVAR_CLIENTDLL);

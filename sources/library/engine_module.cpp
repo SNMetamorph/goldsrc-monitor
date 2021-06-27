@@ -15,9 +15,15 @@ bool CEngineModule::FindHandle()
     if (!m_hModule)
     {
         m_hModule = GetModuleHandle("sw.dll");
-        m_isSoftwareRenderer = true;
-        if (!m_hModule)
-            m_hModule = GetModuleHandle("swds.dll");
+        if (m_hModule) 
+        {
+            m_isSoftwareRenderer = true;
+        }
+        else 
+        {
+            m_isXashEngine = true;
+            m_hModule = GetModuleHandle("xash.dll");
+        }
     }
     return (m_hModule != NULL) && SetupModuleInfo();
 }

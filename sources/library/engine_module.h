@@ -9,6 +9,7 @@ public:
     static CEngineModule& GetInstance();
 
     bool FindHandle();
+    inline bool IsXashEngine() const        { return m_isXashEngine; }
     inline bool IsSoftwareRenderer() const  { return m_isSoftwareRenderer; };
     inline HMODULE GetHandle() const        { return m_hModule; };
     inline uint8_t* GetAddress() const      { return m_pAddress; };
@@ -20,10 +21,10 @@ private:
     CEngineModule& operator=(const CEngineModule&) = delete;
     bool SetupModuleInfo();
 
-    size_t m_iSize;
+    size_t m_iSize = 0;
     HMODULE m_hModule = NULL;
-    bool m_isSoftwareRenderer = false;
     uint8_t *m_pAddress = nullptr;
+    bool m_isXashEngine = false;
+    bool m_isSoftwareRenderer = false;
 };
-
 extern CEngineModule& g_EngineModule;

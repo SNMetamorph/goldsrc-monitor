@@ -45,8 +45,12 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
         moduleAddr,
         moduleEndAddr
     );
-    if (!pfnPrecacheModel)
-        EXCEPT("PrecacheModel() address not found");
+
+    if (!pfnPrecacheModel) 
+    {
+        // PrecacheModel() address not found
+        return false;
+    }
 
     scanStartAddr = moduleAddr;
     while (true)
@@ -56,8 +60,11 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
             moduleEndAddr,
             (uint32_t)pfnPrecacheModel
         );
-        if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
-            EXCEPT("valid pointer to PrecacheModel() not found");
+        if (!coincidenceAddr || scanStartAddr >= moduleEndAddr) 
+        {
+            // valid pointer to PrecacheModel() not found
+            return false;
+        }
         else
             scanStartAddr = coincidenceAddr + sizeof(uint32_t);
 
