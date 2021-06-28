@@ -31,9 +31,9 @@ private:
     ~CApplication() {};
 
     void HandleChangelevel();
-    void FindTimescaleConVar(const moduleinfo_t &engineLib);
+    void FindTimescaleConVar(const ModuleInfo &engineLib);
     void PrintTitleText();
-    void SetupConVars(moduleinfo_t &engineLib);
+    void SetupConVars(ModuleInfo &engineLib);
     void AssignDisplayMode();
     void UpdateScreenInfo();
 

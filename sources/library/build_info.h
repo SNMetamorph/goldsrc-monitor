@@ -1,6 +1,6 @@
 #pragma once
 #include "build_info_entry.h"
-#include "moduleinfo.h"
+#include "module_info.h"
 #include "memory_pattern.h"
 #include <vector>
 #include "rapidjson/rapidjson.h"
@@ -9,7 +9,7 @@
 class CBuildInfo
 {
 public:
-    void Initialize(const moduleinfo_t &engineModule);
+    void Initialize(const ModuleInfo &engineModule);
     void *FindFunctionAddress(FunctionType funcType, void *startAddr, void *endAddr = nullptr) const;
     inline const CBuildInfoEntry &GetInfoEntry() const {
         return m_InfoEntries[m_iActualEntryIndex];
@@ -23,8 +23,8 @@ private:
     bool LoadBuildInfoFile(std::vector<uint8_t> &fileContents);
     void ParseBuildInfo(std::vector<uint8_t> &fileContents);
     void ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rapidjson::Value &jsonObject);
-    bool ApproxBuildNumber(const moduleinfo_t &engineModule);
-    bool FindBuildNumberFunc(const moduleinfo_t &engineModule);
+    bool ApproxBuildNumber(const ModuleInfo &engineModule);
+    bool FindBuildNumberFunc(const ModuleInfo &engineModule);
     int FindActualInfoEntry();
 
     int m_iBuildNumber = -1;

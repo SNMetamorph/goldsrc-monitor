@@ -1,5 +1,5 @@
 #pragma once
-#include "moduleinfo.h"
+#include "module_info.h"
 #include <Windows.h>
 #include <vector>
 #include <string>
@@ -12,7 +12,6 @@ namespace Utils
     bool FindLibraryPath(const std::wstring &libName, std::wstring &libPath);
     int GetThreadExitCode(HANDLE threadHandle);
     size_t GetFunctionOffset(HMODULE moduleHandle, const char *funcName);
-    bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo);
     void GetProcessWindowList(DWORD processID, std::vector<HWND> &windowList);
 }
 

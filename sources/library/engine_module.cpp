@@ -1,5 +1,4 @@
 #include "engine_module.h"
-#include "utils.h"
 
 CEngineModule& g_EngineModule = CEngineModule::GetInstance();
 
@@ -32,11 +31,7 @@ bool CEngineModule::SetupModuleInfo()
 {
     if (m_hModule)
     {
-        moduleinfo_t moduleInfo;
-        if (Utils::GetModuleInfo(GetCurrentProcess(), m_hModule, moduleInfo))
-        {
-            m_iSize = moduleInfo.imageSize;
-            m_pAddress = moduleInfo.baseAddr;
+        if (Utils::GetModuleInfo(GetCurrentProcess(), m_hModule, m_ModuleInfo)) {
             return true;
         }
     }

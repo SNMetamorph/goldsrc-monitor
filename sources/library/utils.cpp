@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "moduleinfo.h"
+#include "module_info.h"
 #include "client_module.h"
 #include "studio.h"
 #include "application.h"
@@ -113,18 +113,6 @@ HMODULE Utils::FindModuleByExport(HANDLE procHandle, const char *exportName)
         }
     }
     return NULL;
-}
-
-bool Utils::GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
-{
-    MODULEINFO minfo;
-    if (!GetModuleInformation(procHandle, moduleHandle, &minfo, sizeof(minfo)))
-        return false;
-
-    moduleInfo.baseAddr = (uint8_t*)minfo.lpBaseOfDll;
-    moduleInfo.imageSize = minfo.SizeOfImage;
-    moduleInfo.entryPointAddr = (uint8_t*)minfo.EntryPoint;
-    return true;
 }
 
 int Utils::GetStringWidth(const char *str)
@@ -257,56 +245,34 @@ void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, con
 
     if (drawFaces)
     {
+        const int faceIndices[] = {
+            7, 2, 1, 0, // 1 face
+            0, 5, 6, 7, // 2 face
+            5, 4, 3, 6, // 3 face
+            2, 3, 4, 1, // 4 face
+            7, 6, 3, 2, // 5 face
+            1, 4, 5, 0  // 6 face
+        };
         glBegin(GL_QUADS);
         glColor4f(colorR, colorG, colorB, 0.3f);
-        glVertex3fv(boxVertices[7]); // 1
-        glVertex3fv(boxVertices[2]);
-        glVertex3fv(boxVertices[1]);
-        glVertex3fv(boxVertices[0]);
-        glVertex3fv(boxVertices[0]); // 2
-        glVertex3fv(boxVertices[5]);
-        glVertex3fv(boxVertices[6]);
-        glVertex3fv(boxVertices[7]);
-        glVertex3fv(boxVertices[5]); // 3
-        glVertex3fv(boxVertices[4]);
-        glVertex3fv(boxVertices[3]);
-        glVertex3fv(boxVertices[6]);
-        glVertex3fv(boxVertices[2]); // 4
-        glVertex3fv(boxVertices[3]);
-        glVertex3fv(boxVertices[4]);
-        glVertex3fv(boxVertices[1]);
-        glVertex3fv(boxVertices[7]); // 5
-        glVertex3fv(boxVertices[6]);
-        glVertex3fv(boxVertices[3]);
-        glVertex3fv(boxVertices[2]);
-        glVertex3fv(boxVertices[1]); // 6
-        glVertex3fv(boxVertices[4]);
-        glVertex3fv(boxVertices[5]);
-        glVertex3fv(boxVertices[0]);
+        for (int i = 0; i < sizeof(faceIndices) / sizeof(faceIndices[0]); ++i) {
+            glVertex3fv(boxVertices[faceIndices[i]]);
+        }
         glEnd();
     }
     
     if (drawEdges)
     {
+        const int edgeIndices[] = {
+            0, 1, 2, 3, 4, 5, 6, 7,
+            0, 7, 2, 1, 4, 3, 6, 5
+        };
         glDisable(GL_DEPTH_TEST);
         glBegin(GL_LINE_LOOP);
         glColor4f(colorR, colorG, colorB, 1.0f);
-        glVertex3fv(boxVertices[0]); // 1
-        glVertex3fv(boxVertices[1]); // 2
-        glVertex3fv(boxVertices[2]); // 3
-        glVertex3fv(boxVertices[3]); // 4
-        glVertex3fv(boxVertices[4]); // 5
-        glVertex3fv(boxVertices[5]); // 6
-        glVertex3fv(boxVertices[6]); // 7
-        glVertex3fv(boxVertices[7]); // 8
-        glVertex3fv(boxVertices[0]); // 1
-        glVertex3fv(boxVertices[7]); // 8
-        glVertex3fv(boxVertices[2]); // 3
-        glVertex3fv(boxVertices[1]); // 2
-        glVertex3fv(boxVertices[4]); // 5
-        glVertex3fv(boxVertices[3]); // 4
-        glVertex3fv(boxVertices[6]); // 7
-        glVertex3fv(boxVertices[5]); // 6
+        for (int i = 0; i < sizeof(edgeIndices) / sizeof(edgeIndices[0]); ++i) {
+            glVertex3fv(boxVertices[edgeIndices[i]]);
+        }
         glEnd();
         glEnable(GL_DEPTH_TEST);
     }

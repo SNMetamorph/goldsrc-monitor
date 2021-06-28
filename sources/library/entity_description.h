@@ -9,9 +9,9 @@ public:
     CEntityDescription();
     void AddKeyValue(const std::string &key, const std::string &value);
     void Initialize();
-    void GetKeyValueString(int index, std::string &buffer) const;
+    void GetPropertiesString(int index, std::string &buffer) const;
 
-    inline int GetKeyValueCount() const { return m_EntityData.size(); };
+    inline int GetPropertiesCount() const { return m_EntityProps.size(); };
     inline const std::string& GetClassname() const  { return m_szClassname; }
     inline const std::string& GetTargetname() const { return m_szTargetname; }
     inline const std::string& GetModelName() const  { return m_szModelName; }
@@ -33,5 +33,5 @@ private:
     vec3_t m_vecOrigin;
     vec3_t m_vecBboxMins;
     vec3_t m_vecBboxMaxs;
-    std::map<std::string, std::string> m_EntityData;
+    std::map<std::string, std::string> m_EntityProps;
 };

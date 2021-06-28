@@ -215,7 +215,7 @@ void CApplication::InjectLibrary(HANDLE procHandle)
     wchar_t         *pathStrRemote;
     HMODULE         k32LocalHandle;
     HMODULE			k32RemoteHandle;
-    moduleinfo_t	k32Info;
+    ModuleInfo	k32Info;
     HANDLE          threadHandle;
     size_t			funcOffset;
     uint8_t         *funcRemote;
@@ -245,7 +245,7 @@ void CApplication::InjectLibrary(HANDLE procHandle)
     // creating thread in game process and invoking LoadLibrary()
     std::cout << "Starting injection thread in remote process..." << std::endl;
     funcOffset = Utils::GetFunctionOffset(k32LocalHandle, "LoadLibraryW");
-    funcRemote = k32Info.baseAddr + funcOffset;
+    funcRemote = k32Info.baseAddress + funcOffset;
     threadHandle = CreateRemoteThread(procHandle,
         0, 0,
         (LPTHREAD_START_ROUTINE)funcRemote, pathStrRemote,

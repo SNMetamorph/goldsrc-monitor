@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
 	"../../sources/exception.cpp"
 	"../../sources/loader/main.cpp"
 	"../../sources/loader/utils.cpp"
+	"../../sources/module_info.cpp"
 	"../../sources/loader/application.cpp"
 	"../../sources/loader/loader.rc"
 )

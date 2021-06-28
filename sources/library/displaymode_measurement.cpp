@@ -224,9 +224,14 @@ void CModeMeasurement::Render2D(int screenWidth, int screenHeight, CStringStack 
     screenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
     screenText.PushPrintf("Snap Mode: %s", snapModeName);
 
-    Utils::DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, screenText);
     if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f)
         DrawVisualization(screenWidth, screenHeight);
+
+    Utils::DrawStringStack(
+        static_cast<int>(ConVars::gsm_margin_right->value),
+        static_cast<int>(ConVars::gsm_margin_up->value),
+        screenText
+    );
 }
 
 const char *CModeMeasurement::GetSnapModeName() const

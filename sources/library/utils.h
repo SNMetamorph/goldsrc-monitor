@@ -1,5 +1,5 @@
 #pragma once
-#include "moduleinfo.h"
+#include "module_info.h"
 #include "string_stack.h"
 #include "memory_pattern.h"
 #include "stdafx.h"
@@ -16,7 +16,6 @@ namespace Utils
     bool GetLibraryDirectory(std::wstring &workingDir);
     void GetGameProcessName(std::string &processName);
     HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName);
-    bool GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo);
     void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t value);
     void *FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern);
     float GetCurrentSysTime();

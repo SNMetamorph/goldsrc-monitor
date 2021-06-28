@@ -85,18 +85,27 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
         if (isDescFound)
         {
-            std::string entityProp;
+            std::string propsString;
             screenText.Push("Entity Properties");
-            for (int i = 0; i < entityDesc.GetKeyValueCount(); ++i)
+            for (int i = 0; i < entityDesc.GetPropertiesCount(); ++i)
             {
-                entityDesc.GetKeyValueString(i, entityProp);
-                screenText.PushPrintf("    %s", entityProp.c_str());
+                entityDesc.GetPropertiesString(i, propsString);
+                if (propsString.length() > 0) {
+                    screenText.PushPrintf("    %s", propsString.c_str());
+                }
+                else {
+                    screenText.Push("No entity properties");
+                }
             }
         }
         else
-            screenText.Push("Properties info not found");
+            screenText.Push("Entity properties not found");
     }
-    Utils::DrawStringStack(ConVars::gsm_margin_right->value, ConVars::gsm_margin_up->value, screenText);
+    Utils::DrawStringStack(
+        static_cast<int>(ConVars::gsm_margin_right->value), 
+        static_cast<int>(ConVars::gsm_margin_up->value), 
+        screenText
+    );
 }
 
 void CModeEntityReport::Render3D()

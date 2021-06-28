@@ -98,22 +98,6 @@ size_t Utils::GetFunctionOffset(HMODULE moduleHandle, const char *funcName)
     return (size_t)(funcAddr - (uint8_t*)moduleHandle);
 }
 
-bool Utils::GetModuleInfo(HANDLE procHandle, HMODULE moduleHandle, moduleinfo_t &moduleInfo)
-{
-    MODULEINFO targetInfo;
-    const int dataSize = sizeof(targetInfo);
-
-    if (GetModuleInformation(procHandle, moduleHandle, &targetInfo, dataSize))
-    {
-        moduleInfo.baseAddr = (uint8_t*)targetInfo.lpBaseOfDll;
-        moduleInfo.imageSize = targetInfo.SizeOfImage;
-        moduleInfo.entryPointAddr = (uint8_t*)targetInfo.EntryPoint;
-        return true;
-    }
-    else
-        return false;
-}
-
 void Utils::GetProcessWindowList(DWORD processID, std::vector<HWND> &windowList)
 {
     HWND window = NULL;

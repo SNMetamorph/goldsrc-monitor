@@ -10,7 +10,7 @@ CEntityDescription::CEntityDescription()
 
 void CEntityDescription::AddKeyValue(const std::string &key, const std::string &value)
 {
-    m_EntityData.insert({ key, value });
+    m_EntityProps.insert({ key, value });
 }
 
 void CEntityDescription::Initialize()
@@ -19,12 +19,12 @@ void CEntityDescription::Initialize()
     EstimateBoundingBox();
 }
 
-void CEntityDescription::GetKeyValueString(int index, std::string &buffer) const
+void CEntityDescription::GetPropertiesString(int index, std::string &buffer) const
 {
     int currIndex = 0;
     buffer.clear();
     buffer.reserve(256);
-    for (auto it = m_EntityData.begin(); it != m_EntityData.end(); ++it)
+    for (auto it = m_EntityProps.begin(); it != m_EntityProps.end(); ++it)
     {
         const std::string &key = it->first;
         const std::string &value = it->second;
@@ -92,7 +92,7 @@ void CEntityDescription::EstimateBoundingBox()
 
 void CEntityDescription::ParseEntityData()
 {
-    for (auto it = m_EntityData.begin(); it != m_EntityData.end();)
+    for (auto it = m_EntityProps.begin(); it != m_EntityProps.end();)
     {
         const std::string &key = it->first;
         const std::string &value = it->second;
@@ -118,7 +118,7 @@ void CEntityDescription::ParseEntityData()
             continue; // keep unhandled parameters
         };
         // erase parameters which already parsed
-        it = m_EntityData.erase(it);
+        it = m_EntityProps.erase(it);
     }
 }
 

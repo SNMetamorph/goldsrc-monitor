@@ -25,7 +25,7 @@ void CApplication::Run()
     if (!g_ClientModule.FindHandle())
         EXCEPT("failed to get client module handle");
 
-    moduleinfo_t engineDLL;
+    ModuleInfo engineDLL;
     Utils::GetModuleInfo(GetCurrentProcess(), g_EngineModule.GetHandle(), engineDLL);
     m_BuildInfo.Initialize(engineDLL);
 
@@ -53,7 +53,7 @@ void CApplication::HandleChangelevel()
     m_ModeAngleTracking.HandleChangelevel();
 }
 
-void CApplication::FindTimescaleConVar(const moduleinfo_t &engineLib)
+void CApplication::FindTimescaleConVar(const ModuleInfo &engineLib)
 {
     uint8_t *probeAddr;
     uint8_t *stringAddr;
@@ -62,7 +62,7 @@ void CApplication::FindTimescaleConVar(const moduleinfo_t &engineLib)
     uint8_t *moduleEndAddr;
     CMemoryPattern scanPattern("sys_timescale", 14);
 
-    moduleStartAddr = engineLib.baseAddr;
+    moduleStartAddr = engineLib.baseAddress;
     moduleEndAddr = moduleStartAddr + engineLib.imageSize;
     scanStartAddr = moduleStartAddr;
     stringAddr = (uint8_t *)Utils::FindPatternAddress(
@@ -145,7 +145,7 @@ static void CommandTimescale()
     }
 }
 
-void CApplication::SetupConVars(moduleinfo_t &engineLib)
+void CApplication::SetupConVars(ModuleInfo &engineLib)
 {
     FindTimescaleConVar(engineLib);
     g_pClientEngfuncs->pfnAddCommand("gsm_timescale", &CommandTimescale);

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <filesystem>
 
-void CBuildInfo::Initialize(const moduleinfo_t &engineModule)
+void CBuildInfo::Initialize(const ModuleInfo &engineModule)
 {
     std::vector<uint8_t> fileContents;
     if (LoadBuildInfoFile(fileContents)) {
@@ -220,10 +220,10 @@ void CBuildInfo::ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rapidjson
     }
 }
 
-bool CBuildInfo::ApproxBuildNumber(const moduleinfo_t &engineModule)
+bool CBuildInfo::ApproxBuildNumber(const ModuleInfo &engineModule)
 {
     CMemoryPattern datePattern("Jan", 4);
-    uint8_t *moduleStartAddr = engineModule.baseAddr;
+    uint8_t *moduleStartAddr = engineModule.baseAddress;
     uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
     uint8_t *scanStartAddr = moduleStartAddr;
     while (true)
@@ -253,9 +253,9 @@ bool CBuildInfo::ApproxBuildNumber(const moduleinfo_t &engineModule)
     }
 }
 
-bool CBuildInfo::FindBuildNumberFunc(const moduleinfo_t &engineModule)
+bool CBuildInfo::FindBuildNumberFunc(const ModuleInfo &engineModule)
 {
-    uint8_t *moduleStartAddr = engineModule.baseAddr;
+    uint8_t *moduleStartAddr = engineModule.baseAddress;
     uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
     for (size_t i = 0; i < m_BuildNumberSignatures.size(); ++i)
     {
