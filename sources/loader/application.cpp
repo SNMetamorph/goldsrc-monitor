@@ -4,7 +4,6 @@
 #include "app_version.h"
 #include <iostream>
 
-
 CApplication &CApplication::GetInstance()
 {
     static CApplication instance;
@@ -156,6 +155,7 @@ HWND CApplication::FindGameWindow(HANDLE procHandle)
 HANDLE CApplication::OpenGameProcess()
 {
     HANDLE processHandle;
+    std::vector<int> processIds;
     const DWORD accessFlags = (
         PROCESS_VM_READ |
         PROCESS_VM_WRITE |
@@ -166,9 +166,29 @@ HANDLE CApplication::OpenGameProcess()
 
     while (true)
     {
-        int processID = Utils::FindProcessID(m_szProcessName.c_str());
-        if (processID > 0)
+        Utils::FindProcessByName(m_szProcessName.c_str(), processIds);
+        if (processIds.size() > 0)
         {
+            int processID = processIds[0];
+            if (processIds.size() > 1)
+            {
+                int processNumber;
+                std::wcout << L"There are several processes with same name." << std::endl;
+                for (size_t i = 0; i < processIds.size(); ++i) {
+                    std::wcout << L"(" << i + 1 << L") " << m_szProcessName << " (PID: " << processIds[i] << ")" << std::endl;
+                }
+                std::wcout << L"Choose the required process: " << std::endl;
+                while (true) // repeat until valid value arrives
+                {
+                    std::cin >> processNumber;
+                    if (processNumber > 0 && processNumber <= processIds.size())
+                    {
+                        processID = processIds[processNumber - 1];
+                        break;
+                    }
+                }
+            }
+
             processHandle = OpenProcess(accessFlags, false, processID);
             if (processHandle)
                 return processHandle;

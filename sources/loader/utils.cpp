@@ -3,13 +3,12 @@
 #include <Psapi.h>
 #include <shlwapi.h>
 
-int Utils::FindProcessID(const wchar_t *processName)
+bool Utils::FindProcessByName(const wchar_t *processName, std::vector<int> &processIds)
 {
-    int             processID;
     HANDLE			processSnap;
     PROCESSENTRY32	processEntry;
 
-    processID = NULL;
+    processIds.clear();
     processEntry.dwSize = sizeof(processEntry);
     processSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
@@ -18,16 +17,14 @@ int Utils::FindProcessID(const wchar_t *processName)
         if (Process32First(processSnap, &processEntry))
         {
             do {
-                if (wcscmp(processName, processEntry.szExeFile) == 0)
-                {
-                    processID = processEntry.th32ProcessID;
-                    break;
+                if (wcscmp(processName, processEntry.szExeFile) == 0) {
+                    processIds.push_back(processEntry.th32ProcessID);
                 }
             } while (Process32Next(processSnap, &processEntry));
         }
         CloseHandle(processSnap);
     }
-    return processID;
+    return processIds.size() > 0;
 }
 
 HMODULE Utils::FindProcessModule(HANDLE procHandle, const wchar_t *moduleName)
