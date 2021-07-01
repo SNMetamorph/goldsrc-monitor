@@ -303,9 +303,8 @@ void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
     }
     else
     {
-        cl_entity_t *traceEntity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-        model_t *entityModel = g_pClientEngfuncs->hudGetModelByIndex(traceEntity->curstate.modelindex);
-        modelName = entityModel->name;
+        cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+        modelName = entity->model->name;
     }
 }
 
