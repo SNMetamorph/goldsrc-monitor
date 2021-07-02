@@ -453,8 +453,11 @@ vec3_t Utils::GetEntityVelocityApprox(int entityIndex, int approxStep)
         position_history_t &currState = entity->ph[currIndex & HISTORY_MASK];
         position_history_t &prevState = entity->ph[(currIndex - approxStep) & HISTORY_MASK];
         float timeDelta = currState.animtime - prevState.animtime;
-        vec3_t originDelta = currState.origin - prevState.origin;
-        return originDelta / timeDelta;
+        if (fabs(timeDelta) > 0.0f)
+        {
+            vec3_t originDelta = currState.origin - prevState.origin;
+            return originDelta / timeDelta; 
+        }
     }
     return vec3_t(0, 0, 0);
 }
