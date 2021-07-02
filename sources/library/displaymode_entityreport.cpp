@@ -36,7 +36,6 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
     {
         CEntityDescription entityDesc;
         cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
-        model_t *entityModel = entity->model;
         vec3_t entityVelocity = Utils::GetEntityVelocityApprox(m_iEntityIndex);
         bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc);
         const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
@@ -68,7 +67,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
                 screenText.PushPrintf("Targetname: %s", targetname.c_str()); 
         }
 
-        if (entityModel->type == mod_studio)
+        if (entity->model->type == mod_studio)
         {
             std::string modelName;
             Utils::GetEntityModelName(m_iEntityIndex, modelName);
@@ -85,17 +84,19 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
         if (isDescFound)
         {
-            std::string propsString;
-            screenText.Push("Entity Properties");
-            for (int i = 0; i < entityDesc.GetPropertiesCount(); ++i)
+            const int propsCount = entityDesc.GetPropertiesCount();
+            if (propsCount > 0)
             {
-                entityDesc.GetPropertiesString(i, propsString);
-                if (propsString.length() > 0) {
+                std::string propsString;
+                screenText.Push("Entity Properties");
+                for (int i = 0; i < propsCount; ++i)
+                {
+                    entityDesc.GetPropertiesString(i, propsString);
                     screenText.PushPrintf("    %s", propsString.c_str());
                 }
-                else {
-                    screenText.Push("No entity properties");
-                }
+            }
+            else {
+                screenText.Push("No entity properties");
             }
         }
         else
