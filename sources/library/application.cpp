@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "hooks.h"
 #include "cvars.h"
-#include "app_version.h"
+#include "app_info.h"
 #include "exception.h"
 #include "memory_pattern.h"
 #include "engine_module.h"
@@ -124,7 +124,7 @@ static void CommandTimescale()
     {
         if (g_pClientEngfuncs->Cmd_Argc() > 1)
         {
-            float argument = (float)atof(g_pClientEngfuncs->Cmd_Argv(1));
+            float argument = static_cast<float>(std::atof(g_pClientEngfuncs->Cmd_Argv(1)));
             if (argument > 0.f)
             {
                 ConVars::sys_timescale->value = argument;

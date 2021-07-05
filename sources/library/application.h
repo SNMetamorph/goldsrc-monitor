@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "hooks.h"
 #include "cvars.h"
-#include "app_version.h"
+#include "app_info.h"
 #include "exception.h"
 #include "build_info.h"
 #include "display_mode.h"

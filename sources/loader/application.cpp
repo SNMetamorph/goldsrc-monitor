@@ -1,7 +1,7 @@
 #include "application.h"
 #include "utils.h"
 #include "exception.h"
-#include "app_version.h"
+#include "app_info.h"
 #include <iostream>
 
 CApplication &CApplication::GetInstance()
@@ -172,7 +172,7 @@ HANDLE CApplication::OpenGameProcess()
             int processID = processIds[0];
             if (processIds.size() > 1)
             {
-                int processNumber;
+                size_t processNumber;
                 std::wcout << L"There are several processes with same name." << std::endl;
                 for (size_t i = 0; i < processIds.size(); ++i) {
                     std::wcout << L"(" << i + 1 << L") " << m_szProcessName << " (PID: " << processIds[i] << ")" << std::endl;
@@ -292,13 +292,14 @@ void CApplication::PrintTitleText()
     std::system("color 02");
     std::printf(
         "\n"
-        "  GoldSrc Monitor - utility for mapping/scripting/researching games on GoldSrc engine\n"
-        "  Version : %d.%d\n"
-        "  Link    : https://github.com/SNMetamorph/goldsrc-monitor\n"
+        "  %s - utility for mapping/scripting/researching games on GoldSrc engine\n"
+        "  Version  : %d.%d\n"
+        "  Compiled : %s\n"
+        "  Link     : %s\n"
         "\n"
         "  WARNING: This stuff is untested on VAC-secured\n"
         "  servers, therefore there is a risk to get VAC ban\n"
         "  while using it on VAC-secured servers.\n"
-        "\n", APP_VERSION_MAJOR, APP_VERSION_MINOR
+        "\n", APP_TITLE_STR, APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_BUILD_DATE, APP_GITHUB_LINK
     );
 }

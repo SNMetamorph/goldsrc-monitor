@@ -26,7 +26,7 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
                 ex.GetLineNumber(),
                 ex.GetDescription()
             );
-            MessageBox(NULL, ex.m_szMessageBuffer, "GoldSrc Monitor", MB_OK | MB_ICONWARNING);
+            MessageBox(NULL, ex.m_szMessageBuffer, APP_TITLE_STR, MB_OK | MB_ICONWARNING);
             return FALSE;
         }
     }

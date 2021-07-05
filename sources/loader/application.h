@@ -1,5 +1,5 @@
 #pragma once
-#include "app_version.h"
+#include "app_info.h"
 #include <stdint.h>
 #include <string>
 #include <Windows.h>
