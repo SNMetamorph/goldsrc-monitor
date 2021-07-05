@@ -16,7 +16,7 @@ private:
 
     void ParseParameters(int argc, wchar_t *argv[]);
     void StartMainLoop();
-    void ReportError(const char *msg);
+    void ReportError(const std::string &msg);
     bool IsLibraryInjected(HANDLE procHandle);
     bool IsGameLoaded(HWND windowHandle, int timeout);
     HWND FindGameWindow(HANDLE procHandle);

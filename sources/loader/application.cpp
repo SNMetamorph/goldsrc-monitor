@@ -110,7 +110,7 @@ void CApplication::StartMainLoop()
     }
 }
 
-void CApplication::ReportError(const char *msg)
+void CApplication::ReportError(const std::string &msg)
 {
     std::cout << "ERROR: " << msg << std::endl;
     std::cout << "Press Enter to try again" << std::endl;

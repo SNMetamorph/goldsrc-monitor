@@ -1,30 +1,29 @@
 #pragma once
+#include <string>
 
-// Universal macros
-#define EXCEPT(message) (throw CException(message, __FUNCTION__, __FILE__, __LINE__))
+#define EXCEPT(msg) (throw CException((msg), __FUNCTION__, __FILE__, __LINE__))
 
 class CException
 {
 public:
     CException(
-        const char *description,
+        std::string description,
         const char *funcName,
         const char *sourceFilePath,
         int lineNumber
     );
 
-    const char *GetFormattedMessage();
-    const char *GetDescription() const;
-    const char *GetFunctionName() const;
+    const std::string &CException::GetFormattedMessage();
+    const std::string &GetDescription() const;
+    const std::string &GetFunctionName() const;
     const char *GetFileName() const;
-    int			GetLineNumber() const;
-
-    char m_szMessageBuffer[256];
+    int GetLineNumber() const;
 
 private:
     int m_iLineNumber;
-    const char *m_szDescription;
-    const char *m_szFuncName;
-    const char *m_szFilePath;
+    std::string m_szDescription;
+    std::string m_szFuncName;
+    std::string m_szFilePath;
+    std::string m_szMessage;
 };
 

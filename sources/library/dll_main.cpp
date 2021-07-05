@@ -5,7 +5,6 @@
 
 #include <Windows.h>
 #include <stdint.h>
-#include <cstdio>
 
 BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
 {
@@ -15,18 +14,19 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
         {
             g_Application.Run();
         }
-        catch (CException &ex)
+        catch (const CException &ex)
         {
-            snprintf(
-                ex.m_szMessageBuffer,
-                sizeof(ex.m_szMessageBuffer),
+            std::string errorMsg(256, '\0');
+            std::snprintf(
+                errorMsg.data(),
+                errorMsg.capacity(),
                 "ERROR [%s:%d]: %s\nReport about error to the project page.\n"
                 "Link: github.com/SNMetamorph/goldsrc-monitor/issues/1",
                 ex.GetFileName(),
                 ex.GetLineNumber(),
-                ex.GetDescription()
+                ex.GetDescription().c_str()
             );
-            MessageBox(NULL, ex.m_szMessageBuffer, APP_TITLE_STR, MB_OK | MB_ICONWARNING);
+            MessageBox(NULL, errorMsg.c_str(), APP_TITLE_STR, MB_OK | MB_ICONWARNING);
             return FALSE;
         }
     }
