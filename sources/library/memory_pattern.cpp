@@ -1,4 +1,6 @@
 #include "memory_pattern.h"
+#include "exception.h"
+#include <exception>
 #include <sstream>
 
 CMemoryPattern::CMemoryPattern(const std::string &pattern)
@@ -57,19 +59,25 @@ void CMemoryPattern::InitFromBytes(uint8_t *pattern, int byteCount, uint8_t wild
 void CMemoryPattern::InitFromString(const std::string &pattern)
 {
     std::stringstream pattern_stream(pattern);
-    std::vector<std::string> tokens( 
-        std::istream_iterator<std::string, char>(pattern_stream), 
+    std::vector<std::string> tokens(
+        std::istream_iterator<std::string, char>(pattern_stream),
         {}
-    ); 
+    );
     Reset();
-    for (const std::string &token : tokens) 
+    try {
+        for (const std::string &token : tokens)
+        {
+            if (token.compare("??") != 0) {
+                AddByte(static_cast<uint8_t>(std::stoul(token, 0, 16)));
+            }
+            else {
+                AddByte(0x0, false);
+            }
+        }
+    }
+    catch (std::exception &ex)
     {
-        if (token.compare("??") != 0) {
-            AddByte(static_cast<uint8_t>(std::stoul(token, 0, 16)));
-        }
-        else {
-            AddByte(0x0, false);
-        }
+        EXCEPT(std::string("memory pattern parsing error: ") + ex.what());
     }
 }
 
