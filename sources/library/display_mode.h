@@ -1,7 +1,7 @@
 #pragma once
 #include "string_stack.h"
 
-enum display_mode_t
+enum DisplayModeIndex
 {
     DISPLAYMODE_FULL,
     DISPLAYMODE_SPEEDOMETER,
@@ -18,4 +18,5 @@ public:
     virtual void Render3D() = 0;
     virtual bool KeyInput(int isKeyDown, int keyNum, const char *bindName) = 0;
     virtual void HandleChangelevel() = 0;
+    virtual DisplayModeIndex GetModeIndex() = 0;
 };

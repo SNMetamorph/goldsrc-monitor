@@ -34,8 +34,8 @@ void CApplication::Run()
     g_ServerModule.FindEngfuncs(m_BuildInfo);
     g_ServerModule.FindHandle();
     
-    SetupConVars(engineDLL);
-    AssignDisplayMode();
+    InitializeConVars(engineDLL);
+    SetCurrentDisplayMode();
     PrintTitleText();
     m_Hooks.Apply();
 
@@ -43,14 +43,27 @@ void CApplication::Run()
     g_pClientEngfuncs->pfnClientCmd("exec gsm_config.cfg");
 }
 
+void CApplication::InitializeDisplayModes()
+{
+    static CModeFull modeFull;
+    static CModeSpeedometer modeSpeedometer;
+    static CModeEntityReport modeEntityReport;
+    static CModeMeasurement modeMeasurement;
+    static CModeAngleTracking modeAngleTracking;
+
+    m_pDisplayModes.clear();
+    m_pDisplayModes.push_back(&modeFull);
+    m_pDisplayModes.push_back(&modeSpeedometer);
+    m_pDisplayModes.push_back(&modeEntityReport);
+    m_pDisplayModes.push_back(&modeMeasurement);
+    m_pDisplayModes.push_back(&modeAngleTracking);
+}
+
 void CApplication::HandleChangelevel()
 {
-    // all display modes should be handled here
-    m_ModeFull.HandleChangelevel();
-    m_ModeSpeedometer.HandleChangelevel();
-    m_ModeEntityReport.HandleChangelevel();
-    m_ModeMeasurement.HandleChangelevel();
-    m_ModeAngleTracking.HandleChangelevel();
+    for (IDisplayMode *mode : m_pDisplayModes) {
+        mode->HandleChangelevel();
+    }
 }
 
 void CApplication::FindTimescaleConVar(const ModuleInfo &engineLib)
@@ -154,7 +167,7 @@ static void CommandTimescale()
     }
 }
 
-void CApplication::SetupConVars(ModuleInfo &engineLib)
+void CApplication::InitializeConVars(ModuleInfo &engineLib)
 {
     FindTimescaleConVar(engineLib);
     g_pClientEngfuncs->pfnAddCommand("gsm_timescale", &CommandTimescale);
@@ -168,27 +181,18 @@ void CApplication::SetupConVars(ModuleInfo &engineLib)
     ConVars::gsm_thirdperson_dist = Utils::RegisterConVar("gsm_thirdperson_dist", "64", FCVAR_CLIENTDLL);
 }
 
-void CApplication::AssignDisplayMode()
+void CApplication::SetCurrentDisplayMode()
 {
-    int displayMode = (int)ConVars::gsm_mode->value;
-    switch (displayMode)
+    DisplayModeIndex displayMode = static_cast<DisplayModeIndex>(ConVars::gsm_mode->value);
+    for (IDisplayMode *mode : m_pDisplayModes) 
     {
-    case DISPLAYMODE_SPEEDOMETER:
-        m_pDisplayMode = &m_ModeSpeedometer;
-        break;
-    case DISPLAYMODE_ENTITYREPORT:
-        m_pDisplayMode = &m_ModeEntityReport;
-        break;
-    case DISPLAYMODE_MEASUREMENT:
-        m_pDisplayMode = &m_ModeMeasurement;
-        break;
-    case DISPLAYMODE_ANGLETRACKING:
-        m_pDisplayMode = &m_ModeAngleTracking;
-        break;
-    default:
-        m_pDisplayMode = &m_ModeFull;
-        break;
+        if (mode->GetModeIndex() == displayMode) 
+        {
+            m_pCurrentDisplayMode = mode;
+            return;
+        }
     }
+    m_pCurrentDisplayMode = m_pDisplayModes[0];
 }
 
 void CApplication::UpdateScreenInfo()
@@ -199,15 +203,15 @@ void CApplication::UpdateScreenInfo()
 
 void CApplication::DisplayModeRender2D()
 {
-    AssignDisplayMode();
+    SetCurrentDisplayMode();
     UpdateScreenInfo();
-    m_pDisplayMode->Render2D(m_ScreenInfo.iWidth, m_ScreenInfo.iHeight, m_StringStack);
+    m_pCurrentDisplayMode->Render2D(m_ScreenInfo.iWidth, m_ScreenInfo.iHeight, m_StringStack);
 }
 
 void CApplication::DisplayModeRender3D()
 {
-    AssignDisplayMode();
-    m_pDisplayMode->Render3D();
+    SetCurrentDisplayMode();
+    m_pCurrentDisplayMode->Render3D();
 }
 
 void CApplication::CheckForChangelevel(float currTime)
@@ -220,5 +224,5 @@ void CApplication::CheckForChangelevel(float currTime)
 
 bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)
 {
-    return m_pDisplayMode->KeyInput(keyDown, keyCode, bindName);
+    return m_pCurrentDisplayMode->KeyInput(keyDown, keyCode, bindName);
 }

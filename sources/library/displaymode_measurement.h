@@ -23,6 +23,7 @@ public:
     void Render3D() override {};
     bool KeyInput(int isKeyDown, int keyCode, const char *) override;
     void HandleChangelevel() override;
+    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_MEASUREMENT; };
 
 private:
     const vec3_t &GetPointOriginA() const;

@@ -11,6 +11,7 @@ public:
     void Render3D() override {};
     bool KeyInput(int, int, const char *) override { return true; };
     void HandleChangelevel() override {};
+    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_SPEEDOMETER; };
 
 private:
     void DrawVelocityBar(int scrWidth, int scrHeight, float velocity);

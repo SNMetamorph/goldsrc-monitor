@@ -7,6 +7,7 @@
 #include "build_info.h"
 #include "display_mode.h"
 #include "string_stack.h"
+#include <vector>
 #include <stdint.h>
 
 #include "displaymode_full.h"
@@ -27,25 +28,24 @@ public:
     inline const SCREENINFO& GetScreenInfo() const { return m_ScreenInfo; };
 
 private:
-    CApplication() : m_StringStack(128) {};
+    CApplication() {
+        InitializeDisplayModes();
+    };
     ~CApplication() {};
 
+    void InitializeDisplayModes();
     void HandleChangelevel();
     void FindTimescaleConVar(const ModuleInfo &engineLib);
     void PrintTitleText();
-    void SetupConVars(ModuleInfo &engineLib);
-    void AssignDisplayMode();
+    void InitializeConVars(ModuleInfo &engineLib);
+    void SetCurrentDisplayMode();
     void UpdateScreenInfo();
 
     CHooks m_Hooks;
     CBuildInfo m_BuildInfo;
-    SCREENINFO m_ScreenInfo;
-    CStringStack m_StringStack;
-    IDisplayMode *m_pDisplayMode;
-    CModeFull m_ModeFull;
-    CModeSpeedometer m_ModeSpeedometer;
-    CModeEntityReport m_ModeEntityReport;
-    CModeMeasurement m_ModeMeasurement;
-    CModeAngleTracking m_ModeAngleTracking;
+    SCREENINFO m_ScreenInfo = { 0 };
+    CStringStack m_StringStack = CStringStack(128);
+    IDisplayMode *m_pCurrentDisplayMode = nullptr;
+    std::vector<IDisplayMode *> m_pDisplayModes;
 };
 extern CApplication &g_Application;
