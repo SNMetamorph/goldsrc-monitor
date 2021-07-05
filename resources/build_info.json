@@ -33,9 +33,23 @@
             "sv_engfuncs_offset": 1925512,
             "signatures": {
                 "SPR_Load": "53 8B 5C 24 08 55 56 57 85 DB 0F 84 ?? ?? ?? ?? A1",
-                "SPR_Frames": "8B 44 24 04 83 C0 FF 78 1B",
-                "PrecacheModel": "57 8B 7C 24 08 85 FF 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 33 C0 5F C3 8A 07 88 44 24 08 3C 20 7F ?? 57",
-                "PrecacheSound": "57 8B 7C 24 08 85 FF 75 ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 C4 04 33 C0 5F C3 8A 07 3C 20 7F ?? 57 68"
+                "SPR_Frames": "8B 44 24 04 83 C0 FF 78 1B"
+            }
+        },
+        {
+            "process_name": "bdef.exe",
+            "description": "Base Defence (build 7561, 09:10:05 Jul  7 2017)",
+            "signatures": {
+                "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45",
+                "SPR_Frames": "55 8B EC 8D 45 ?? 50 FF 15 ?? ?? ?? ?? 8B 4D"
+            }
+        },
+        {
+            "process_name": "cof.exe",
+            "description": "Cry Of Fear (build 5936, 18:03:54 Apr 21 2013)",
+            "signatures": {
+                "SPR_Load": "55 8B EC 51 8D 45 08 50 FF 15 ?? ?? ?? ?? 83 C4 04 83",
+                "SPR_Frames": "55 8B EC 51 8D 45 ?? 50 FF 15 ?? ?? ?? ?? 83 C4 ?? 8B 4D ?? 51 E8"
             }
         }
     ]
