@@ -102,13 +102,22 @@ void CApplication::PrintTitleText()
 {
     const int verMajor = APP_VERSION_MAJOR;
     const int verMinor = APP_VERSION_MINOR;
-
-    g_pClientEngfuncs->Con_Printf(" \n");
-    g_pClientEngfuncs->Con_Printf("   GoldScr Monitor | version %d.%d | by SNMetamorph  \n",
-        verMajor, verMinor);
-    g_pClientEngfuncs->Con_Printf("         Debugging tool for GoldSrc-based games      \n");
-    g_pClientEngfuncs->Con_Printf("   Use with caution, VAC can be react on this stuff  \n");
-    g_pClientEngfuncs->Con_Printf(" \n");
+    g_pClientEngfuncs->Con_Printf(
+        " \n"
+        "   %s - utility for mapping/scripting/researching games on GoldSrc engine\n"
+        "   Version : %d.%d\n"
+        "   Compiled : %s\n"
+        "   Link : %s\n"
+        " \n"
+        "  WARNING: This stuff is untested on VAC-secured\n"
+        "  servers, therefore there is a risk to get VAC ban\n"
+        "  while using it on VAC-secured servers.\n"
+        " \n", 
+        APP_TITLE_STR, 
+        verMajor, verMinor, 
+        APP_BUILD_DATE, 
+        APP_GITHUB_LINK
+    );
     g_pClientEngfuncs->pfnPlaySoundByName("buttons/blip2.wav", 0.6f);
 }
 
