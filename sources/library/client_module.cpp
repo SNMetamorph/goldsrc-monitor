@@ -23,29 +23,36 @@ bool CClientModule::FindHandle()
 
 bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
 {
-    void *pfnSPR_Load;
-    void *pfnSPR_Frames;
     uint8_t *probeAddr;
     uint8_t *coincidenceAddr;
     uint8_t *scanStartAddr;
     uint8_t *moduleEndAddr;
-    uint8_t *moduleAddr = g_EngineModule.GetAddress();
-    size_t moduleSize = g_EngineModule.GetSize();
-
+    uint8_t *moduleAddr;
     const CBuildInfoEntry &buildInfoEntry = buildInfo.GetInfoEntry();
+
+    moduleAddr = g_EngineModule.GetAddress();
+    scanStartAddr = moduleAddr;
+    moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+
     if (buildInfoEntry.HasClientEngfuncsOffset()) {
         g_pClientEngfuncs = (cl_enginefunc_t *)(moduleAddr + buildInfoEntry.GetClientEngfuncsOffset());
         return true;
     }
 
-    moduleEndAddr = moduleAddr + moduleSize;
-    pfnSPR_Load = buildInfo.FindFunctionAddress(
+    uint8_t *pfnSPR_Load = static_cast<uint8_t*>(buildInfo.FindFunctionAddress(
         FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
-    );
-    if (!pfnSPR_Load)
+    ));
+    if (!pfnSPR_Load) {
         EXCEPT("SPR_Load() address not found");
+    }
 
-    scanStartAddr = moduleAddr;
+    uint8_t *pfnSPR_Frames = static_cast<uint8_t*>(buildInfo.FindFunctionAddress(
+        FUNCTYPE_SPR_FRAMES, moduleAddr, moduleEndAddr
+    ));
+    if (!pfnSPR_Frames) {
+        EXCEPT("SPR_Frames() address not found");
+    }
+
     while (true)
     {
         coincidenceAddr = (uint8_t *)Utils::FindMemoryInt32(
@@ -54,19 +61,18 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
             (uint32_t)pfnSPR_Load
         );
         if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
-            EXCEPT("valid pointer to SPR_Load() not found");
+            EXCEPT("valid reference to SPR_Load() not found");
         else
             scanStartAddr = coincidenceAddr + sizeof(uint32_t);
 
-        probeAddr = *(uint8_t **)(coincidenceAddr + sizeof(uint32_t));
         // check for module range to avoid segfault
+        probeAddr = *(uint8_t **)(coincidenceAddr + sizeof(uint32_t));
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
-            pfnSPR_Frames = buildInfo.FindFunctionAddress(FUNCTYPE_SPR_FRAMES, probeAddr);
-            if (pfnSPR_Frames)
+            if (probeAddr == pfnSPR_Frames) 
             {
                 g_pClientEngfuncs = (cl_enginefunc_t *)coincidenceAddr;
-                return true;
+                return true; 
             }
         }
     }

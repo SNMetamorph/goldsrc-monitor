@@ -4,44 +4,42 @@
         "55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 56 33 F6 85 C0 0F 85"
     ],
     "engine_builds_info": [
-        {
+	    {
             "number": 8196,
-            "description": "GoldSrc Engine Build #8196 (Steam)",
+			"description": "GoldSrc Engine Build #8196 (Steam)",
             "signatures": {
                 "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45 08 83 C4 04 85 C0 0F 84",
-                "SPR_Frames": "55 8B EC 8D 45 08 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8",
+                "SPR_Frames": "55 8B EC 8D 45 08 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8 ?? ?? ?? ?? 83 C4 08 85 C0",
                 "PrecacheModel": "55 8B EC 53 56 57 8B 7D 08 33 DB 85 FF 75 14 68 ?? ?? ?? ?? E8",
                 "PrecacheSound": "55 8B EC 56 57 8B 7D 08 85 FF 75 13 68 ?? ?? ?? ?? E8"
             }
         },
         {
             "number": 4554,
-            "description": "GoldSrc Engine Build #4554",
+			"description": "GoldSrc Engine Build #4554",
             "signatures": {
                 "SPR_Load": "56 8D 44 24 08 57 50 FF 15 ?? ?? ?? ?? 8B 44 24 10",
-                "SPR_Frames": "8D 44 24 04 50 FF 15 ?? ?? ?? ?? 8B 4C 24 08",
+                "SPR_Frames": "8D 44 24 04 50 FF 15 ?? ?? ?? ?? 8B 4C 24 08 51 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 04 8B 40 08",
                 "PrecacheModel": "53 55 8B 6C 24 0C 33 DB 56 57 85 ED 75 14 68",
                 "PrecacheSound": "53 8B 5C 24 08 56 57 85 DB 75 13 68"
             }
         }
     ],
-    "game_specific_builds_info": [
-        {
-            "process_name": "svencoop.exe",
-            "description": "Sven Co-op (build 8832, 10:50:19 Jan 9 2021)",
-            "cl_engfuncs_offset": 1928064,
-            "sv_engfuncs_offset": 1925512,
-            "signatures": {
-                "SPR_Load": "53 8B 5C 24 08 55 56 57 85 DB 0F 84 ?? ?? ?? ?? A1",
-                "SPR_Frames": "8B 44 24 04 83 C0 FF 78 1B"
+	"game_specific_builds_info": [
+		{
+			"process_name": "svencoop.exe",
+			"description": "Sven Co-op (build 8832, 10:50:19 Jan 9 2021)",
+			"signatures": {
+                "SPR_Load": "E9 AB 6B 00 00 CC CC CC CC",
+                "SPR_Frames": "E9 BB 6C 00 00 CC CC CC CC"
             }
         },
         {
             "process_name": "bdef.exe",
-            "description": "Base Defence (build 7561, 09:10:05 Jul  7 2017)",
-            "signatures": {
+			"description": "Base Defence (build 7561, 09:10:05 Jul  7 2017)",
+			"signatures": {
                 "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45",
-                "SPR_Frames": "55 8B EC 8D 45 ?? 50 FF 15 ?? ?? ?? ?? 8B 4D"
+                "SPR_Frames": "55 8B EC 8D 45 ?? 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8 ?? ?? ?? ?? 83 C4 08 85"
             }
         },
         {
@@ -49,8 +47,8 @@
             "description": "Cry Of Fear (build 5936, 18:03:54 Apr 21 2013)",
             "signatures": {
                 "SPR_Load": "55 8B EC 51 8D 45 08 50 FF 15 ?? ?? ?? ?? 83 C4 04 83",
-                "SPR_Frames": "55 8B EC 51 8D 45 ?? 50 FF 15 ?? ?? ?? ?? 83 C4 ?? 8B 4D ?? 51 E8"
+                "SPR_Frames": "55 8B EC 51 8D 45 08 50 FF 15 ?? ?? ?? ?? 83 C4 04 8B 4D 08 51 E8 ?? ?? ?? ?? 83 C4 04 89 45 FC 83 7D FC 00 74 08 8B 55 FC 8B 42 08"
             }
         }
-    ]
+	]
 }

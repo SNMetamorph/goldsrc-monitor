@@ -138,21 +138,11 @@ bool Utils::WorldToScreen(int w, int h, int &x, int &y, const vec3_t &origin)
 
 void *Utils::FindMemoryInt32(void *startAddr, void *endAddr, uint32_t scanValue)
 {
-    void *valueAddr;
-    HANDLE procHandle;
-    uint32_t probeValue;
-    uint32_t *totalEndAddr;
-
-    valueAddr       = nullptr;
-    procHandle      = GetCurrentProcess();
-    totalEndAddr    = (uint32_t*)((size_t)endAddr - sizeof(scanValue));
-
+    void *valueAddr = nullptr;
+    uint32_t *totalEndAddr = (uint32_t *)endAddr - sizeof(scanValue);
     for (uint32_t *i = (uint32_t*)startAddr; i <= totalEndAddr; ++i)
     {
-        if (!ReadProcessMemory(procHandle, i, &probeValue, sizeof(*i), NULL))
-            continue;
-
-        if (probeValue == scanValue)
+        if (i[0] == scanValue)
         {
             valueAddr = i;
             break;
