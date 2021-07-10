@@ -72,14 +72,10 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             std::string modelName;
             Utils::GetEntityModelName(m_iEntityIndex, modelName);
             screenText.PushPrintf("Model Name: %s", modelName.c_str());
-            screenText.PushPrintf("Anim. Frame: %.1f",
-                entity->curstate.frame);
-            screenText.PushPrintf("Anim. Sequence: %d",
-                entity->curstate.sequence);
-            screenText.PushPrintf("Bodygroup Number: %d",
-                entity->curstate.body);
-            screenText.PushPrintf("Skin Number: %d",
-                entity->curstate.skin);
+            screenText.PushPrintf("Anim. Frame: %.1f", entity->curstate.frame);
+            screenText.PushPrintf("Anim. Sequence: %d", entity->curstate.sequence);
+            screenText.PushPrintf("Bodygroup Number: %d", entity->curstate.body);
+            screenText.PushPrintf("Skin Number: %d", entity->curstate.skin);
         }
 
         if (isDescFound)
@@ -91,7 +87,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
                 screenText.Push("Entity Properties");
                 for (int i = 0; i < propsCount; ++i)
                 {
-                    entityDesc.GetPropertiesString(i, propsString);
+                    entityDesc.GetPropertyString(i, propsString);
                     screenText.PushPrintf("    %s", propsString.c_str());
                 }
             }

@@ -10,35 +10,39 @@ CEntityDictionary &CEntityDictionary::GetInstance()
     return instance;
 }
 
+// Should be initialized after every map change
 void CEntityDictionary::Initialize()
 {
     Reset();
     ParseEntityData();
-    m_isInitialized = true;
+    FindEntityAssociations();
 }
 
-// should be reset and initialized after every map change
 void CEntityDictionary::Reset()
 {
     m_EntityDescList.clear();
-    m_iParsedEntityCount = 0;
-    m_isInitialized = false;
 }
 
-bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription) const
+bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription)
 {
     vec3_t entityMins;
     vec3_t entityMaxs;
     Utils::GetEntityBbox(entityIndex, entityMins, entityMaxs);
     for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
     {
-        const CEntityDescription &entityDesc = *it;
+        CEntityDescription &entityDesc = *it;
+        if (entityDesc.GetAssocEntityIndex() == entityIndex) {
+            destDescription = entityDesc;
+            return true;
+        }
+
         const vec3_t &bboxMins = entityDesc.GetBboxMins();
         const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
         const vec3_t diffMin = entityMins - bboxMins;
         const vec3_t diffMax = entityMaxs - bboxMaxs;
         if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
         {
+            entityDesc.AssociateEntity(entityIndex);
             destDescription = entityDesc;
             return true;
         }
@@ -79,7 +83,6 @@ void CEntityDictionary::ParseEntityData()
                 {
                     entityDesc.Initialize();
                     m_EntityDescList.push_back(entityDesc);
-                    m_iParsedEntityCount++;
                     break;
                 }
                 else
@@ -94,4 +97,52 @@ void CEntityDictionary::ParseEntityData()
             }
         }
     }
+}
+
+// Finds associations between entity descriptions and actual game entities
+void CEntityDictionary::FindEntityAssociations()
+{
+    const int entityCount = GetClientMaxEntities();
+    const int maxClients = g_pClientEngfuncs->GetMaxClients();
+    if (entityCount > 0)
+    {
+        for (int i = maxClients; i < entityCount; ++i)
+        {
+            vec3_t entityMins, entityMaxs;
+            Utils::GetEntityBbox(i, entityMins, entityMaxs);
+            for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
+            {
+                CEntityDescription &entityDesc = *it;
+                const vec3_t &bboxMins = entityDesc.GetBboxMins();
+                const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
+                const vec3_t diffMin = entityMins - bboxMins;
+                const vec3_t diffMax = entityMaxs - bboxMaxs;
+                if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
+                {
+                    entityDesc.AssociateEntity(i);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// Very non-optimal, but there is no way to get this directly from engine
+int CEntityDictionary::GetClientMaxEntities()
+{
+    const int iterStep = 75;
+    const int maxClients = g_pClientEngfuncs->GetMaxClients();
+    for (int i = maxClients; i < 65536; i += iterStep)
+    {
+        if (!g_pClientEngfuncs->GetEntityByIndex(i)) 
+        {
+            for (int j = 0; j <= iterStep; ++j)
+            {
+                if (g_pClientEngfuncs->GetEntityByIndex(i - j)) {
+                    return i - j + 1;
+                }
+            }
+        }
+    }
+    return -1;
 }

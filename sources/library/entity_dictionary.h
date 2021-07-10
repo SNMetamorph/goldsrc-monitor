@@ -7,10 +7,10 @@ class CEntityDictionary
 {
 public:
     static CEntityDictionary &GetInstance();
-    void Initialize();
     void Reset();
-    inline bool IsInitialized() const { return m_isInitialized;  }
-    bool FindDescription(int entityIndex, CEntityDescription &destDescription) const;
+    void Initialize();
+    inline bool IsInitialized() const { return m_EntityDescList.size() > 0;  }
+    bool FindDescription(int entityIndex, CEntityDescription &destDescription);
 
 private:
     CEntityDictionary() {};
@@ -18,9 +18,9 @@ private:
     CEntityDictionary &operator=(const CEntityDictionary &) = delete;
 
     void ParseEntityData();
+    void FindEntityAssociations();
+    int GetClientMaxEntities();
 
-    int m_iParsedEntityCount = 0;
-    bool m_isInitialized = false;
     std::vector<CEntityDescription> m_EntityDescList;
 };
 extern CEntityDictionary &g_EntityDictionary;

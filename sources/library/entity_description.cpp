@@ -19,7 +19,7 @@ void CEntityDescription::Initialize()
     EstimateBoundingBox();
 }
 
-void CEntityDescription::GetPropertiesString(int index, std::string &buffer) const
+void CEntityDescription::GetPropertyString(int index, std::string &buffer) const
 {
     int currIndex = 0;
     buffer.clear();
@@ -37,6 +37,11 @@ void CEntityDescription::GetPropertiesString(int index, std::string &buffer) con
     }
 }
 
+void CEntityDescription::AssociateEntity(int entityIndex)
+{
+    m_iAssociatedEntity = entityIndex;
+}
+
 void CEntityDescription::Reset()
 {
     const vec3_t vecNull = vec3_t(0, 0, 0);
@@ -44,6 +49,7 @@ void CEntityDescription::Reset()
     m_vecAngles = vecNull;
     m_vecBboxMins = vecNull;
     m_vecBboxMaxs = vecNull;
+    m_iAssociatedEntity = -1;
 }
 
 void CEntityDescription::EstimateBoundingBox()

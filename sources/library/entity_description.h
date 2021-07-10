@@ -9,9 +9,11 @@ public:
     CEntityDescription();
     void AddKeyValue(const std::string &key, const std::string &value);
     void Initialize();
-    void GetPropertiesString(int index, std::string &buffer) const;
+    void GetPropertyString(int index, std::string &buffer) const;
+    void AssociateEntity(int entityIndex);
 
-    inline int GetPropertiesCount() const { return m_EntityProps.size(); };
+    inline int GetPropertiesCount() const { return m_EntityProps.size(); }
+    inline int GetAssocEntityIndex() const { return m_iAssociatedEntity; }
     inline const std::string& GetClassname() const  { return m_szClassname; }
     inline const std::string& GetTargetname() const { return m_szTargetname; }
     inline const std::string& GetModelName() const  { return m_szModelName; }
@@ -33,5 +35,6 @@ private:
     vec3_t m_vecOrigin;
     vec3_t m_vecBboxMins;
     vec3_t m_vecBboxMaxs;
+    int m_iAssociatedEntity;
     std::map<std::string, std::string> m_EntityProps;
 };
