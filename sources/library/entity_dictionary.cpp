@@ -130,18 +130,20 @@ void CEntityDictionary::FindEntityAssociations()
 // Very non-optimal, but there is no way to get this directly from engine
 int CEntityDictionary::GetClientMaxEntities()
 {
-    const int iterStep = 75;
+    int leftBound = 0;
+    int rightBound = 65536;
     const int maxClients = g_pClientEngfuncs->GetMaxClients();
-    for (int i = maxClients; i < 65536; i += iterStep)
+    while (true)
     {
-        if (!g_pClientEngfuncs->GetEntityByIndex(i)) 
+        int center = (leftBound + rightBound) / 2;
+        if (g_pClientEngfuncs->GetEntityByIndex(center))
+            leftBound = center;
+        else
+            rightBound = center;
+
+        if (abs(leftBound - rightBound) < 2)
         {
-            for (int j = 0; j <= iterStep; ++j)
-            {
-                if (g_pClientEngfuncs->GetEntityByIndex(i - j)) {
-                    return i - j + 1;
-                }
-            }
+            return rightBound;
         }
     }
     return -1;
