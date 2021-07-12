@@ -298,6 +298,14 @@ void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
     }
 }
 
+std::string Utils::GetCurrentMapName()
+{
+    std::string mapName = g_pClientEngfuncs->pfnGetLevelName();
+    mapName.erase(0, mapName.find_last_of("/\\") + 1);
+    mapName.erase(mapName.find_last_of("."));
+    return mapName;
+}
+
 const char *Utils::GetMovetypeName(int moveType)
 {
     switch (moveType)

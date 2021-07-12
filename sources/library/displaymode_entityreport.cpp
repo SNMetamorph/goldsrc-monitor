@@ -24,7 +24,10 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
     m_iEntityIndex = TraceEntity();
     if (!m_iEntityIndex)
     {
+        std::string mapName = Utils::GetCurrentMapName();
         screenText.Push("Entity not found");
+        screenText.PushPrintf("Map: %s", mapName.c_str());
+        screenText.PushPrintf("Entity descriptions: %d", g_EntityDictionary.GetDescriptionsCount());
     }
     else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_pPlayerMove->iuser3 != 3)
     {

@@ -9,9 +9,11 @@ public:
     static CEntityDictionary &GetInstance();
     void Reset();
     void Initialize();
-    inline bool IsInitialized() const { return m_EntityDescList.size() > 0;  }
     bool FindDescription(int entityIndex, CEntityDescription &destDescription);
 
+    inline int GetDescriptionsCount() const { return m_EntityDescList.size(); }
+    inline bool IsInitialized() const { return m_EntityDescList.size() > 0;  }
+    
 private:
     CEntityDictionary() {};
     CEntityDictionary(const CEntityDictionary &) = delete;
