@@ -6,6 +6,7 @@
 #include "studio.h"
 #include "entity_dictionary.h"
 #include "local_player.h"
+#include "bounding_box.h"
 #include <algorithm>
 #include <iterator> 
 
@@ -13,9 +14,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 {
     vec3_t entityOrigin;
     vec3_t entityAngles;
-    vec3_t hullSize;
-    vec3_t hullMins;
-    vec3_t hullMaxs;
+    CBoundingBox entityBbox;
 
     if (!g_EntityDictionary.IsInitialized())
         g_EntityDictionary.Initialize();
@@ -45,8 +44,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
         entityAngles = entity->curstate.angles;
         entityOrigin = entity->origin + centerOffset;
-        Utils::GetEntityBbox(m_iEntityIndex, hullMins, hullMaxs);
-        hullSize = hullMaxs - hullMins;
+        Utils::GetEntityBoundingBox(m_iEntityIndex, entityBbox);
 
         screenText.PushPrintf("Entity Index: %d", m_iEntityIndex);
         screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
@@ -58,7 +56,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
             entityAngles.x, entityAngles.y, entityAngles.z);
         screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
-            hullSize.x, hullSize.y, hullSize.z);
+            entityBbox.GetSize().x, entityBbox.GetSize().y, entityBbox.GetSize().z);
         screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
 
         if (isDescFound)
@@ -110,9 +108,8 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
 void CModeEntityReport::Render3D()
 {
-    vec3_t hullMins;
-    vec3_t hullMaxs;
     cl_entity_t *entity;
+    CBoundingBox entityBbox;
     const float colorR = 0.0f;
     const float colorG = 1.0f;
     const float colorB = 0.0f;
@@ -123,10 +120,9 @@ void CModeEntityReport::Render3D()
     if (!g_EngineModule.IsSoftwareRenderer())
     {
         entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
-        Utils::GetEntityBbox(m_iEntityIndex, hullMins, hullMaxs);
-        vec3_t bboxSize = (hullMaxs - hullMins);
+        Utils::GetEntityBoundingBox(m_iEntityIndex, entityBbox);
         vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
-        Utils::DrawEntityHull(entity->origin, centerOffset, entity->angles, bboxSize);
+        Utils::DrawEntityHull(entity->origin, centerOffset, entity->angles, entityBbox.GetSize());
     }
 }
 
@@ -190,18 +186,19 @@ int CModeEntityReport::TraceEntity()
 
 float CModeEntityReport::TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
 {
-    vec3_t bboxMin;
-    vec3_t bboxMax;
-    vec3_t lineEnd;
+    CBoundingBox entityBbox;
+    Utils::GetEntityBoundingBox(physEnt.info, entityBbox);
 
     // skip studiomodel visents which is culled
-    Utils::GetEntityBbox(physEnt.info, bboxMin, bboxMax);
-    if (!g_pClientEngfuncs->pTriAPI->BoxInPVS(bboxMin, bboxMax))
+    vec3_t bboxMins = entityBbox.GetMins();
+    vec3_t bboxMaxs = entityBbox.GetMaxs();
+    if (!g_pClientEngfuncs->pTriAPI->BoxInPVS(bboxMins, bboxMaxs)) {
         return 1.0f;
+    }
 
     // check for intersection
-    lineEnd = viewOrigin + (viewDir * lineLen);
-    return Utils::TraceBBoxLine(bboxMin, bboxMax, viewOrigin, lineEnd);
+    vec3_t lineEnd = viewOrigin + (viewDir * lineLen);
+    return Utils::TraceBBoxLine(entityBbox, viewOrigin, lineEnd);
 }
 
 int CModeEntityReport::TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
@@ -226,19 +223,20 @@ int CModeEntityReport::TracePhysEntList(physent_t list[], int count, vec3_t &vie
 float CModeEntityReport::GetEntityDistance(int entityIndex)
 {
     vec3_t pointInBbox;
-    vec3_t bboxMin, bboxMax;
+    CBoundingBox entityBbox;
     cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-
     if (entity)
     {
         model_t *entityModel = entity->model;
         vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
 
         // get nearest bbox-to-player distance by point caged in bbox
-        Utils::GetEntityBbox(entityIndex, bboxMin, bboxMax);
-        pointInBbox.x = max(min(viewOrigin.x, bboxMax.x), bboxMin.x);
-        pointInBbox.y = max(min(viewOrigin.y, bboxMax.y), bboxMin.y);
-        pointInBbox.z = max(min(viewOrigin.z, bboxMax.z), bboxMin.z);
+        Utils::GetEntityBoundingBox(entityIndex, entityBbox);
+        const vec3_t &bboxMins = entityBbox.GetMins();
+        const vec3_t &bboxMaxs = entityBbox.GetMaxs();
+        pointInBbox.x = max(min(viewOrigin.x, bboxMaxs.x), bboxMins.x);
+        pointInBbox.y = max(min(viewOrigin.y, bboxMaxs.y), bboxMins.y);
+        pointInBbox.z = max(min(viewOrigin.z, bboxMaxs.z), bboxMins.z);
         return (pointInBbox - viewOrigin).Length();
     }
     return 0.0f;

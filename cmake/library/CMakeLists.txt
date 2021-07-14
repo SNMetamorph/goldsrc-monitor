@@ -18,6 +18,7 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/string_stack.cpp"
 	"../../sources/module_info.cpp"
 	"../../sources/library/application.cpp"
+	"../../sources/library/bounding_box.cpp"
 	"../../sources/library/local_player.cpp"
 	"../../sources/library/client_module.cpp"
 	"../../sources/library/server_module.cpp"

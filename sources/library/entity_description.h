@@ -1,5 +1,6 @@
 #pragma once
 #include "hlsdk.h"
+#include "bounding_box.h"
 #include <string>
 #include <map>
 
@@ -19,8 +20,7 @@ public:
     inline const std::string& GetModelName() const  { return m_szModelName; }
     inline const vec3_t &GetOrigin() const { return m_vecOrigin; }
     inline const vec3_t &GetAngles() const { return m_vecAngles; }
-    inline const vec3_t &GetBboxMins() const { return m_vecBboxMins; }
-    inline const vec3_t &GetBboxMaxs() const { return m_vecBboxMaxs; }
+    inline const CBoundingBox &GetBoundingBox() const { return m_BoundingBox; }
 
 private:
     void Reset();
@@ -33,8 +33,7 @@ private:
     std::string m_szModelName;
     vec3_t m_vecAngles;
     vec3_t m_vecOrigin;
-    vec3_t m_vecBboxMins;
-    vec3_t m_vecBboxMaxs;
     int m_iAssociatedEntity;
+    CBoundingBox m_BoundingBox;
     std::map<std::string, std::string> m_EntityProps;
 };

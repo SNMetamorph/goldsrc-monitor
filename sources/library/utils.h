@@ -2,6 +2,7 @@
 #include "module_info.h"
 #include "string_stack.h"
 #include "memory_pattern.h"
+#include "bounding_box.h"
 #include "stdafx.h"
 #include <stdint.h>
 #include <string>
@@ -32,10 +33,7 @@ namespace Utils
     bool IsGameDirEquals(const char *gameDir);
 
     vec3_t GetEntityVelocityApprox(int entityIndex, int approxStep = 22);
-    void GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax);
+    void GetEntityBoundingBox(int entityIndex, CBoundingBox &bbox);
     void TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData, int ignoredEnt = -1);
-    float TraceBBoxLine(
-        const vec3_t &bboxMin, const vec3_t &bboxMax,
-        const vec3_t &lineStart, const vec3_t &lineEnd
-    );
+    float TraceBBoxLine(const CBoundingBox &bbox, const vec3_t &lineStart, const vec3_t &lineEnd);
 };

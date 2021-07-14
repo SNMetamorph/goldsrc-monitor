@@ -369,18 +369,18 @@ void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *tra
     g_pClientEngfuncs->pEventAPI->EV_PopPMStates();
 }
 
-float Utils::TraceBBoxLine(
-    const vec3_t &bboxMin, const vec3_t &bboxMax, 
-    const vec3_t &lineStart, const vec3_t &lineEnd)
+float Utils::TraceBBoxLine(const CBoundingBox &bbox, const vec3_t &lineStart, const vec3_t &lineEnd)
 {
-    vec3_t rayDirection;
     vec3_t invertedDir;
+    vec3_t rayDirection;
     vec3_t fractionMin;
     vec3_t fractionMax;
     vec3_t fractionNear;
     vec3_t fractionFar;
     float nearDotFract;
     float farDotFract;
+    const vec3_t &bboxMaxs = bbox.GetMaxs();
+    const vec3_t &bboxMins = bbox.GetMins();
 
     // ray equation
     // vector O + vector D * t
@@ -389,19 +389,21 @@ float Utils::TraceBBoxLine(
     // t - fraction
     // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 
+    
     const vec3_t &rayOrigin = lineStart;
     rayDirection = (lineEnd - lineStart);
     const float lineLength = rayDirection.Length();
     rayDirection = rayDirection.Normalize();
 
+    
     invertedDir.x   = 1.f / rayDirection.x; 
     invertedDir.y   = 1.f / rayDirection.y; 
     invertedDir.z   = 1.f / rayDirection.z; 
 
-    fractionMin.x   = (bboxMin.x - rayOrigin.x) * invertedDir.x;
-    fractionMin.y   = (bboxMin.y - rayOrigin.y) * invertedDir.y;
-    fractionMax.x   = (bboxMax.x - rayOrigin.x) * invertedDir.x;
-    fractionMax.y   = (bboxMax.y - rayOrigin.y) * invertedDir.y;
+    fractionMin.x   = (bboxMins.x - rayOrigin.x) * invertedDir.x;
+    fractionMin.y   = (bboxMins.y - rayOrigin.y) * invertedDir.y;
+    fractionMax.x   = (bboxMaxs.x - rayOrigin.x) * invertedDir.x;
+    fractionMax.y   = (bboxMaxs.y - rayOrigin.y) * invertedDir.y;
 
     fractionNear.x  = min(fractionMin.x, fractionMax.x);
     fractionNear.y  = min(fractionMin.y, fractionMax.y);
@@ -421,8 +423,8 @@ float Utils::TraceBBoxLine(
     if (fractionFar.y < farDotFract)
         farDotFract = fractionFar.y;
 
-    fractionMin.z   = (bboxMin.z - rayOrigin.z) * invertedDir.z;
-    fractionMax.z   = (bboxMax.z - rayOrigin.z) * invertedDir.z;
+    fractionMin.z   = (bboxMins.z - rayOrigin.z) * invertedDir.z;
+    fractionMax.z   = (bboxMaxs.z - rayOrigin.z) * invertedDir.z;
     fractionFar.z   = max(fractionMin.z, fractionMax.z);
     fractionNear.z  = min(fractionMin.z, fractionMax.z);
 
@@ -460,7 +462,7 @@ vec3_t Utils::GetEntityVelocityApprox(int entityIndex, int approxStep)
     return vec3_t(0, 0, 0);
 }
 
-void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
+void Utils::GetEntityBoundingBox(int entityIndex, CBoundingBox &bbox)
 {
     int seqIndex;
     vec3_t hullSize;
@@ -470,8 +472,7 @@ void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
 
     if (!entity)
     {
-        bboxMin = vec3_t(0, 0, 0);
-        bboxMax = vec3_t(0, 0, 0);
+        bbox = CBoundingBox(vec3_t(0, 0, 0));
         return;
     }
     else
@@ -488,8 +489,8 @@ void Utils::GetEntityBbox(int entityIndex, vec3_t &bboxMin, vec3_t &bboxMax)
         else {
             hullSize = entity->curstate.maxs - entity->curstate.mins;
         }
-        bboxMin = entityOrigin - hullSize / 2;
-        bboxMax = entityOrigin + hullSize / 2;
+        bbox = CBoundingBox(hullSize);
+        bbox.SetCenterToPoint(entityOrigin);
     }
 }
 

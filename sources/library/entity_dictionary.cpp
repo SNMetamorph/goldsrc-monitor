@@ -25,9 +25,8 @@ void CEntityDictionary::Reset()
 
 bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription)
 {
-    vec3_t entityMins;
-    vec3_t entityMaxs;
-    Utils::GetEntityBbox(entityIndex, entityMins, entityMaxs);
+    CBoundingBox entityBoundingBox;
+    Utils::GetEntityBoundingBox(entityIndex, entityBoundingBox);
     for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
     {
         CEntityDescription &entityDesc = *it;
@@ -36,10 +35,9 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
             return true;
         }
 
-        const vec3_t &bboxMins = entityDesc.GetBboxMins();
-        const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
-        const vec3_t diffMin = entityMins - bboxMins;
-        const vec3_t diffMax = entityMaxs - bboxMaxs;
+        const CBoundingBox &descBoundingBox = entityDesc.GetBoundingBox();
+        const vec3_t diffMin = entityBoundingBox.GetMins() - descBoundingBox.GetMins();
+        const vec3_t diffMax = entityBoundingBox.GetMaxs() - descBoundingBox.GetMaxs();
         if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
         {
             entityDesc.AssociateEntity(entityIndex);
@@ -108,15 +106,14 @@ void CEntityDictionary::FindEntityAssociations()
     {
         for (int i = maxClients; i < entityCount; ++i)
         {
-            vec3_t entityMins, entityMaxs;
-            Utils::GetEntityBbox(i, entityMins, entityMaxs);
+            CBoundingBox entityBoundingBox;
+            Utils::GetEntityBoundingBox(i, entityBoundingBox);
             for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
             {
                 CEntityDescription &entityDesc = *it;
-                const vec3_t &bboxMins = entityDesc.GetBboxMins();
-                const vec3_t &bboxMaxs = entityDesc.GetBboxMaxs();
-                const vec3_t diffMin = entityMins - bboxMins;
-                const vec3_t diffMax = entityMaxs - bboxMaxs;
+                const CBoundingBox &descBoundingBox = entityDesc.GetBoundingBox();
+                const vec3_t diffMin = entityBoundingBox.GetMins() - descBoundingBox.GetMins();
+                const vec3_t diffMax = entityBoundingBox.GetMaxs() - descBoundingBox.GetMaxs();
                 if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
                 {
                     entityDesc.AssociateEntity(i);
