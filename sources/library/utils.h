@@ -30,6 +30,8 @@ namespace Utils
     void GetEntityModelName(int entityIndex, std::string &modelName);
     std::string GetCurrentMapName();
     const char *GetMovetypeName(int moveType);
+    const char *GetRenderModeName(int renderMode);
+    const char *GetRenderFxName(int renderFx);
     bool IsGameDirEquals(const char *gameDir);
 
     vec3_t GetEntityVelocityApprox(int entityIndex, int approxStep = 22);

@@ -310,32 +310,63 @@ const char *Utils::GetMovetypeName(int moveType)
 {
     switch (moveType)
     {
-    case MOVETYPE_BOUNCE:
-        return "Bounce";
-    case MOVETYPE_BOUNCEMISSILE:
-        return "Bounce-missle";
-    case MOVETYPE_FLY:
-        return "Fly";
-    case MOVETYPE_FLYMISSILE:
-        return "Fly-missle";
-    case MOVETYPE_FOLLOW:
-        return "Follow";
-    case MOVETYPE_NOCLIP:
-        return "Noclip";
-    case MOVETYPE_NONE:
-        return "None";
-    case MOVETYPE_PUSH:
-        return "Push";
-    case MOVETYPE_PUSHSTEP:
-        return "Push-step";
-    case MOVETYPE_STEP:
-        return "Step";
-    case MOVETYPE_TOSS:
-        return "Toss";
-    case MOVETYPE_WALK:
-        return "Walk";
-    default:
-        return "Unknown";
+        case MOVETYPE_BOUNCE:           return "Bounce";
+        case MOVETYPE_BOUNCEMISSILE:    return "Bounce-missle";
+        case MOVETYPE_FLY:              return "Fly";
+        case MOVETYPE_FLYMISSILE:       return "Fly-missle";
+        case MOVETYPE_FOLLOW:           return "Follow";
+        case MOVETYPE_NOCLIP:           return "Noclip";
+        case MOVETYPE_NONE:             return "None";
+        case MOVETYPE_PUSH:             return "Push";
+        case MOVETYPE_PUSHSTEP:         return "Push-step";
+        case MOVETYPE_STEP:             return "Step";
+        case MOVETYPE_TOSS:             return "Toss";
+        case MOVETYPE_WALK:             return "Walk";
+        default:                        return "Unknown";
+    }
+}
+
+const char *Utils::GetRenderModeName(int renderMode)
+{
+    switch (renderMode)
+    {
+        case kRenderNormal:         return "Normal";
+        case kRenderTransColor:     return "Trans. color";
+        case kRenderTransTexture:   return "Trans. texture";
+        case kRenderGlow:           return "Glow";
+        case kRenderTransAlpha:     return "Trans. alpha";
+        case kRenderTransAdd:       return "Trans. additive";
+        default:                    return "Unknown";
+    }
+}
+
+const char *Utils::GetRenderFxName(int renderFx)
+{
+    switch (renderFx)
+    {
+        case kRenderFxNone:             return "None";
+        case kRenderFxPulseSlow:        return "Pulse (slow)";
+        case kRenderFxPulseFast:        return "Pulse (fast)";
+        case kRenderFxPulseSlowWide:    return "Pulse (slow wide)";
+        case kRenderFxPulseFastWide:    return "Pulse (fast wide)";
+        case kRenderFxFadeSlow:         return "Fade (slow)";
+        case kRenderFxFadeFast:         return "Fade (fast)";
+        case kRenderFxSolidSlow:        return "Solid (slow)";
+        case kRenderFxSolidFast:        return "Solid (fast)";
+        case kRenderFxStrobeSlow:       return "Strobe (slow)";
+        case kRenderFxStrobeFast:       return "Strobe (fast)";
+        case kRenderFxStrobeFaster:     return "Strobe (faster)";
+        case kRenderFxFlickerSlow:      return "Flicker (slow)";
+        case kRenderFxFlickerFast:      return "Flicker (fast)";
+        case kRenderFxNoDissipation:    return "No dissipation";
+        case kRenderFxDistort:          return "Distort";
+        case kRenderFxHologram:         return "Hologram";
+        case kRenderFxDeadPlayer:       return "Dead player";
+        case kRenderFxExplode:          return "Explode";
+        case kRenderFxGlowShell:        return "Glow shell";
+        case kRenderFxClampMinScale:    return "Clamp min. scale";
+        case kRenderFxLightMultiplier:  return "Light multiplier";
+        default:                        return "Unknown";
     }
 }
 

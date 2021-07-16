@@ -58,6 +58,14 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
             entityBbox.GetSize().x, entityBbox.GetSize().y, entityBbox.GetSize().z);
         screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
+        screenText.PushPrintf("Render Mode: %s", Utils::GetRenderModeName(entity->curstate.rendermode));
+        screenText.PushPrintf("Render FX: %s", Utils::GetRenderFxName(entity->curstate.renderfx));
+        screenText.PushPrintf("Render Amount: %d", entity->curstate.renderamt);
+        screenText.PushPrintf("Render Color: %d %d %d", 
+            entity->curstate.rendercolor.r, 
+            entity->curstate.rendercolor.g, 
+            entity->curstate.rendercolor.b
+        );
 
         if (isDescFound)
         {
