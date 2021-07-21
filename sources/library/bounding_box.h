@@ -11,6 +11,9 @@ public:
     float GetSurfaceArea() const;
     vec3_t GetCenterPoint() const;
     void SetCenterToPoint(const vec3_t &point);
+    CBoundingBox GetUnionBoundingBox(const CBoundingBox &operand) const;
+    void CombineWith(const CBoundingBox &operand);
+    bool ContainsPoint(const vec3_t &point) const;
     inline const vec3_t &GetSize() const { return m_vecSize; };
     inline const vec3_t &GetMins() const { return m_vecMins; };
     inline const vec3_t &GetMaxs() const { return m_vecMaxs; };

@@ -16,6 +16,12 @@ void CEntityDictionary::Initialize()
     Reset();
     ParseEntityData();
     FindEntityAssociations();
+    BuildDescriptionsTree();
+}
+
+void CEntityDictionary::VisualizeTree(bool textRendering)
+{
+    m_EntityDescTree.Visualize(textRendering);
 }
 
 void CEntityDictionary::Reset()
@@ -25,8 +31,26 @@ void CEntityDictionary::Reset()
 
 bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription)
 {
+    int nodeIndex;
     CBoundingBox entityBoundingBox;
     Utils::GetEntityBoundingBox(entityIndex, entityBoundingBox);
+
+    // try to get associated description directly
+    //if (entityIndex >= 0 && entityIndex < m_EntityDescList.size())
+    //{
+    //    CEntityDescription &entityDesc = m_EntityDescList[entityIndex];
+    //    if (entityDesc.GetAssocEntityIndex() == entityIndex) {
+    //        destDescription = entityDesc;
+    //        return true;
+    //    }
+    //}
+
+    //if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex)) {
+    //    const CBVHTreeNode &node = m_EntityDescTree.GetNode(nodeIndex);
+    //    destDescription = m_EntityDescList[node.GetDescriptionIndex()];
+    //    return true;
+    //}
+
     for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
     {
         CEntityDescription &entityDesc = *it;
@@ -46,6 +70,12 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
         }
     }
     return false;
+}
+
+void CEntityDictionary::BuildDescriptionsTree()
+{
+    m_EntityDescTree.Reset();
+    m_EntityDescTree.Build();
 }
 
 void CEntityDictionary::ParseEntityData()
