@@ -3,6 +3,7 @@
 #include "client_module.h"
 #include <cmath>
 #include <array>
+#include <cfloat>
 #include <algorithm>
 
 CBVHTree::CBVHTree(const std::vector<CEntityDescription> *descList)
@@ -18,26 +19,13 @@ void CBVHTree::Reset()
 
 void CBVHTree::Build()
 {
-    CBVHTreeNode rootNode = AppendRootNode(GetRootBoundingBox());
-    std::vector<int> rootNodeObjects = GetRootObjectList();
-    m_Nodes.reserve(rootNodeObjects.size());
-    m_iRootNodeIndex = rootNode.GetIndex();
-
-    m_NodesStack.push(m_iRootNodeIndex);
-    m_ObjectListStack.push(rootNodeObjects);
-    while (!m_NodesStack.empty())
-    {
-        CBVHTreeNode &node = m_Nodes[m_NodesStack.top()];
-        m_NodesStack.pop();
-        ObjectList nodeObjects = m_ObjectListStack.top();
-        m_ObjectListStack.pop();
-        SplitNode(node, nodeObjects);
-    }
-    g_pClientEngfuncs->Con_Printf(GetGraphvisDescription().c_str());
+    BuildBottomUp();
+    //PrintReport();
 }
 
 bool CBVHTree::FindLeaf(const CBoundingBox &box, int &nodeIndex)
 {
+    int iterations = 0;
     std::stack<int> nodesStack;
     nodesStack.push(m_iRootNodeIndex);
     while (!nodesStack.empty())
@@ -46,12 +34,16 @@ bool CBVHTree::FindLeaf(const CBoundingBox &box, int &nodeIndex)
         CBVHTreeNode &node = m_Nodes[currNode];
         const CBoundingBox &nodeBounds = node.GetBoundingBox();
         nodesStack.pop();
-        if (nodeBounds.ContainsPoint(box.GetMins()) && nodeBounds.ContainsPoint(box.GetMaxs()))
+
+        if (nodeBounds.Contains(box))
         {
-            if (node.IsLeaf() && node.GetDescriptionIndex() > 0) {
+            if (node.IsLeaf() && node.GetDescriptionIndex() != -1) 
+            {
+                const vec3_t difference = nodeBounds.GetCenterPoint() - box.GetCenterPoint();
                 const vec3_t diffMin = nodeBounds.GetMins() - box.GetMins();
                 const vec3_t diffMax = nodeBounds.GetMaxs() - box.GetMaxs();
-                if (diffMin.Length() < 1.f && diffMax.Length() < 1.f) {
+                if (diffMin.Length() < 0.2f && diffMax.Length() < 0.2f)
+                {
                     nodeIndex = currNode;
                     return true;
                 }
@@ -66,13 +58,27 @@ bool CBVHTree::FindLeaf(const CBoundingBox &box, int &nodeIndex)
                 nodesStack.push(rightChild);
             }
         }
+        ++iterations;
     }
     return false;
 }
 
+double CBVHTree::ComputeCost() const
+{
+    double cost = 0.0;
+    for (size_t i = 0; i < m_Nodes.size(); ++i)
+    {
+        const CBVHTreeNode &node = m_Nodes[i];
+        if (!node.IsLeaf()) {
+            cost += node.GetBoundingBox().GetSurfaceArea();
+        }
+    }
+    return cost / 1000.0;
+}
+
 void CBVHTree::Visualize(bool textRendering)
 {
-    if (!IsBuilt())
+    if (m_Nodes.size() <= 0)
         return;
 
     std::stack<int> nodesStack;
@@ -81,18 +87,16 @@ void CBVHTree::Visualize(bool textRendering)
     {
         CBVHTreeNode &node = m_Nodes[nodesStack.top()];
         const CBoundingBox &nodeBounds = node.GetBoundingBox();
+        const int nodeIndex = node.GetIndex();
         nodesStack.pop();
 
-        if (node.GetIndex() == (int)g_pClientEngfuncs->GetClientTime() % m_Nodes.size())
-        {
-            if (textRendering) {
-                Utils::DrawString3D(nodeBounds.GetCenterPoint(), std::to_string(node.GetIndex()).c_str(), 0, 255, 255);
-            }
-            else {
-                Utils::DrawEntityHull(nodeBounds.GetCenterPoint(), vec3_t(0, 0, 0), vec3_t(0, 0, 0), nodeBounds.GetSize());
-            }
+        if (textRendering) {
+            Utils::DrawString3D(nodeBounds.GetCenterPoint(), std::to_string(nodeIndex).c_str(), 0, 255, 255);
         }
-
+        else {
+            Utils::DrawCuboid(nodeBounds.GetCenterPoint(), vec3_t(0, 0, 0), vec3_t(0, 0, 0), nodeBounds.GetSize(), Color::GetRandom(nodeIndex));
+        }
+        
         if (node.GetLeftChild() >= 0) {
             nodesStack.push(node.GetLeftChild());
         }
@@ -102,20 +106,20 @@ void CBVHTree::Visualize(bool textRendering)
     }
 }
 
-std::string CBVHTree::GetGraphvisDescription()
+std::string CBVHTree::GetGraphvisDescription() const
 {
     std::string treeDesc;
     std::stack<int> nodesStack;
     treeDesc += "digraph bvh_tree {\n";
 
     // mark leaf nodes that has linked descriptions as red boxes
-    for (int i = 0; i < m_Nodes.size(); ++i)
+    for (size_t i = 0; i < m_Nodes.size(); ++i)
     {
-        CBVHTreeNode &node = m_Nodes[i];
+        const CBVHTreeNode &node = m_Nodes[i];
         if (node.IsLeaf()) 
         {
             treeDesc += std::to_string(i) + " [shape=box]";
-            if (node.GetDescriptionIndex() >= 0) {
+            if (node.GetDescriptionIndex() != -1) {
                 treeDesc += " [color=red]";
             }
             treeDesc += '\n';
@@ -125,7 +129,7 @@ std::string CBVHTree::GetGraphvisDescription()
     nodesStack.push(m_iRootNodeIndex);
     while (!nodesStack.empty())
     {
-        CBVHTreeNode &node = m_Nodes[nodesStack.top()];
+        const CBVHTreeNode &node = m_Nodes[nodesStack.top()];
         int leftChild = node.GetLeftChild();
         int rightChild = node.GetRightChild();
         nodesStack.pop();
@@ -142,17 +146,131 @@ std::string CBVHTree::GetGraphvisDescription()
     return treeDesc;
 }
 
+void CBVHTree::BuildBottomUp()
+{
+    std::vector<int> objectNodes;
+    std::vector<int> gameObjects = GetGameObjects();
+    m_Nodes.reserve(gameObjects.size());
+    for (int i : gameObjects)
+    {
+        const CEntityDescription &desc = m_DescList->at(i);
+        int newNode = AppendNode(desc.GetBoundingBox());
+        NodeAt(newNode).SetDescriptionIndex(i);
+        objectNodes.push_back(newNode);
+    }
+
+    while (objectNodes.size() > 0) 
+    {
+        if (objectNodes.size() == 1) 
+        {
+            m_iRootNodeIndex = objectNodes[0];
+            return;
+        }
+        objectNodes = MergeLevelNodes(objectNodes);
+    }
+}
+
+std::vector<int> CBVHTree::MergeLevelNodes(std::vector<int> &levelNodes)
+{
+    int parentIndex;
+    std::vector<int> unionNodes;
+
+    for (size_t i = 0; i < levelNodes.size(); ++i)
+    {
+        CBVHTreeNode &node = NodeAt(levelNodes[i]);
+        if (node.GetParent() != -1)
+            continue;
+
+        // find best sibling
+        double minSurfaceArea = DBL_MAX;
+        int siblingIndex = -1;
+        for (size_t j = 0; j < levelNodes.size(); ++j)
+        {
+            CBVHTreeNode &siblingNode = NodeAt(levelNodes[j]);
+            if (i != j && siblingNode.GetParent() == -1)
+            {
+                const CBoundingBox &nodeBounds = node.GetBoundingBox();
+                const CBoundingBox &siblingBounds = siblingNode.GetBoundingBox();
+                double surfaceArea = nodeBounds.GetUnion(siblingBounds).GetSurfaceArea();
+                if (surfaceArea < minSurfaceArea)
+                {
+                    minSurfaceArea = surfaceArea;
+                    siblingIndex = j;
+                }
+            }
+        }
+
+        // if siblingIndex == -1 значит свободных нод не осталось, и нужно создать родительскую ноду только с одим потомком
+        if (siblingIndex != -1)
+        {
+            int leftNodeIndex = levelNodes[i];
+            int rightNodeIndex = levelNodes[siblingIndex];
+            CBoundingBox leftNodeBounds = NodeAt(leftNodeIndex).GetBoundingBox();
+            CBoundingBox rightNodeBounds = NodeAt(rightNodeIndex).GetBoundingBox();
+            CBoundingBox parentNodeBounds = leftNodeBounds.GetUnion(rightNodeBounds);
+            parentIndex = AppendNode(parentNodeBounds);
+            NodeAt(parentIndex).SetLeftChild(leftNodeIndex);
+            NodeAt(parentIndex).SetRightChild(rightNodeIndex);
+            NodeAt(leftNodeIndex).SetParent(parentIndex);
+            NodeAt(rightNodeIndex).SetParent(parentIndex);
+        }
+        else {
+            int leftNodeIndex = levelNodes[i];
+            parentIndex = AppendNode(NodeAt(leftNodeIndex).GetBoundingBox());
+            NodeAt(parentIndex).SetLeftChild(leftNodeIndex);
+            NodeAt(leftNodeIndex).SetParent(parentIndex);
+        }
+        unionNodes.push_back(parentIndex);
+    }
+    return unionNodes;
+}
+
+void CBVHTree::PrintReport()
+{
+    std::string line;
+    std::string treeDesc = GetGraphvisDescription();
+    for (size_t offset = 0; offset < treeDesc.size(); offset += 500)
+    {
+        line.clear();
+        line.assign(treeDesc, offset, 500);
+        g_pClientEngfuncs->Con_Printf(line.c_str());
+    }
+    g_pClientEngfuncs->Con_Printf("BVH nodes: %d\nBVH tree cost: %f\n", m_Nodes.size(), ComputeCost());
+}
+
+// Not suitable for game objects, tree doesn't covers all game objects with leaf nodes
+void CBVHTree::BuildTopDown()
+{
+    std::vector<int> rootNodeObjects = GetGameObjects();
+    int rootNode = AppendNode(CalcNodeBoundingBox(rootNodeObjects));
+    m_Nodes.reserve(rootNodeObjects.size());
+    m_iRootNodeIndex = rootNode;
+
+    m_NodesStack.push(m_iRootNodeIndex);
+    m_ObjectListStack.push(rootNodeObjects);
+    while (!m_NodesStack.empty())
+    {
+        CBVHTreeNode &node = m_Nodes[m_NodesStack.top()];
+        ObjectList nodeObjects = m_ObjectListStack.top();
+        m_NodesStack.pop();
+        m_ObjectListStack.pop();
+        SplitNode(node, nodeObjects);
+    }
+}
+
 void CBVHTree::SplitNode(CBVHTreeNode &node, ObjectList nodeObjects)
 {
-    if (nodeObjects.size() == 1) {
-        node.SetDescriptionIndex(nodeObjects[0]);
+    const int count = nodeObjects.size();
+    if (count == 1)
+    {
+        node.SetDescriptionIndex(nodeObjects[0]); 
         return;
     }
 
     int nodeIndex = node.GetIndex();
     const CBoundingBox &nodeBounds = node.GetBoundingBox();
     vec3_t nodeCenter = nodeBounds.GetCenterPoint();
-    static const vec3_t &axisLengths = nodeBounds.GetSize();
+    static vec3_t axisLengths = nodeBounds.GetSize();
     std::vector<int> leftNodeElements[3];
     std::vector<int> rightNodeElements[3];
 
@@ -172,7 +290,7 @@ void CBVHTree::SplitNode(CBVHTreeNode &node, ObjectList nodeObjects)
     }
 
     // check is it possible to split by any of axes
-    bool splitFailed[3];
+    bool splitFailed[3] = { false };
     for (int i = 0; i < 3; ++i) {
         splitFailed[i] = (leftNodeElements[i].size() == 0) || (rightNodeElements[i].size() == 0);
     }
@@ -185,7 +303,7 @@ void CBVHTree::SplitNode(CBVHTreeNode &node, ObjectList nodeObjects)
     // sort axes accoring to it lengths
     std::array<int, 3> splitOrder = { 0, 1, 2 };
     struct {
-        bool operator()(int a, int b) const { return axisLengths[a] < axisLengths[b]; }
+        bool operator()(int a, int b) const { return axisLengths[a] > axisLengths[b]; }
     } sortFunc;
     std::sort(splitOrder.begin(), splitOrder.end(), sortFunc);
 
@@ -193,10 +311,11 @@ void CBVHTree::SplitNode(CBVHTreeNode &node, ObjectList nodeObjects)
     std::vector<int> *rightElements = nullptr;
     for (int i = 0; i < 3; ++i)
     {
-        if (!splitFailed[i]) 
+        int j = splitOrder[i];
+        if (!splitFailed[j]) 
         {
-            leftElements = &leftNodeElements[i];
-            rightElements = &rightNodeElements[i];
+            leftElements = &leftNodeElements[j];
+            rightElements = &rightNodeElements[j];
             break;
         }
     }
@@ -222,11 +341,6 @@ int CBVHTree::AppendNode(const CBoundingBox &nodeBounds, int parent)
     return m_Nodes.size() - 1;
 }
 
-CBVHTreeNode &CBVHTree::AppendRootNode(const CBoundingBox &rootNodeBox)
-{
-    return m_Nodes.emplace_back(CBVHTreeNode(m_Nodes.size(), rootNodeBox));
-}
-
 CBoundingBox CBVHTree::CalcNodeBoundingBox(ObjectList nodeObjects, float epsilon)
 {
     CBoundingBox nodeBounds;
@@ -239,19 +353,11 @@ CBoundingBox CBVHTree::CalcNodeBoundingBox(ObjectList nodeObjects, float epsilon
     return CBoundingBox(nodeBounds.GetMins() - fudge, nodeBounds.GetMaxs() + fudge);
 }
 
-CBoundingBox CBVHTree::GetRootBoundingBox()
+std::vector<int> CBVHTree::GetGameObjects()
 {
-    CBoundingBox rootNodeBox;
-    for (const CEntityDescription &desc : *m_DescList) {
-        rootNodeBox.CombineWith(desc.GetBoundingBox());
-    }
-    return rootNodeBox;
-}
-
-std::vector<int> CBVHTree::GetRootObjectList()
-{
+    // skip worldspawn here
     std::vector<int> objectList;
-    for (size_t i = 0; i < m_DescList->size(); ++i) {
+    for (size_t i = 1; i < m_DescList->size(); ++i) {
         objectList.push_back(i);
     }
     return objectList;

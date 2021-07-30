@@ -1,6 +1,10 @@
 #include "bvh_tree_node.h"
 #include "exception.h"
 
+CBVHTreeNode::CBVHTreeNode()
+{
+}
+
 CBVHTreeNode::CBVHTreeNode(int index, const CBoundingBox &box)
 {
     m_iIndex = index;

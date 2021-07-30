@@ -107,7 +107,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         else
             screenText.Push("Entity properties not found");
     }
-    g_EntityDictionary.VisualizeTree(true);
+
     Utils::DrawStringStack(
         static_cast<int>(ConVars::gsm_margin_right->value), 
         static_cast<int>(ConVars::gsm_margin_up->value), 
@@ -121,7 +121,6 @@ void CModeEntityReport::Render3D()
     CBoundingBox entityBbox;
     const Color colorGreen = Color(0.f, 1.f, 0.f, 1.f);
 
-    g_EntityDictionary.VisualizeTree(false);
     if (m_iEntityIndex <= 0) 
         return;
 

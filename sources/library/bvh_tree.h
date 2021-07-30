@@ -12,21 +12,24 @@ public:
     CBVHTree(const std::vector<CEntityDescription> *descList);
     void Reset();
     void Build();
+    double ComputeCost() const;
     bool FindLeaf(const CBoundingBox &box, int &nodeIndex);
     void Visualize(bool textRendering);
-    std::string GetGraphvisDescription();
     inline const CBVHTreeNode &GetNode(int index) const { return m_Nodes[index]; }
 
 private:
     typedef std::vector<int> ObjectList;
+    inline CBVHTreeNode &NodeAt(int index) { return m_Nodes[index]; }
 
-    inline bool IsBuilt() const { return m_Nodes.size() > 0; };
+    void PrintReport();
+    void BuildTopDown();
+    void BuildBottomUp();
+    std::vector<int> MergeLevelNodes(std::vector<int> &levelNodes);
     void SplitNode(CBVHTreeNode &node, ObjectList nodeObjects);
     int AppendNode(const CBoundingBox &nodeBounds, int parent = -1);
-    CBVHTreeNode &AppendRootNode(const CBoundingBox &rootNodeBox);
-    CBoundingBox CalcNodeBoundingBox(ObjectList, float epsilon = 0.00001f);
-    CBoundingBox GetRootBoundingBox();
-    std::vector<int> GetRootObjectList();
+    CBoundingBox CalcNodeBoundingBox(ObjectList, float epsilon = 0.001f);
+    std::string GetGraphvisDescription() const;
+    std::vector<int> GetGameObjects();
 
     int                       m_iRootNodeIndex = -1;
     std::stack<int>           m_NodesStack;
