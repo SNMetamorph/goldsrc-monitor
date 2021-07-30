@@ -120,11 +120,18 @@ void CEntityDescription::ParseEntityData()
             std::istringstream angles_str(value);
             angles_str >> m_vecAngles.x >> m_vecAngles.y >> m_vecAngles.z;
         }
-        else {
-            ++it;
-            continue; // keep unhandled parameters
+        else 
+        {
+            // check if we should remove property
+            if (key.compare("renderamt") != 0 && 
+                key.compare("rendercolor") != 0 && 
+                key.compare("rendermode") != 0)
+            {
+                ++it;
+                continue; // keep unhandled properties
+            }
         };
-        // erase parameters which already parsed
+        // erase properties which already parsed
         it = m_EntityProps.erase(it);
     }
 }
