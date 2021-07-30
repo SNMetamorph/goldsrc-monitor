@@ -193,16 +193,14 @@ void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &s
     }
 }
 
-void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size)
+void Utils::DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size, Color color)
 {
-    const float colorR = 0.0f;
-    const float colorG = 1.0f;
-    const float colorB = 0.0f;
     const bool drawFaces = false;
     const bool drawEdges = true;
     const vec3_t bboxMin = vec3_t(0, 0, 0) - size / 2;
     Matrix4x4<vec_t> transformMat;
-    
+    color.Normalize();
+
     // assumed that point (0, 0, 0) located in center of bbox
     vec3_t boxVertices[8] = {
         {bboxMin.x, bboxMin.y, bboxMin.z},
@@ -244,7 +242,7 @@ void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, con
             1, 4, 5, 0  // 6 face
         };
         glBegin(GL_QUADS);
-        glColor4f(colorR, colorG, colorB, 0.3f);
+        glColor4f(color.Red(), color.Green(), color.Blue(), 0.3f);
         for (int i = 0; i < sizeof(faceIndices) / sizeof(faceIndices[0]); ++i) {
             glVertex3fv(boxVertices[faceIndices[i]]);
         }
@@ -259,7 +257,7 @@ void Utils::DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, con
         };
         glDisable(GL_DEPTH_TEST);
         glBegin(GL_LINE_LOOP);
-        glColor4f(colorR, colorG, colorB, 1.0f);
+        glColor4f(color.Red(), color.Green(), color.Blue(), 1.0f);
         for (int i = 0; i < sizeof(edgeIndices) / sizeof(edgeIndices[0]); ++i) {
             glVertex3fv(boxVertices[edgeIndices[i]]);
         }

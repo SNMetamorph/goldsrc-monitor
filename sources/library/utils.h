@@ -3,6 +3,7 @@
 #include "string_stack.h"
 #include "memory_pattern.h"
 #include "bounding_box.h"
+#include "color.h"
 #include "stdafx.h"
 #include <stdint.h>
 #include <string>
@@ -25,7 +26,7 @@ namespace Utils
     int GetStringWidth(const char *str);
     bool WorldToScreen(int w, int h, int &x, int &y, const vec3_t &origin);
     void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
-    void DrawEntityHull(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size);
+    void DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size, Color color);
     void DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b);
     void GetEntityModelName(int entityIndex, std::string &modelName);
     std::string GetCurrentMapName();
