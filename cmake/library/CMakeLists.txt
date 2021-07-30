@@ -19,6 +19,8 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/module_info.cpp"
 	"../../sources/library/application.cpp"
 	"../../sources/library/bounding_box.cpp"
+	"../../sources/library/bvh_tree.cpp"
+	"../../sources/library/bvh_tree_node.cpp"
 	"../../sources/library/local_player.cpp"
 	"../../sources/library/client_module.cpp"
 	"../../sources/library/server_module.cpp"

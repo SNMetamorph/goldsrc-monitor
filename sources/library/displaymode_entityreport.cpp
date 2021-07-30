@@ -107,6 +107,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
         else
             screenText.Push("Entity properties not found");
     }
+
     Utils::DrawStringStack(
         static_cast<int>(ConVars::gsm_margin_right->value), 
         static_cast<int>(ConVars::gsm_margin_up->value), 
@@ -118,9 +119,7 @@ void CModeEntityReport::Render3D()
 {
     cl_entity_t *entity;
     CBoundingBox entityBbox;
-    const float colorR = 0.0f;
-    const float colorG = 1.0f;
-    const float colorB = 0.0f;
+    const Color colorGreen = Color(0.f, 1.f, 0.f, 1.f);
 
     if (m_iEntityIndex <= 0) 
         return;
@@ -130,7 +129,7 @@ void CModeEntityReport::Render3D()
         entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
         Utils::GetEntityBoundingBox(m_iEntityIndex, entityBbox);
         vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
-        Utils::DrawEntityHull(entity->origin, centerOffset, entity->angles, entityBbox.GetSize());
+        Utils::DrawCuboid(entity->origin, centerOffset, entity->angles, entityBbox.GetSize(), colorGreen);
     }
 }
 

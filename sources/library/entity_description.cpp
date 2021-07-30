@@ -47,6 +47,9 @@ void CEntityDescription::Reset()
     const vec3_t vecNull = vec3_t(0, 0, 0);
     m_vecOrigin = vecNull;
     m_vecAngles = vecNull;
+    m_szClassname.clear();
+    m_szTargetname.clear();
+    m_szModelName.clear();
     m_BoundingBox = CBoundingBox(vecNull);
     m_iAssociatedEntity = -1;
 }

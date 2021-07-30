@@ -16,6 +16,12 @@ void CEntityDictionary::Initialize()
     Reset();
     ParseEntityData();
     FindEntityAssociations();
+    BuildDescriptionsTree();
+}
+
+void CEntityDictionary::VisualizeTree(bool textRendering)
+{
+    m_EntityDescTree.Visualize(textRendering);
 }
 
 void CEntityDictionary::Reset()
@@ -25,27 +31,22 @@ void CEntityDictionary::Reset()
 
 bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription)
 {
+    int nodeIndex;
     CBoundingBox entityBoundingBox;
     Utils::GetEntityBoundingBox(entityIndex, entityBoundingBox);
-    for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
+    if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex)) 
     {
-        CEntityDescription &entityDesc = *it;
-        if (entityDesc.GetAssocEntityIndex() == entityIndex) {
-            destDescription = entityDesc;
-            return true;
-        }
-
-        const CBoundingBox &descBoundingBox = entityDesc.GetBoundingBox();
-        const vec3_t diffMin = entityBoundingBox.GetMins() - descBoundingBox.GetMins();
-        const vec3_t diffMax = entityBoundingBox.GetMaxs() - descBoundingBox.GetMaxs();
-        if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
-        {
-            entityDesc.AssociateEntity(entityIndex);
-            destDescription = entityDesc;
-            return true;
-        }
+        const CBVHTreeNode &node = m_EntityDescTree.GetNode(nodeIndex);
+        destDescription = m_EntityDescList[node.GetDescriptionIndex()];
+        return true;
     }
     return false;
+}
+
+void CEntityDictionary::BuildDescriptionsTree()
+{
+    m_EntityDescTree.Reset();
+    m_EntityDescTree.Build();
 }
 
 void CEntityDictionary::ParseEntityData()
