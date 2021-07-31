@@ -4,5 +4,5 @@ rem Assumed that GoldSrc Monitor located in directory C:\goldsrc-monitor
 rem But you just can change it to yours in line number 6
 @echo off
 set DIR_GOLDSRC_MONITOR="C:\goldsrc-monitor"
-start "" %DIR_GOLDSRC_MONITOR%\gsm-loader.exe +inject_delay 5000 +process_name hl.exe +library_name "%DIR_GOLDSRC_MONITOR%\gsm-library.dll"
-start "" hl.exe -game ts
+start "" %DIR_GOLDSRC_MONITOR%\gsm-loader.exe +process_name hl.exe +library_name "%DIR_GOLDSRC_MONITOR%\gsm-library.dll"
+start "" hl.exe -game valve

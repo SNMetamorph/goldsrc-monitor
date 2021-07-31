@@ -1,0 +1,1 @@
+start "" gsm-loader.exe +process_name xash3d.exe
