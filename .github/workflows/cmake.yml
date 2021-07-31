@@ -2,9 +2,9 @@ name: CMake
 
 on:
   push:
-    # Run workflow only if version-* tag was pushed
+    # Run workflow only if v* tag was pushed
     tags:
-      - 'version-*'
+      - 'v*'
 
 jobs:
   build-win:
@@ -65,7 +65,8 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Get tag
+        # ${{github.ref}} can't be used as variable, because it starts with ref/tags/, so we need to extract actual tag name
+      - name: Get tag name
         id: tag
         uses: dawidd6/action-get-tag@v1
 
