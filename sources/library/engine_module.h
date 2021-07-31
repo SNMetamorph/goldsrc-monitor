@@ -1,5 +1,4 @@
 #pragma once
-#include "hlsdk.h"
 #include "module_info.h"
 #include <windows.h>
 #include <stdint.h>
@@ -10,6 +9,7 @@ public:
     static CEngineModule& GetInstance();
 
     bool FindHandle();
+    bool GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames);
     inline bool IsXashEngine() const        { return m_isXashEngine; }
     inline bool IsSoftwareRenderer() const  { return m_isSoftwareRenderer; };
     inline HMODULE GetHandle() const        { return m_hModule; };

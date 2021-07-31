@@ -28,29 +28,35 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
     uint8_t *scanStartAddr;
     uint8_t *moduleEndAddr;
     uint8_t *moduleAddr;
+    uint8_t *pfnSPR_Load;
+    uint8_t *pfnSPR_Frames;
     const CBuildInfoEntry &buildInfoEntry = buildInfo.GetInfoEntry();
 
     moduleAddr = g_EngineModule.GetAddress();
     scanStartAddr = moduleAddr;
     moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
-
+    
+    // obtain address directly without searching
     if (buildInfoEntry.HasClientEngfuncsOffset()) {
         g_pClientEngfuncs = (cl_enginefunc_t *)(moduleAddr + buildInfoEntry.GetClientEngfuncsOffset());
         return true;
     }
 
-    uint8_t *pfnSPR_Load = static_cast<uint8_t*>(buildInfo.FindFunctionAddress(
-        FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
-    ));
-    if (!pfnSPR_Load) {
-        EXCEPT("SPR_Load() address not found");
-    }
+    if (!g_EngineModule.GetFunctionsFromAPI(&pfnSPR_Load, &pfnSPR_Frames))
+    {
+        pfnSPR_Load = static_cast<uint8_t *>(buildInfo.FindFunctionAddress(
+            FUNCTYPE_SPR_LOAD, moduleAddr, moduleEndAddr
+            ));
+        if (!pfnSPR_Load) {
+            EXCEPT("SPR_Load() address not found");
+        }
 
-    uint8_t *pfnSPR_Frames = static_cast<uint8_t*>(buildInfo.FindFunctionAddress(
-        FUNCTYPE_SPR_FRAMES, moduleAddr, moduleEndAddr
-    ));
-    if (!pfnSPR_Frames) {
-        EXCEPT("SPR_Frames() address not found");
+        pfnSPR_Frames = static_cast<uint8_t *>(buildInfo.FindFunctionAddress(
+            FUNCTYPE_SPR_FRAMES, moduleAddr, moduleEndAddr
+            ));
+        if (!pfnSPR_Frames) {
+            EXCEPT("SPR_Frames() address not found");
+        }
     }
 
     while (true)
