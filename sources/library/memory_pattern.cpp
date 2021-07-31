@@ -2,6 +2,7 @@
 #include "exception.h"
 #include <exception>
 #include <sstream>
+#include <iterator>
 
 CMemoryPattern::CMemoryPattern(const std::string &pattern)
 {

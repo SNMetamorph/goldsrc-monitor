@@ -183,7 +183,7 @@ void CApplication::InitializeConVars(ModuleInfo &engineLib)
 
 void CApplication::SetCurrentDisplayMode()
 {
-    DisplayModeIndex displayMode = static_cast<DisplayModeIndex>(ConVars::gsm_mode->value);
+    DisplayModeIndex displayMode = static_cast<DisplayModeIndex>((int)ConVars::gsm_mode->value);
     for (IDisplayMode *mode : m_pDisplayModes) 
     {
         if (mode->GetModeIndex() == displayMode) 
