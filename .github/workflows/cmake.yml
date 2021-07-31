@@ -51,7 +51,7 @@ jobs:
           mkdir publish\${{env.BUILD_TYPE}}\cfg
           move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\${{env.BUILD_TYPE}}\gsm-library.dll
           move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\${{env.BUILD_TYPE}}\gsm-loader.exe
-          move resources publish\${{env.BUILD_TYPE}}
+          move resources\*.* publish\${{env.BUILD_TYPE}}\
           move publish\${{env.BUILD_TYPE}}\gsm_config.cfg publish\${{env.BUILD_TYPE}}\cfg\gsm_config.cfg
 
       - name: Upload artifacts
