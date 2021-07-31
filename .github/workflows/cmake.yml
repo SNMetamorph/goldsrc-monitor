@@ -49,8 +49,8 @@ jobs:
         run: |
           mkdir publish\${{env.BUILD_TYPE}}
           mkdir publish\${{env.BUILD_TYPE}}\cfg
-          move build\sources\${{env.BUILD_TYPE}}\gsm-library.dll publish\${{env.BUILD_TYPE}}\gsm-library.dll
-          move build\sources\${{env.BUILD_TYPE}}\gsm-library.exe publish\${{env.BUILD_TYPE}}\gsm-library.exe
+          move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\${{env.BUILD_TYPE}}\gsm-library.dll
+          move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\${{env.BUILD_TYPE}}\gsm-loader.exe
           move resources publish\${{env.BUILD_TYPE}}
           move publish\${{env.BUILD_TYPE}}\gsm_config.cfg publish\${{env.BUILD_TYPE}}\cfg\gsm_config.cfg
 
