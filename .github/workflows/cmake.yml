@@ -2,7 +2,7 @@ name: CMake
 
 on:
   push:
-    # Run workflow only if commit with version-* tag was pushed
+    # Run workflow only version-* tag was pushed
     tags:
       - 'version-*'
 
@@ -50,9 +50,8 @@ jobs:
           mkdir publish\${{env.BUILD_TYPE}}\cfg
           move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\${{env.BUILD_TYPE}}\gsm-library.dll
           move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\${{env.BUILD_TYPE}}\gsm-loader.exe
-          move resources\*.* publish\${{env.BUILD_TYPE}}\
-          move publish\${{env.BUILD_TYPE}}\gsm_config.cfg publish\${{env.BUILD_TYPE}}\cfg\gsm_config.cfg
-          powershell Compress-Archive publish win32.zip
+          move resources\program_dir\*.* publish\${{env.BUILD_TYPE}}\
+          powershell Compress-Archive -Path publish\${{env.BUILD_TYPE}}\* win32.zip
 
       - name: Create release
         id: create_release
