@@ -1,0 +1,82 @@
+name: CMake
+
+on:
+  push:
+    # Run workflow only if v* tag was pushed
+    tags:
+      - 'v*'
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        conf: [Release]
+
+    env:
+      BUILD_TYPE: ${{ matrix.conf }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Create Build Environment
+        # Some projects don't allow in-source building, so create a separate build directory
+        # We'll use this as our working directory for all subsequent commands
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Configure CMake
+        # Use a bash shell so we can use the same syntax for environment variable
+        # access regardless of the host operating system
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        # Note the current convention is to use the -S and -B options here to specify source
+        # and build directories, but this is only available with CMake 3.13 and higher.
+        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -T v141_xp -A win32 -Wno-dev
+
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        # Execute the build.  You can specify a specific target with "--target <NAME>"
+        run: cmake --build . --config $BUILD_TYPE
+
+      - name: Prepare artifacts
+        run: |
+          mkdir publish\${{env.BUILD_TYPE}}
+          mkdir publish\${{env.BUILD_TYPE}}\cfg
+          move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\${{env.BUILD_TYPE}}\gsm-library.dll
+          move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\${{env.BUILD_TYPE}}\gsm-loader.exe
+          move resources\*.* publish\${{env.BUILD_TYPE}}\
+          move publish\${{env.BUILD_TYPE}}\gsm_config.cfg publish\${{env.BUILD_TYPE}}\cfg\gsm_config.cfg
+          powershell Compress-Archive publish win32.zip
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+        # ${{github.ref}} can't be used as variable, because it starts with ref/tags/, so we need to extract actual tag name
+      - name: Get tag name
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+
+      - name: Upload artifacts
+        id: upload-artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./win32.zip
+          asset_name: gsm-${{ steps.tag.outputs.tag }}-win32.zip
+          asset_content_type: application/zip
