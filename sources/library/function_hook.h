@@ -13,6 +13,9 @@ public:
 
     bool Hook(T origFunc, T callbackFunc)
     {
+        if (origFunc == nullptr) {
+            return false;
+        }
         m_pDetour = new PLH::x86Detour(
             reinterpret_cast<char *>(origFunc),
             reinterpret_cast<char *>(callbackFunc),

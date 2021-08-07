@@ -87,7 +87,7 @@ void CHooks::Apply()
 
     if (!g_hookDrawTriangles.IsHooked())
     {
-        pfnDrawTriangles_t pfnDrawTriangles = (pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawNormalTriangles");
+        pfnDrawTriangles = (pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawNormalTriangles");
         if (!g_hookDrawTriangles.Hook(pfnDrawTriangles, &HookDrawTriangles))
         {
             g_pClientEngfuncs->Con_Printf(
