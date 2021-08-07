@@ -16,7 +16,7 @@ CClientModule& CClientModule::GetInstance()
 bool CClientModule::FindHandle()
 {
     HANDLE currProcess = GetCurrentProcess();
-    m_hModule = Utils::FindModuleByExport(currProcess, "V_CalcRefdef");
+    m_hModule = Utils::FindModuleByExport(currProcess, "HUD_ProcessPlayerState");
     Utils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
     return m_hModule != NULL;
 }
