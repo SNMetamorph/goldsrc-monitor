@@ -11,6 +11,7 @@ public:
     void Reset();
     void Initialize();
     void VisualizeTree(bool textRendering);
+    void VisualizeDescriptions() const;
     bool FindDescription(int entityIndex, CEntityDescription &destDescription);
 
     inline int GetDescriptionsCount() const { return m_EntityDescList.size(); }

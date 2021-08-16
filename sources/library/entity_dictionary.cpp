@@ -24,6 +24,21 @@ void CEntityDictionary::VisualizeTree(bool textRendering)
     m_EntityDescTree.Visualize(textRendering);
 }
 
+void CEntityDictionary::VisualizeDescriptions() const
+{
+    for (int i = 0; i < m_EntityDescList.size(); ++i)
+    {
+        const CEntityDescription &description = m_EntityDescList[i];
+        Utils::DrawCuboid(
+            description.GetOrigin(), 
+            vec3_t(0, 0, 0), 
+            description.GetAngles(), 
+            description.GetBoundingBox().GetSize(), 
+            Color::GetRandom(i)
+        );
+    }
+}
+
 void CEntityDictionary::Reset()
 {
     m_EntityDescList.clear();
