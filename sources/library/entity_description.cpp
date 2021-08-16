@@ -1,5 +1,6 @@
 #include "entity_description.h"
 #include "client_module.h"
+#include "engine_module.h"
 #include "studio.h"
 #include <sstream>
 
@@ -138,8 +139,13 @@ void CEntityDescription::ParseEntityData()
 
 model_t *CEntityDescription::FindModelByName(const char *name)
 {
-    const int modelIndex = g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(name);
-    if (modelIndex > 0) {
+    int modelIndex = g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(name);
+    if (modelIndex > 0) 
+    {
+        // https://github.com/FWGS/xash3d-fwgs/issues/518
+        if (g_EngineModule.IsXashEngine()) {
+            modelIndex -= 1;
+        }
         return g_pClientEngfuncs->hudGetModelByIndex(modelIndex);
     }
     return nullptr;
