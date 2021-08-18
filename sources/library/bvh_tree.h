@@ -13,7 +13,7 @@ public:
     void Reset();
     void Build();
     double ComputeCost() const;
-    bool FindLeaf(const CBoundingBox &box, int &nodeIndex);
+    bool FindLeaf(const CBoundingBox &box, int &nodeIndex, int &iterCount);
     void Visualize(bool textRendering);
     inline const CBVHTreeNode &GetNode(int index) const { return m_Nodes[index]; }
 

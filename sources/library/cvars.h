@@ -10,6 +10,7 @@ public:
     static cvar_t *gsm_margin_up;
     static cvar_t *gsm_margin_right;
     static cvar_t *gsm_mode;
+    static cvar_t *gsm_debug;
     static cvar_t *gsm_thirdperson;
     static cvar_t *gsm_thirdperson_dist;
     static cvar_t *sys_timescale;

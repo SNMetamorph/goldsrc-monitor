@@ -15,6 +15,7 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
     vec3_t entityOrigin;
     vec3_t entityAngles;
     CBoundingBox entityBbox;
+    int debugMode = ConVars::gsm_debug->value;
 
     if (!g_EntityDictionary.IsInitialized())
         g_EntityDictionary.Initialize();
@@ -36,10 +37,11 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
     }
     else
     {
+        int iterCount;
         CEntityDescription entityDesc;
         cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
         vec3_t entityVelocity = Utils::GetEntityVelocityApprox(m_iEntityIndex);
-        bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc);
+        bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc, iterCount);
         const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
 
         entityAngles = entity->curstate.angles;
@@ -89,6 +91,10 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
         if (isDescFound)
         {
+            if (debugMode == 2) {
+                screenText.PushPrintf("Search iteration count: %d", iterCount);
+            }
+
             const int propsCount = entityDesc.GetPropertiesCount();
             if (propsCount > 0)
             {
@@ -108,6 +114,10 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
             screenText.Push("Entity properties not found");
     }
 
+    if (debugMode == 2) {
+        g_EntityDictionary.VisualizeTree(true);
+    }
+
     Utils::DrawStringStack(
         static_cast<int>(ConVars::gsm_margin_right->value), 
         static_cast<int>(ConVars::gsm_margin_up->value), 
@@ -119,12 +129,17 @@ void CModeEntityReport::Render3D()
 {
     cl_entity_t *entity;
     CBoundingBox entityBbox;
+    int debugMode = ConVars::gsm_debug->value;
     const Color colorGreen = Color(0.f, 1.f, 0.f, 1.f);
 
-    if (m_iEntityIndex <= 0) 
-        return;
+    if (debugMode == 1) {
+        g_EntityDictionary.VisualizeDescriptions();
+    }
+    else if (debugMode == 2) {
+        g_EntityDictionary.VisualizeTree(false);
+    }
 
-    if (!g_EngineModule.IsSoftwareRenderer())
+    if (m_iEntityIndex > 0 && !g_EngineModule.IsSoftwareRenderer())
     {
         entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
         Utils::GetEntityBoundingBox(m_iEntityIndex, entityBbox);

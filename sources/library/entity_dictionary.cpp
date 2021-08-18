@@ -44,12 +44,12 @@ void CEntityDictionary::Reset()
     m_EntityDescList.clear();
 }
 
-bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription)
+bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription, int &iterCount)
 {
     int nodeIndex;
     CBoundingBox entityBoundingBox;
     Utils::GetEntityBoundingBox(entityIndex, entityBoundingBox);
-    if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex)) 
+    if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex, iterCount)) 
     {
         const CBVHTreeNode &node = m_EntityDescTree.GetNode(nodeIndex);
         destDescription = m_EntityDescList[node.GetDescriptionIndex()];

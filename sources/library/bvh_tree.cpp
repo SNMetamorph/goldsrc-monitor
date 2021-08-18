@@ -1,6 +1,7 @@
 #include "bvh_tree.h"
 #include "utils.h"
 #include "client_module.h"
+#include "cvars.h"
 #include <cmath>
 #include <array>
 #include <cfloat>
@@ -20,14 +21,17 @@ void CBVHTree::Reset()
 void CBVHTree::Build()
 {
     BuildBottomUp();
-    //PrintReport();
+    if ((int)ConVars::gsm_debug->value == 2) {
+        PrintReport();
+    }
 }
 
-bool CBVHTree::FindLeaf(const CBoundingBox &box, int &nodeIndex)
+bool CBVHTree::FindLeaf(const CBoundingBox &box, int &nodeIndex, int &iterCount)
 {
-    int iterations = 0;
     std::stack<int> nodesStack;
     nodesStack.push(m_iRootNodeIndex);
+    iterCount = 0;
+
     while (!nodesStack.empty())
     {
         int currNode = nodesStack.top();
@@ -58,7 +62,7 @@ bool CBVHTree::FindLeaf(const CBoundingBox &box, int &nodeIndex)
                 nodesStack.push(rightChild);
             }
         }
-        ++iterations;
+        ++iterCount;
     }
     return false;
 }
@@ -78,7 +82,7 @@ double CBVHTree::ComputeCost() const
 
 void CBVHTree::Visualize(bool textRendering)
 {
-    if (m_Nodes.size() <= 0)
+    if (m_Nodes.size() < 1)
         return;
 
     std::stack<int> nodesStack;
