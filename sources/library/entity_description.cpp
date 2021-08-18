@@ -100,6 +100,7 @@ void CEntityDescription::EstimateBoundingBox()
 
 void CEntityDescription::ParseEntityData()
 {
+    std::istringstream tokenStream;
     for (auto it = m_EntityProps.begin(); it != m_EntityProps.end();)
     {
         const std::string &key = it->first;
@@ -113,13 +114,13 @@ void CEntityDescription::ParseEntityData()
             m_szModelName.assign(value);
         else if (key.compare("origin") == 0)
         {
-            std::istringstream origin_str(value);
-            origin_str >> m_vecOrigin.x >> m_vecOrigin.y >> m_vecOrigin.z;
+            tokenStream.str(value);
+            tokenStream >> m_vecOrigin.x >> m_vecOrigin.y >> m_vecOrigin.z;
         }
         else if (key.compare("angles") == 0)
         {
-            std::istringstream angles_str(value);
-            angles_str >> m_vecAngles.x >> m_vecAngles.y >> m_vecAngles.z;
+            tokenStream.str(value);
+            tokenStream >> m_vecAngles.x >> m_vecAngles.y >> m_vecAngles.z;
         }
         else 
         {

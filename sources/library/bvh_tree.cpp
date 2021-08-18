@@ -148,45 +148,48 @@ std::string CBVHTree::GetGraphvisDescription() const
 
 void CBVHTree::BuildBottomUp()
 {
-    std::vector<int> objectNodes;
+    std::vector<int> inputNodes;
+    std::vector<int> outputNodes;
     std::vector<int> gameObjects = GetGameObjects();
+
+    // create and initialize leaf nodes
     m_Nodes.reserve(gameObjects.size());
     for (int i : gameObjects)
     {
         const CEntityDescription &desc = m_DescList->at(i);
         int newNode = AppendNode(desc.GetBoundingBox());
         NodeAt(newNode).SetDescriptionIndex(i);
-        objectNodes.push_back(newNode);
+        inputNodes.push_back(newNode);
     }
 
-    while (objectNodes.size() > 0) 
+    while (inputNodes.size() > 0)
     {
-        if (objectNodes.size() == 1) 
+        if (inputNodes.size() == 1)
         {
-            m_iRootNodeIndex = objectNodes[0];
+            m_iRootNodeIndex = inputNodes[0];
             return;
         }
-        objectNodes = MergeLevelNodes(objectNodes);
+        MergeLevelNodes(inputNodes, outputNodes);
+        inputNodes = outputNodes;
     }
 }
 
-std::vector<int> CBVHTree::MergeLevelNodes(std::vector<int> &levelNodes)
+void CBVHTree::MergeLevelNodes(const std::vector<int> &inputNodes, std::vector<int> &outputNodes)
 {
-    int parentIndex;
-    std::vector<int> unionNodes;
-
-    for (size_t i = 0; i < levelNodes.size(); ++i)
+    outputNodes.clear();
+    for (size_t i = 0; i < inputNodes.size(); ++i)
     {
-        CBVHTreeNode &node = NodeAt(levelNodes[i]);
+        int parentIndex;
+        CBVHTreeNode &node = NodeAt(inputNodes[i]);
         if (node.GetParent() != -1)
             continue;
 
         // find best sibling
         double minSurfaceArea = DBL_MAX;
         int siblingIndex = -1;
-        for (size_t j = 0; j < levelNodes.size(); ++j)
+        for (size_t j = 0; j < inputNodes.size(); ++j)
         {
-            CBVHTreeNode &siblingNode = NodeAt(levelNodes[j]);
+            CBVHTreeNode &siblingNode = NodeAt(inputNodes[j]);
             if (i != j && siblingNode.GetParent() == -1)
             {
                 const CBoundingBox &nodeBounds = node.GetBoundingBox();
@@ -200,11 +203,10 @@ std::vector<int> CBVHTree::MergeLevelNodes(std::vector<int> &levelNodes)
             }
         }
 
-        // if siblingIndex == -1 значит свободных нод не осталось, и нужно создать родительскую ноду только с одим потомком
         if (siblingIndex != -1)
         {
-            int leftNodeIndex = levelNodes[i];
-            int rightNodeIndex = levelNodes[siblingIndex];
+            int leftNodeIndex = inputNodes[i];
+            int rightNodeIndex = inputNodes[siblingIndex];
             CBoundingBox leftNodeBounds = NodeAt(leftNodeIndex).GetBoundingBox();
             CBoundingBox rightNodeBounds = NodeAt(rightNodeIndex).GetBoundingBox();
             CBoundingBox parentNodeBounds = leftNodeBounds.GetUnion(rightNodeBounds);
@@ -214,15 +216,18 @@ std::vector<int> CBVHTree::MergeLevelNodes(std::vector<int> &levelNodes)
             NodeAt(leftNodeIndex).SetParent(parentIndex);
             NodeAt(rightNodeIndex).SetParent(parentIndex);
         }
-        else {
-            int leftNodeIndex = levelNodes[i];
+        else 
+        {
+            // if siblingIndex == -1 means that there is no free sibling nodes left, and we should 
+            // create parent node only with current node sibling, because we haven't second sibling lol
+            // anyway this node will be merged somewhere on top levels
+            int leftNodeIndex = inputNodes[i];
             parentIndex = AppendNode(NodeAt(leftNodeIndex).GetBoundingBox());
             NodeAt(parentIndex).SetLeftChild(leftNodeIndex);
             NodeAt(leftNodeIndex).SetParent(parentIndex);
         }
-        unionNodes.push_back(parentIndex);
+        outputNodes.push_back(parentIndex);
     }
-    return unionNodes;
 }
 
 void CBVHTree::PrintReport()

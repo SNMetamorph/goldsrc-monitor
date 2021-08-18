@@ -24,7 +24,7 @@ private:
     void PrintReport();
     void BuildTopDown();
     void BuildBottomUp();
-    std::vector<int> MergeLevelNodes(std::vector<int> &levelNodes);
+    void MergeLevelNodes(const std::vector<int> &inputNodes, std::vector<int> &outputNodes);
     void SplitNode(CBVHTreeNode &node, ObjectList nodeObjects);
     int AppendNode(const CBoundingBox &nodeBounds, int parent = -1);
     CBoundingBox CalcNodeBoundingBox(ObjectList, float epsilon = 0.001f);
