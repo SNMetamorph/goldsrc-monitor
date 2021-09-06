@@ -18,7 +18,15 @@ namespace Utils
     bool GetLibraryDirectory(std::wstring &workingDir);
     void GetGameProcessName(std::string &processName);
     HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName);
-    void *FindMemoryInt32(void *startAddr, void *endAddr, uint32_t value);
+    
+#if _WIN64
+#define FindMemory FindMemoryInt64
+    void *FindMemoryInt64(void *startAddr, void *endAddr, uint64_t scanValue);
+#else
+#define FindMemory FindMemoryInt32
+    void* FindMemoryInt32(void* startAddr, void* endAddr, uint32_t scanValue);
+#endif
+
     void *FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern);
     float GetCurrentSysTime();
 

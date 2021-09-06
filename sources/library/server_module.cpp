@@ -55,7 +55,7 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
     scanStartAddr = moduleAddr;
     while (true)
     {
-        coincidenceAddr = (uint8_t *)Utils::FindMemoryInt32(
+        coincidenceAddr = (uint8_t *)Utils::FindMemory(
             scanStartAddr,
             moduleEndAddr,
             (uint32_t)pfnPrecacheModel
