@@ -125,7 +125,7 @@ bool CApplication::IsLibraryInjected(HANDLE procHandle)
 
 bool CApplication::IsGameLoaded(HWND windowHandle, int timeout)
 {
-    DWORD result;
+    DWORD_PTR result;
     return SendMessageTimeout(windowHandle, WM_NULL, NULL, NULL, SMTO_BLOCK, timeout, &result) != NULL;
 }
 
