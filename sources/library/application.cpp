@@ -86,7 +86,7 @@ void CApplication::FindTimescaleConVar(const ModuleInfo &engineLib)
 
     while (true)
     {
-        probeAddr = (uint8_t *)Utils::FindMemoryInt32(
+        probeAddr = (uint8_t *)Utils::FindMemory(
             scanStartAddr, moduleEndAddr, (uint32_t)stringAddr
         );
 

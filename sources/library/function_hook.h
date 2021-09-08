@@ -1,7 +1,16 @@
 #pragma once
-// polyhook headers
+
 #include <polyhook2/ZydisDisassembler.hpp>
+
+#if _WIN64
+#include <polyhook2/Detour/x64Detour.hpp>
+#define ARCH_DETOUR     x64Detour
+#define ARCH_ZYDIS_MODE x64
+#else
 #include <polyhook2/Detour/x86Detour.hpp>
+#define ARCH_DETOUR     x86Detour
+#define ARCH_ZYDIS_MODE x86
+#endif
 
 template <class T> class CFunctionHook
 {
@@ -16,7 +25,7 @@ public:
         if (origFunc == nullptr) {
             return false;
         }
-        m_pDetour = new PLH::x86Detour(
+        m_pDetour = new PLH::ARCH_DETOUR(
             reinterpret_cast<char *>(origFunc),
             reinterpret_cast<char *>(callbackFunc),
             &m_pfnTrampoline,
@@ -44,7 +53,7 @@ public:
 private:
     bool m_isHooked = false;
     uint64_t m_pfnTrampoline = 0;
-    PLH::x86Detour *m_pDetour = nullptr;
+    PLH::ARCH_DETOUR*m_pDetour = nullptr;
     static PLH::ZydisDisassembler m_Disassembler;
 };
-template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::x86);
+template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::ARCH_ZYDIS_MODE);

@@ -61,18 +61,23 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
 
     while (true)
     {
-        coincidenceAddr = (uint8_t *)Utils::FindMemoryInt32(
+#if _WIN64
+#define ARCH_UINT uint64_t
+#else
+#define ARCH_UINT uint32_t
+#endif
+        coincidenceAddr = (uint8_t *)Utils::FindMemory(
             scanStartAddr,
             moduleEndAddr,
-            (uint32_t)pfnSPR_Load
+            (ARCH_UINT)pfnSPR_Load
         );
         if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
             EXCEPT("valid reference to SPR_Load() not found");
         else
-            scanStartAddr = coincidenceAddr + sizeof(uint32_t);
+            scanStartAddr = coincidenceAddr + sizeof(ARCH_UINT);
 
         // check for module range to avoid segfault
-        probeAddr = *(uint8_t **)(coincidenceAddr + sizeof(uint32_t));
+        probeAddr = *(uint8_t **)(coincidenceAddr + sizeof(ARCH_UINT));
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
             if (probeAddr == pfnSPR_Frames) 
@@ -81,6 +86,8 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
                 return true; 
             }
         }
+
+#undef ARCH_UINT
     }
     return false;
 }
