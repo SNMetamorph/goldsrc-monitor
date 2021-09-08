@@ -31,6 +31,7 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
     uint8_t *moduleEndAddr;
     uint8_t *moduleAddr;
 
+    const size_t pointerSize = sizeof(void *);
     moduleAddr = g_EngineModule.GetAddress();
     moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
 
@@ -55,10 +56,10 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
     scanStartAddr = moduleAddr;
     while (true)
     {
-        coincidenceAddr = (uint8_t *)Utils::FindMemory(
+        coincidenceAddr = (uint8_t *)Utils::FindMemoryPointer(
             scanStartAddr,
             moduleEndAddr,
-            (uint32_t)pfnPrecacheModel
+            pfnPrecacheModel
         );
         if (!coincidenceAddr || scanStartAddr >= moduleEndAddr) 
         {
@@ -66,9 +67,9 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
             return false;
         }
         else
-            scanStartAddr = coincidenceAddr + sizeof(uint32_t);
+            scanStartAddr = coincidenceAddr + pointerSize;
 
-        probeAddr = *(uint8_t **)(coincidenceAddr + sizeof(uint32_t));
+        probeAddr = *(uint8_t **)(coincidenceAddr + pointerSize);
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
             pfnPrecacheSound = buildInfo.FindFunctionAddress(

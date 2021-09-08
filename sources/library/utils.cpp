@@ -136,29 +136,18 @@ bool Utils::WorldToScreen(int w, int h, int &x, int &y, const vec3_t &origin)
     return false;
 }
 
-#if _WIN64
-void* Utils::FindMemoryInt64(void* startAddr, void* endAddr, uint64_t scanValue)
+void *Utils::FindMemoryPointer(void *startAddr, void *endAddr, void *scanValue)
 {
-    void* valueAddr = nullptr;
-    uint64_t* totalEndAddr = (uint64_t*)endAddr - sizeof(scanValue);
-    for (uint64_t* i = (uint64_t*)startAddr; i <= totalEndAddr; ++i)
-    {
-        if (i[0] == scanValue)
-        {
-            valueAddr = i;
-            break;
-        }
-    }
-    return valueAddr;
-}
+#ifdef APP_SUPPORT_64BIT
+    typedef uint64_t PointerSize;
 #else
-void* Utils::FindMemoryInt32(void* startAddr, void* endAddr, uint32_t scanValue)
-{
-    void* valueAddr = nullptr;
-    uint32_t* totalEndAddr = (uint32_t*)endAddr - sizeof(scanValue);
-    for (uint64_t* i = (uint32_t*)startAddr; i <= totalEndAddr; ++i)
+    typedef uint32_t PointerSize;
+#endif
+    void *valueAddr = nullptr;
+    void *totalEndAddr = (PointerSize *)endAddr - sizeof(scanValue);
+    for (PointerSize *i = (PointerSize *)startAddr; i <= totalEndAddr; ++i)
     {
-        if (i[0] == scanValue)
+        if (i[0] == (PointerSize)scanValue)
         {
             valueAddr = i;
             break;
@@ -166,8 +155,6 @@ void* Utils::FindMemoryInt32(void* startAddr, void* endAddr, uint32_t scanValue)
     }
     return valueAddr;
 }
-#endif
-
 
 cvar_t *Utils::RegisterConVar(const char *name, const char *value, int flags)
 {

@@ -99,8 +99,8 @@ void CHooks::Apply()
 
     if (!g_hookIsThirdPerson.IsHooked() || !g_hookCameraOffset.IsHooked())
     {
-        if (g_hookIsThirdPerson.IsHooked()) g_hookIsThirdPerson.Unhook();
-        if (g_hookCameraOffset.IsHooked()) g_hookCameraOffset.Unhook();
+        g_hookIsThirdPerson.Unhook();
+        g_hookCameraOffset.Unhook();
         g_pClientEngfuncs->Con_Printf(
             "WARNING: IsThirdPerson() hooking failed: "
             "command gsm_thirdperson will not work."

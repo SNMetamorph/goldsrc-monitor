@@ -2,7 +2,7 @@
 
 #include <polyhook2/ZydisDisassembler.hpp>
 
-#if _WIN64
+#if APP_SUPPORT_64BIT
 #include <polyhook2/Detour/x64Detour.hpp>
 #define ARCH_DETOUR     x64Detour
 #define ARCH_ZYDIS_MODE x64
@@ -36,7 +36,7 @@ public:
     };
     bool Unhook()
     {
-        if (m_pDetour)
+        if (m_pDetour && m_isHooked)
         {
             bool isUnhooked = m_pDetour->unHook();
             if (isUnhooked)
@@ -53,7 +53,7 @@ public:
 private:
     bool m_isHooked = false;
     uint64_t m_pfnTrampoline = 0;
-    PLH::ARCH_DETOUR*m_pDetour = nullptr;
+    PLH::ARCH_DETOUR *m_pDetour = nullptr;
     static PLH::ZydisDisassembler m_Disassembler;
 };
 template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::ARCH_ZYDIS_MODE);

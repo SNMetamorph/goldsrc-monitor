@@ -125,7 +125,11 @@ bool CApplication::IsLibraryInjected(HANDLE procHandle)
 
 bool CApplication::IsGameLoaded(HWND windowHandle, int timeout)
 {
+#ifdef APP_SUPPORT_64BIT // TODO instead check for WinSDK version
     DWORD_PTR result;
+#else
+    DWORD result;
+#endif
     return SendMessageTimeout(windowHandle, WM_NULL, NULL, NULL, SMTO_BLOCK, timeout, &result) != NULL;
 }
 

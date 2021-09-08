@@ -74,6 +74,7 @@ void CApplication::FindTimescaleConVar(const ModuleInfo &engineLib)
     uint8_t *moduleStartAddr;
     uint8_t *moduleEndAddr;
     CMemoryPattern scanPattern("sys_timescale", 14);
+    const size_t pointerSize = sizeof(void *);
 
     moduleStartAddr = engineLib.baseAddress;
     moduleEndAddr = moduleStartAddr + engineLib.imageSize;
@@ -86,14 +87,14 @@ void CApplication::FindTimescaleConVar(const ModuleInfo &engineLib)
 
     while (true)
     {
-        probeAddr = (uint8_t *)Utils::FindMemory(
-            scanStartAddr, moduleEndAddr, (uint32_t)stringAddr
+        probeAddr = (uint8_t *)Utils::FindMemoryPointer(
+            scanStartAddr, moduleEndAddr, stringAddr
         );
 
         if (!probeAddr || scanStartAddr >= moduleEndAddr)
             return;
         else
-            scanStartAddr = probeAddr + sizeof(uint32_t);
+            scanStartAddr = probeAddr + pointerSize;
 
         if (probeAddr >= moduleStartAddr && probeAddr < moduleEndAddr)
         {
