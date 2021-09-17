@@ -33,6 +33,7 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/library/display_mode.h"
 	"../../sources/library/displaymode_angletracking.cpp"
 	"../../sources/library/displaymode_entityreport.cpp"
+	"../../sources/library/displaymode_facereport.cpp"
 	"../../sources/library/displaymode_full.cpp"
 	"../../sources/library/displaymode_measurement.cpp"
 	"../../sources/library/displaymode_speedometer.cpp"
