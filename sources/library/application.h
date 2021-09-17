@@ -10,12 +10,6 @@
 #include <vector>
 #include <stdint.h>
 
-#include "displaymode_full.h"
-#include "displaymode_measurement.h"
-#include "displaymode_speedometer.h"
-#include "displaymode_entityreport.h"
-#include "displaymode_angletracking.h"
-
 class CApplication
 {
 public:

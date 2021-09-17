@@ -8,6 +8,12 @@
 #include "engine_module.h"
 #include "client_module.h"
 #include "server_module.h"
+#include "displaymode_full.h"
+#include "displaymode_measurement.h"
+#include "displaymode_speedometer.h"
+#include "displaymode_entityreport.h"
+#include "displaymode_angletracking.h"
+#include "displaymode_facereport.h"
 #include <stdint.h>
 
 CApplication &g_Application = CApplication::GetInstance();
@@ -50,6 +56,7 @@ void CApplication::InitializeDisplayModes()
     static CModeEntityReport modeEntityReport;
     static CModeMeasurement modeMeasurement;
     static CModeAngleTracking modeAngleTracking;
+    static CModeFaceReport modeFaceReport;
 
     m_pDisplayModes.clear();
     m_pDisplayModes.push_back(&modeFull);
@@ -57,6 +64,7 @@ void CApplication::InitializeDisplayModes()
     m_pDisplayModes.push_back(&modeEntityReport);
     m_pDisplayModes.push_back(&modeMeasurement);
     m_pDisplayModes.push_back(&modeAngleTracking);
+    m_pDisplayModes.push_back(&modeFaceReport);
 }
 
 void CApplication::HandleChangelevel()
