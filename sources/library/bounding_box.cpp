@@ -48,6 +48,25 @@ void CBoundingBox::CombineWith(const CBoundingBox &operand)
     Initialize(unionMins, unionMaxs);
 }
 
+void CBoundingBox::ExpandToPoint(const vec3_t &point)
+{
+    if (point.x < m_vecMins.x)
+        m_vecMins.x = point.x;
+    if (point.y < m_vecMins.y)
+        m_vecMins.y = point.y;
+    if (point.z < m_vecMins.z)
+        m_vecMins.z = point.z;
+
+    if (point.x > m_vecMaxs.x)
+        m_vecMaxs.x = point.x;
+    if (point.y > m_vecMaxs.y)
+        m_vecMaxs.y = point.y;
+    if (point.z > m_vecMaxs.z)
+        m_vecMaxs.z = point.z;
+
+    Initialize(m_vecMins, m_vecMaxs);
+}
+
 bool CBoundingBox::Contains(const CBoundingBox &operand) const
 {
     const vec3_t &mins = operand.GetMins();

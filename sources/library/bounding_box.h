@@ -13,6 +13,7 @@ public:
     void SetCenterToPoint(const vec3_t &point);
     CBoundingBox GetUnion(const CBoundingBox &operand) const;
     void CombineWith(const CBoundingBox &operand);
+    void ExpandToPoint(const vec3_t &point);
     bool Contains(const CBoundingBox &operand) const;
     bool ContainsPoint(const vec3_t &point) const;
 
