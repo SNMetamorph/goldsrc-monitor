@@ -81,7 +81,7 @@ void CHooks::Apply()
     {
         g_pClientEngfuncs->Con_Printf(
             "WARNING: KeyEvent() hooking failed: "
-            "measurement mode will not react to keys."
+            "measurement mode will not react to keys.\n"
         );
     }
 
@@ -92,7 +92,7 @@ void CHooks::Apply()
         {
             g_pClientEngfuncs->Con_Printf(
                 "WARNING: DrawTriangles() hooking failed: entity "
-                "report mode will not draw entity hull."
+                "report mode will not draw entity hull.\n"
             );
         }
     }
@@ -103,7 +103,7 @@ void CHooks::Apply()
         g_hookCameraOffset.Unhook();
         g_pClientEngfuncs->Con_Printf(
             "WARNING: IsThirdPerson() hooking failed: "
-            "command gsm_thirdperson will not work."
+            "command gsm_thirdperson will not work.\n"
         );
     }
 
