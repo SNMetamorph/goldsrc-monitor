@@ -2,50 +2,49 @@
 #include "client_module.h"
 #include "utils.h"
 #include "local_player.h"
-#include <vector>
 #include <gl/GL.h>
 
 #define PlaneDiff(point,plane) (((plane)->type < 3 ? (point)[(plane)->type] : DotProduct((point), (plane)->normal)) - (plane)->dist)
+#define	SURF_PLANEBACK		2
+#define	SURF_DRAWSKY		4
+#define SURF_DRAWSPRITE		8
+#define SURF_DRAWTURB		0x10
+#define SURF_DRAWTILED		0x20
+#define SURF_DRAWBACKGROUND	0x40
 
 void CModeFaceReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     const float lineLen = 11590.0f;
+    vec3_t intersectPoint;
     vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
     vec3_t viewDir = g_LocalPlayer.GetViewDirection();
-    EngineTypes::msurface_t *surface = TraceSurface(viewOrigin, viewDir, lineLen);
+    m_pCurrentFace = TraceSurface(viewOrigin, viewDir, lineLen, intersectPoint);
     
     screenText.Clear();
-    if (surface)
+    if (m_pCurrentFace)
     {
-        color24 colorProbe = { 0 };
-        const mplane_t *plane = surface->plane;
-        const texture_t *texture = surface->texinfo->texture;
+        const mplane_t *plane = m_pCurrentFace->plane;
+        const texture_t *texture = m_pCurrentFace->texinfo->texture;
         vec3_t planeCenter = plane->normal * plane->dist;
-        vec3_t s = surface->texinfo->vecs[0];
-        vec3_t t = surface->texinfo->vecs[1];
-        int lightmapWidth = (surface->extents[0] >> 4) + 1;
-        int lightmapHeight = (surface->extents[1] >> 4) + 1;
-
-        if (surface->samples) {
-            colorProbe = surface->samples[0];
-        }
+        m_ColorProbe = { 0 };
 
         screenText.PushPrintf("Texture Name: %s", texture->name);
         screenText.PushPrintf("Width: %d", texture->width);
         screenText.PushPrintf("Height: %d", texture->height);
-        screenText.PushPrintf("Lightmap Color: %d %d %d", colorProbe.r, colorProbe.g, colorProbe.b);
-        screenText.PushPrintf("Lightmap Width: %d", lightmapWidth);
-        screenText.PushPrintf("Lightmap Height: %d", lightmapHeight);
-        screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)", planeCenter.x, planeCenter.y, planeCenter.z);
+        screenText.PushPrintf("Edges: %d", m_pCurrentFace->numedges);
         screenText.PushPrintf("Normal: (%.1f; %.1f; %.1f)", plane->normal.x, plane->normal.y, plane->normal.z);
-        screenText.PushPrintf("Vector S: (%.1f; %.1f; %.1f)", s.x, s.y, s.z);
-        screenText.PushPrintf("Vector T: (%.1f; %.1f; %.1f)", t.x, t.y, t.z);
+
+        if (GetLightmapProbe(m_pCurrentFace, intersectPoint, m_ColorProbe)) 
+        {
+            screenText.PushPrintf("Lightmap Color: %d %d %d", 
+                m_ColorProbe.r, m_ColorProbe.g, m_ColorProbe.b);
+            screenText.Push("Press V to print lightmap info");
+        } 
     }
     else {
-        screenText.Push("Face not found");
+        screenText.Push("Surface not found");
     }
    
-    m_pCurrentFace = surface;
     Utils::DrawStringStack(
         static_cast<int>(ConVars::gsm_margin_right->value),
         static_cast<int>(ConVars::gsm_margin_up->value),
@@ -64,6 +63,28 @@ void CModeFaceReport::Render3D()
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_2D);
     }
+}
+
+bool CModeFaceReport::KeyInput(int isKeyDown, int keyNum, const char *bindName)
+{
+    if (keyNum == 'v')
+    {
+        if (m_pCurrentFace)
+        {
+            const texture_t *texture = m_pCurrentFace->texinfo->texture;
+            g_pClientEngfuncs->Con_Printf("%s %d %d %d\n", 
+                texture->name, m_ColorProbe.r, m_ColorProbe.g, m_ColorProbe.b);
+            g_pClientEngfuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
+            return false;
+        }
+    }
+    return true;
+}
+
+void CModeFaceReport::HandleChangelevel()
+{
+    m_pCurrentModel = nullptr;
+    m_pCurrentFace = nullptr;
 }
 
 int CModeFaceReport::TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect)
@@ -87,24 +108,24 @@ int CModeFaceReport::TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3
 
 void CModeFaceReport::GetSurfaceBoundingBox(EngineTypes::msurface_t *surf, CBoundingBox &bbox)
 {
-    std::vector<vec3_t> vertices;
-    vertices.reserve(surf->numedges * 2);
     bbox = CBoundingBox();
-
+    m_BoundPoints.reserve(surf->numedges * 2);
+    m_BoundPoints.clear();
+ 
     for (int i = 0; i < surf->numedges; ++i)
     {
         int edgeIndex = m_pCurrentModel->surfedges[surf->firstedge + i];
         const medge_t *edge = m_pCurrentModel->edges + (edgeIndex >= 0 ? edgeIndex : -edgeIndex);
         const mvertex_t *vertex = m_pCurrentModel->vertexes + (edgeIndex >= 0 ? edge->v[0] : edge->v[1]);
-        vertices.push_back(vertex->position);
+        m_BoundPoints.push_back(vertex->position);
     }
 
-    if (vertices.size() > 0)
+    if (m_BoundPoints.size() > 0)
     {
-        bbox.SetCenterToPoint(vertices[0]);
-        for (int i = 0; i < vertices.size(); ++i)
+        bbox.SetCenterToPoint(m_BoundPoints[0]);
+        for (size_t i = 0; i < m_BoundPoints.size(); ++i)
         {
-            const vec3_t &vertex = vertices[i];
+            const vec3_t &vertex = m_BoundPoints[i];
             bbox.ExpandToPoint(vertex);
         }
     }
@@ -142,7 +163,7 @@ void CModeFaceReport::DrawSurfaceBounds(EngineTypes::msurface_t *surf)
 {
     CBoundingBox bounds;
     const vec3_t nullVec = vec3_t(0, 0, 0);
-    const Color boxColor = Color(0.f, 1.f, 0.f, 1.f);
+    const Color boxColor = Color(1.f, 0.f, 0.f, 1.f);
 
     GetSurfaceBoundingBox(surf, bounds);
     Utils::DrawCuboid(
@@ -154,28 +175,90 @@ void CModeFaceReport::DrawSurfaceBounds(EngineTypes::msurface_t *surf)
     );
 }
 
-EngineTypes::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, float distance)
+bool CModeFaceReport::IsSurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p1, vec3_t p2)
 {
-    vec3_t intersectPoint;
     CBoundingBox surfaceBounds;
-    int entityIndex = TraceEntity(origin, dir, distance, intersectPoint);
+    GetSurfaceBoundingBox(surf, surfaceBounds);
+    if (Utils::TraceBBoxLine(surfaceBounds, p1, p2) < 1.0f) {
+        return true;
+    }
+    return false;
+}
+
+bool CModeFaceReport::GetLightmapProbe(EngineTypes::msurface_t *surf, const vec3_t &point, color24 &probe)
+{
+    if (surf->flags & SURF_DRAWTILED)
+        return false; // no lightmaps
+
+    mtexinfo_t *tex = surf->texinfo;
+    int s = DotProduct(point, tex->vecs[0]) + tex->vecs[0][3];
+    int t = DotProduct(point, tex->vecs[1]) + tex->vecs[1][3];
+
+    if (s < surf->texturemins[0] || t < surf->texturemins[1])
+        return false;
+
+    int ds = s - surf->texturemins[0];
+    int dt = t - surf->texturemins[1];
+
+    if (ds > surf->extents[0] || dt > surf->extents[1])
+        return false;
+
+    if (!surf->samples)
+        return false;
+
+    ds >>= 4;
+    dt >>= 4;
+
+    color24 *lightmap = surf->samples;
+    int lw = (surf->extents[0] >> 4) + 1;
+    int lh = (surf->extents[1] >> 4) + 1;
+
+    if (lightmap)
+    {
+        // this code also should assume lightstyles but this info not available here
+        lightmap += dt * lw + ds;
+        probe.r = lightmap->r;
+        probe.g = lightmap->g;
+        probe.b = lightmap->b;
+        return true;
+    }
+    return false;
+}
+
+EngineTypes::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect)
+{
+    int entityIndex = TraceEntity(origin, dir, distance, intersect);
     cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+    model_t *worldModel = g_pClientEngfuncs->hudGetModelByIndex(1);
 
     if (entity->model->type != mod_brush) {
-        m_pCurrentModel = g_pClientEngfuncs->hudGetModelByIndex(1);
-   }
+        m_pCurrentModel = worldModel;
+    }
     else {
         m_pCurrentModel = entity->model;
     }
 
-    EngineTypes::mleaf_t *leaf = PointInLeaf(intersectPoint, (EngineTypes::mnode_t*)m_pCurrentModel->nodes);
-    if (leaf)
+    if (m_pCurrentModel == worldModel)
     {
-        for (int i = 0; i < leaf->nummarksurfaces; ++i)
+        EngineTypes::mleaf_t *leaf = PointInLeaf(intersect, (EngineTypes::mnode_t *)m_pCurrentModel->nodes);
+        if (leaf)
         {
-            EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)leaf->firstmarksurface[i];
-            GetSurfaceBoundingBox(surf, surfaceBounds);
-            if (Utils::TraceBBoxLine(surfaceBounds, origin, origin + dir * distance) < 1.0f) {
+            for (int i = 0; i < leaf->nummarksurfaces; ++i)
+            {
+                EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)leaf->firstmarksurface[i];
+                if (IsSurfaceIntersected(surf, origin, origin + dir * distance)) {
+                    return surf;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < m_pCurrentModel->nummodelsurfaces; ++i)
+        {
+            int surfIndex = m_pCurrentModel->firstmodelsurface + i;
+            EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)m_pCurrentModel->surfaces + surfIndex;
+            if (IsSurfaceIntersected(surf, origin, origin + dir * distance)) {
                 return surf;
             }
         }
