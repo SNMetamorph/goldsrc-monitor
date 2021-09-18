@@ -16,7 +16,6 @@ NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
     // call original function
     PLH::FnCast(g_hookRedraw.GetTrampolineAddr(), CHooks::pfnRedraw_t())(time, intermission);
-    g_Application.CheckForChangelevel(time);
     if (g_pPlayerMove)
     {
         bool isIntermission = intermission != 0;
@@ -29,6 +28,7 @@ NOINLINE static void __cdecl HookPlayerMove(playermove_t *pmove, int server)
 {
     PLH::FnCast(g_hookPlayerMove.GetTrampolineAddr(), CHooks::pfnPlayerMove_t())(pmove, server);
     g_LocalPlayer.Setup(pmove);
+    g_Application.CheckForChangelevel(pmove->time / 1000.f);
 }
 
 NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *bindName)
