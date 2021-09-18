@@ -56,10 +56,14 @@ void CModeFaceReport::Render3D()
 {
     if (m_pCurrentFace && m_pCurrentModel)
     {
+        g_pClientEngfuncs->pTriAPI->RenderMode(kRenderTransColor);
+        g_pClientEngfuncs->pTriAPI->CullFace(TRI_NONE);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_DEPTH_TEST);
         DrawFaceOutline(m_pCurrentFace);
         //DrawSurfaceBounds(m_pCurrentFace);
+        g_pClientEngfuncs->pTriAPI->RenderMode(kRenderNormal);
+        g_pClientEngfuncs->pTriAPI->CullFace(TRI_FRONT);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_2D);
     }
