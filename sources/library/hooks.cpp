@@ -28,7 +28,6 @@ NOINLINE static void __cdecl HookPlayerMove(playermove_t *pmove, int server)
 {
     PLH::FnCast(g_hookPlayerMove.GetTrampolineAddr(), CHooks::pfnPlayerMove_t())(pmove, server);
     g_LocalPlayer.Setup(pmove);
-    g_Application.CheckForChangelevel(pmove->time / 1000.f);
 }
 
 NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *bindName)
@@ -42,6 +41,7 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *b
 NOINLINE static void __cdecl HookDrawTriangles()
 {
     PLH::FnCast(g_hookDrawTriangles.GetTrampolineAddr(), CHooks::pfnDrawTriangles_t())();
+    g_Application.CheckForChangelevel(g_pClientEngfuncs->GetClientTime());
     g_Application.DisplayModeRender3D();
 }
 
