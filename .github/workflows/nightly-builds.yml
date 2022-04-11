@@ -41,8 +41,8 @@ jobs:
       - name: Prepare artifacts
         run: |
           mkdir publish\
-          move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\gsm-library.dll
-          move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\gsm-loader.exe
+          move build\${{env.BUILD_TYPE}}\bin\gsm-library.dll publish\gsm-library.dll
+          move build\${{env.BUILD_TYPE}}\bin\gsm-loader.exe publish\gsm-loader.exe
           move resources\program_dir\*.* publish\
 
       - name: Upload artifacts
