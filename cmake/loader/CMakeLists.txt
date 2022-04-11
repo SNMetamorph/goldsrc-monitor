@@ -1,16 +1,8 @@
 cmake_minimum_required(VERSION 3.3)
 
-project(goldsrc-monitor-loader CXX)
-include("../compiler_runtime.cmake")
-
-if (POLICY CMP0069)
-    cmake_policy(SET CMP0069 NEW)
-endif()
-
-cmake_policy(SET CMP0063 NEW)
-if (POLICY CMP0091)
-    cmake_policy(SET CMP0091 NEW)
-endif()
+project(loader CXX)
+include(CompilerRuntime)
+include(SupportWinXP)
 
 add_executable(${PROJECT_NAME} 
 	"../../sources/exception.cpp"
@@ -33,27 +25,41 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_EXTENSIONS NO
 )
 
-if (MSVC)
+# compiler flags
+if(MSVC)
 	target_compile_definitions(${PROJECT_NAME} PRIVATE
 		UNICODE=1
 		_UNICODE=1
 		_CRT_SECURE_NO_WARNINGS=1 # disable CRT warnings
-		PSAPI_VERSION=1 # for WinXP compatibility
 	)
 
-	if (CMAKE_CONFIGURATION_TYPES MATCHES Debug)
-		target_compile_options(${PROJECT_NAME} PRIVATE /Od) # disable optimizing at all
-		target_compile_options(${PROJECT_NAME} PRIVATE /ZI) # enable "Edit and Continue" MSVC feature
-		target_link_options(${PROJECT_NAME} PRIVATE /INCREMENTAL /SAFESEH:NO)
-	else()
-		target_compile_options(${PROJECT_NAME} PRIVATE /Ob1) # disable force function inlining, to prevent segfault in release mode
-		target_compile_options(${PROJECT_NAME} PRIVATE /O1) # enable optimizing to minimize size
+	if(ENABLE_WINXP_SUPPORT)
+		target_compile_definitions(${PROJECT_NAME} PRIVATE PSAPI_VERSION=1)
+		target_compile_options(${PROJECT_NAME} PRIVATE /Zc:threadSafeInit-) # for WinXP compatibility (to avoid LoadLibrary error #998)
+		enable_winxp_support(${PROJECT_NAME})
 	endif()
 
-	set_compiler_runtime(${PROJECT_NAME} STATIC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /Zc:threadSafeInit-) # for WinXP compatibility (to avoid LoadLibrary error #998)
+	# debug mode compiler flags
+	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Od>) # disable optimizing at all
+	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/ZI>) # enable "Edit and Continue" MSVC feature
+	target_link_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:
+		/INCREMENTAL 
+		/SAFESEH:NO
+	>)
+
+	# release mode compiler flags
+	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/Ob1>) # disable force function inlining, to prevent segfault in release mode
+	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/O1>) # enable optimizing to minimize size
+else()
+endif()
+
+set_compiler_runtime(${PROJECT_NAME} STATIC)
+
+# linking libraries
+if(MSVC)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
 		psapi 
 		shlwapi
 	)
+else()
 endif()
