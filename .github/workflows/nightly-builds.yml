@@ -1,16 +1,16 @@
-name: Continious build
-on: [push, pull_request]
-jobs:
-  build-win32:
-    runs-on: windows-2016
+name: nightly-builds
+on:
+  push:
+    branches: [master]
 
+jobs:
+  build-windows:
+    runs-on: windows-2016
     strategy:
       matrix:
         conf: [Release]
-
     env:
       BUILD_TYPE: ${{ matrix.conf }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -30,7 +30,7 @@ jobs:
         # Note the current convention is to use the -S and -B options here to specify source
         # and build directories, but this is only available with CMake 3.13 and higher.
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 15 2017" -T v141_xp -A win32 -Wno-dev
+        run: cmake $GITHUB_WORKSPACE -G "Visual Studio 15 2017" -T v141_xp -A win32
 
       - name: Build
         working-directory: ${{github.workspace}}/build
@@ -40,32 +40,46 @@ jobs:
 
       - name: Prepare artifacts
         run: |
-          mkdir publish\${{env.BUILD_TYPE}}
-          mkdir publish\${{env.BUILD_TYPE}}\cfg
-          move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\${{env.BUILD_TYPE}}\gsm-library.dll
-          move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\${{env.BUILD_TYPE}}\gsm-loader.exe
-          move resources\program_dir\*.* publish\${{env.BUILD_TYPE}}\
-          powershell Compress-Archive -Path publish\${{env.BUILD_TYPE}}\* win32.zip
+          mkdir publish\
+          move build\bin\${{env.BUILD_TYPE}}\gsm-library.dll publish\gsm-library.dll
+          move build\bin\${{env.BUILD_TYPE}}\gsm-loader.exe publish\gsm-loader.exe
+          move resources\program_dir\*.* publish\
 
-      - name: Create release
-        id: create_release
-        uses: ncipollo/release-action@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows
+          path: |
+            publish/*
+
+  release:
+    name: release-builds
+    runs-on: ubuntu-latest
+    needs: [build-windows]
+    steps:
+      - name: Fetch artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Repackage binaries
+        run: |
+          cd Windows
+          zip -r ../goldsrc-monitor-win32.zip *
+
+      - name: Remove old release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: continious
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag: continious
-          name: Continious build
-          draft: false
-          prerelease: true
-          allowUpdates: true
-          
-      - name: Upload artifacts
-        id: upload-artifacts
+
+      - name: Upload new release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./win32.zip
-          asset_name: gsm-continious-win32.zip
+          file_glob: true
+          file: goldsrc-monitor*
           tag: continious
           overwrite: true
           prerelease: true
+          release_name: GoldSrc Monitor Continuous Build
