@@ -58,11 +58,13 @@ void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
 {
     float lifeTime = min(0.05f, g_pPlayerMove->frametime);
     DrawMeasurementLine(lifeTime);
-    DrawPointHints(screenWidth, screenHeight);
+    DrawLineProjections(screenWidth, screenHeight, lifeTime);
+    PrintPointHints(screenWidth, screenHeight);
+    PrintLineLength(screenWidth, screenHeight, m_vecPointA, m_vecPointB);
 
-    if (m_iSnapMode != SNAPMODE_FREE &&
-        m_iSnapMode != SNAPMODE_ALONGLINE)
+    if (m_iSnapMode != SNAPMODE_FREE && m_iSnapMode != SNAPMODE_ALONGLINE) {
         DrawSupportLines(lifeTime);
+    }
 }
 
 const vec3_t& CModeMeasurement::GetPointOriginA() const
@@ -131,12 +133,12 @@ void CModeMeasurement::HandleChangelevel()
 
 void CModeMeasurement::DrawMeasurementLine(float lifeTime)
 {
-    const float lineWidth       = 2.0f;
+    const float lineWidth       = 0.7f;
     const float lineBrightness  = 1.0f;
     const float lineSpeed       = 5.0f;
-    const float lineColorR      = 0.0f;
+    const float lineColorR      = 0.1f;
     const float lineColorG      = 1.0f;
-    const float lineColorB      = 0.0f;
+    const float lineColorB      = 0.11f;
 
     g_pClientEngfuncs->pEfxAPI->R_BeamPoints(
         m_vecPointA, m_vecPointB, m_iLineSprite,
@@ -146,26 +148,44 @@ void CModeMeasurement::DrawMeasurementLine(float lifeTime)
     );
 }
 
-void CModeMeasurement::DrawPointHints(int screenWidth, int screenHeight)
+void CModeMeasurement::PrintPointHints(int screenWidth, int screenHeight)
 {
-    const int textColorR = 0;
-    const int textColorG = 255;
-    const int textColorB = 255;
+    const int textColorR = 39;
+    const int textColorG = 227;
+    const int textColorB = 198;
+
     Utils::DrawString3D(m_vecPointA, "A", textColorR, textColorG, textColorB);
     Utils::DrawString3D(m_vecPointB, "B", textColorR, textColorG, textColorB);
+}
+
+void CModeMeasurement::PrintLineLength(int screenWidth, int screenHeight, vec3_t pointStart, vec3_t pointEnd)
+{
+    std::string lengthStr;
+    vec3_t lineMiddle = (pointStart + pointEnd) / 2.f;
+    const int textColorR = 255;
+    const int textColorG = 20;
+    const int textColorB = 20;
+
+    float distance = (pointStart - pointEnd).Length();
+    if (distance > 0.0f)
+    {
+        vec3_t offset = vec3_t(0.0f, 0.0f, 1.0f) * std::powf(distance, 0.5f);
+        Utils::Snprintf(lengthStr, "%.2f", distance);
+        Utils::DrawString3D(lineMiddle + offset, lengthStr.c_str(), textColorR, textColorG, textColorB);
+    }
 }
 
 void CModeMeasurement::DrawSupportLines(float lifeTime)
 {
     vec3_t axisVector               = { 0.f, 0.f, 0.f };
     const vec3_t *pointsList[2]     = { &m_vecPointA, &m_vecPointB };
-    const float lineWidth           = 1.0f;
+    const float lineWidth           = 0.7f;
     const float lineLenght          = 24.0f;
     const float lineSpeed           = 5.0f;
     const float lineColorR          = 1.0f;
-    const float lineColorG          = 0.2f;
-    const float lineColorB          = 0.2f;
-    const float lineBrightness      = 1.0f;
+    const float lineColorG          = 0.0f;
+    const float lineColorB          = 0.5f;
+    const float lineBrightness      = 1.2f;
 
     if (m_iSnapMode == SNAPMODE_AXIS_X)
         axisVector.x = 1.f;
@@ -184,6 +204,51 @@ void CModeMeasurement::DrawSupportLines(float lifeTime)
             lineBrightness, lineSpeed, 0, 0,
             lineColorR, lineColorG, lineColorB
         );
+    }
+}
+
+void CModeMeasurement::DrawLineProjections(int screenWidth, int screenHeight, float lifeTime)
+{
+    bool baseFound = false;
+    vec3_t basePoint = m_vecPointA;
+    const float lineWidth = 0.7f;
+    const float lineLenght = 24.0f;
+    const float lineSpeed = 5.0f;
+    const float lineColorR = 1.0f;
+    const float lineColorG = 1.0f;
+    const float lineColorB = 0.0f;
+    const float lineBrightness = 1.2f;
+    const vec3_t *pointsList[2] = { &m_vecPointA, &m_vecPointB };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        if (std::fabsf(m_vecPointA[i] - m_vecPointB[i]) > 0.1f) 
+        {
+            basePoint[i] = m_vecPointB[i];
+            baseFound = true;
+            break;
+        }
+    }
+
+    for (int i = 0; baseFound && i < 3; ++i)
+    {
+        vec3_t axisVector = { 0.f, 0.f, 0.f }; 
+        float diff = basePoint[i] - m_vecPointB[i];
+        if (std::fabsf(diff) < 0.001f) {
+            diff = basePoint[i] - m_vecPointA[i];
+        }
+
+        axisVector[i] = 1.0f - 2.0f * (diff > 0.0f);
+        vec3_t endPoint = basePoint + axisVector * std::fabsf(diff);
+        g_pClientEngfuncs->pEfxAPI->R_BeamPoints(
+            basePoint, 
+            endPoint,
+            m_iLineSprite,
+            lifeTime * 2.0f, lineWidth, 0,
+            lineBrightness, lineSpeed, 0, 0,
+            lineColorR, lineColorG, lineColorB
+        );
+        PrintLineLength(screenWidth, screenHeight, basePoint, endPoint);
     }
 }
 

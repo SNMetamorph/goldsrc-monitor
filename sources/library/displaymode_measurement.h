@@ -36,8 +36,10 @@ private:
     void TraceAlongNormal(pmtrace_t &traceData, float traceLength);
     void DrawVisualization(int screenWidth, int screenHeight);
     void DrawMeasurementLine(float lifeTime);
-    void DrawPointHints(int screenWidth, int screenHeight);
+    void PrintPointHints(int screenWidth, int screenHeight);
+    void PrintLineLength(int screenWidth, int screenHeight, vec3_t pointStart, vec3_t pointEnd);
     void DrawSupportLines(float lifeTime);
+    void DrawLineProjections(int screenWidth, int screenHeight, float lifeTime);
     void LoadLineSprite();
 
     vec3_t       m_vecPointA;
