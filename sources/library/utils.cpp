@@ -281,7 +281,10 @@ int Utils::DrawString3D(const vec3_t &origin, const char *text, int r, int g, in
     const SCREENINFO &screenInfo = g_Application.GetScreenInfo();
     if (Utils::WorldToScreen(screenInfo.iWidth, screenInfo.iHeight, screenX, screenY, origin))
     {
-        return g_pClientEngfuncs->pfnDrawString(screenX, screenY, text, r, g, b);
+        // center-align text relative to point on screen
+        int stringWidth = Utils::GetStringWidth(text);
+        int textX = screenX - stringWidth * 0.5f;
+        return g_pClientEngfuncs->pfnDrawString(textX, screenY, text, r, g, b);
     }
     return 0;
 }
