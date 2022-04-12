@@ -10,6 +10,7 @@ public:
     typedef void(__cdecl *pfnDrawTriangles_t)();
     typedef int(__cdecl *pfnIsThirdPerson_t)();
     typedef void(__cdecl *pfnCameraOffset_t)(float *);
+    typedef int(__cdecl *pfnVidInit_t)();
 
     void Apply();
     void Remove();

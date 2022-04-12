@@ -11,6 +11,7 @@ static CFunctionHook<CHooks::pfnKeyEvent_t> g_hookKeyEvent;
 static CFunctionHook<CHooks::pfnDrawTriangles_t> g_hookDrawTriangles;
 static CFunctionHook<CHooks::pfnIsThirdPerson_t> g_hookIsThirdPerson;
 static CFunctionHook<CHooks::pfnCameraOffset_t> g_hookCameraOffset;
+static CFunctionHook<CHooks::pfnVidInit_t> g_hookVidInit;
 
 NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
@@ -41,7 +42,6 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *b
 NOINLINE static void __cdecl HookDrawTriangles()
 {
     PLH::FnCast(g_hookDrawTriangles.GetTrampolineAddr(), CHooks::pfnDrawTriangles_t())();
-    g_Application.CheckForChangelevel(g_pClientEngfuncs->GetClientTime());
     g_Application.DisplayModeRender3D();
 }
 
@@ -61,6 +61,13 @@ NOINLINE static void __cdecl HookCameraOffset(float *cameraOffset)
     }
 }
 
+NOINLINE static int __cdecl HookVidInit()
+{
+    int returnCode = PLH::FnCast(g_hookVidInit.GetTrampolineAddr(), CHooks::pfnVidInit_t())();
+    g_Application.HandleChangelevel();
+    return returnCode;
+}
+
 void CHooks::Apply()
 {
     pfnRedraw_t pfnRedraw = (pfnRedraw_t)g_ClientModule.GetFuncAddress("HUD_Redraw");
@@ -69,6 +76,7 @@ void CHooks::Apply()
     pfnDrawTriangles_t pfnDrawTriangles = (pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawTransparentTriangles");
     pfnIsThirdPerson_t pfnIsThirdPerson = (pfnIsThirdPerson_t)g_ClientModule.GetFuncAddress("CL_IsThirdPerson");
     pfnCameraOffset_t pfnCameraOffset = (pfnCameraOffset_t)g_ClientModule.GetFuncAddress("CL_CameraOffset");
+    pfnVidInit_t pfnVidInit = (pfnVidInit_t)g_ClientModule.GetFuncAddress("HUD_VidInit");
 
     g_hookRedraw.Hook(pfnRedraw, &HookRedraw);
     g_hookPlayerMove.Hook(pfnPlayerMove, &HookPlayerMove);
@@ -76,6 +84,7 @@ void CHooks::Apply()
     g_hookDrawTriangles.Hook(pfnDrawTriangles, &HookDrawTriangles);
     g_hookIsThirdPerson.Hook(pfnIsThirdPerson, &HookIsThirdPerson);
     g_hookCameraOffset.Hook(pfnCameraOffset, &HookCameraOffset);
+    g_hookVidInit.Hook(pfnVidInit, &HookVidInit);
 
     if (!g_hookKeyEvent.IsHooked())
     {
@@ -107,7 +116,11 @@ void CHooks::Apply()
         );
     }
 
-    bool isHookSuccessful = g_hookRedraw.IsHooked() && g_hookPlayerMove.IsHooked();
+    bool isHookSuccessful = (
+        g_hookRedraw.IsHooked() && 
+        g_hookPlayerMove.IsHooked() &&
+        g_hookVidInit.IsHooked()
+    );
     if (!isHookSuccessful)
     {
         RevertHooks();
@@ -132,4 +145,5 @@ void CHooks::RevertHooks()
     g_hookDrawTriangles.Unhook();
     g_hookIsThirdPerson.Unhook();
     g_hookCameraOffset.Unhook();
+    g_hookVidInit.Unhook();
 }

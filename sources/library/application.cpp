@@ -224,14 +224,6 @@ void CApplication::DisplayModeRender3D()
     m_pCurrentDisplayMode->Render3D();
 }
 
-void CApplication::CheckForChangelevel(float currTime)
-{
-    static float oldTime = FLT_MAX;
-    if (currTime < oldTime)
-        HandleChangelevel();
-    oldTime = currTime;
-}
-
 bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)
 {
     return m_pCurrentDisplayMode->KeyInput(keyDown, keyCode, bindName);
