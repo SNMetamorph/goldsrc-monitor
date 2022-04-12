@@ -30,9 +30,12 @@ void CModeMeasurement::UpdatePointOrigin(vec3_t &linePoint, const vec3_t &target
     else
     {
         vec3_t lineVector = m_vecPointB - m_vecPointA;
-        vec3_t targVector = targetPoint - linePoint;
-        float projLen = DotProduct(lineVector, targVector) / lineVector.Length();
-        linePoint = linePoint + lineVector.Normalize() * projLen;
+        if (lineVector.Length() > 0.0f)
+        {
+            vec3_t targVector = targetPoint - linePoint;
+            float projLen = DotProduct(lineVector, targVector) / lineVector.Length();
+            linePoint = linePoint + lineVector.Normalize() * projLen;
+        }
     }
 }
 
@@ -122,7 +125,8 @@ void CModeMeasurement::HandleChangelevel()
     const vec3_t vecNull = vec3_t(0, 0, 0);
     m_vecPointA = vecNull;
     m_vecPointB = vecNull;
-    LoadLineSprite();
+    m_iSnapMode = SNAPMODE_FREE;
+    m_iLineSprite = 0;
 }
 
 void CModeMeasurement::DrawMeasurementLine(float lifeTime)
@@ -185,10 +189,12 @@ void CModeMeasurement::DrawSupportLines(float lifeTime)
 
 void CModeMeasurement::LoadLineSprite()
 {
+    if (m_iLineSprite)
+        return;
+
     const char *spritePath = "sprites/laserbeam.spr";
     g_pClientEngfuncs->pfnSPR_Load(spritePath);
-    m_iLineSprite = 
-        g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(spritePath);
+    m_iLineSprite = g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(spritePath);
 }
 
 void CModeMeasurement::Render2D(int screenWidth, int screenHeight, CStringStack &screenText)
@@ -224,8 +230,10 @@ void CModeMeasurement::Render2D(int screenWidth, int screenHeight, CStringStack 
     screenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
     screenText.PushPrintf("Snap Mode: %s", snapModeName);
 
-    if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f)
+    LoadLineSprite();
+    if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f) {
         DrawVisualization(screenWidth, screenHeight);
+    }
 
     Utils::DrawStringStack(
         static_cast<int>(ConVars::gsm_margin_right->value),
