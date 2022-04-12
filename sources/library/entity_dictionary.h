@@ -3,6 +3,7 @@
 #include "bvh_tree.h"
 #include "hlsdk.h"
 #include <vector>
+#include <map>
 
 class CEntityDictionary
 {
@@ -22,11 +23,11 @@ private:
     CEntityDictionary(const CEntityDictionary &) = delete;
     CEntityDictionary &operator=(const CEntityDictionary &) = delete;
 
+    void AssociateDescription(int entityIndex, int descIndex);
     void BuildDescriptionsTree();
     void ParseEntityData();
-    void FindEntityAssociations();
-    int GetClientMaxEntities();
 
+    std::map<int, int> m_Associations;
     CBVHTree m_EntityDescTree = CBVHTree(&m_EntityDescList);
     std::vector<CEntityDescription> m_EntityDescList;
 };

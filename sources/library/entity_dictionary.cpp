@@ -15,7 +15,6 @@ void CEntityDictionary::Initialize()
 {
     Reset();
     ParseEntityData();
-    FindEntityAssociations();
     BuildDescriptionsTree();
 }
 
@@ -42,6 +41,7 @@ void CEntityDictionary::VisualizeDescriptions() const
 void CEntityDictionary::Reset()
 {
     m_EntityDescList.clear();
+    m_Associations.clear();
 }
 
 bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription, int &iterCount)
@@ -49,13 +49,28 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
     int nodeIndex;
     CBoundingBox entityBoundingBox;
     Utils::GetEntityBoundingBox(entityIndex, entityBoundingBox);
-    if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex, iterCount)) 
+    if (m_Associations.count(entityIndex) > 0)
+    {
+        int descIndex = m_Associations[entityIndex];
+        destDescription = m_EntityDescList[descIndex];
+        return true;
+    }
+    else if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex, iterCount))
     {
         const CBVHTreeNode &node = m_EntityDescTree.GetNode(nodeIndex);
-        destDescription = m_EntityDescList[node.GetDescriptionIndex()];
+        int descIndex = node.GetDescriptionIndex();
+        AssociateDescription(entityIndex, descIndex);
+        destDescription = m_EntityDescList[descIndex];
         return true;
     }
     return false;
+}
+
+void CEntityDictionary::AssociateDescription(int entityIndex, int descIndex)
+{
+    CEntityDescription &entityDesc = m_EntityDescList[descIndex];
+    entityDesc.AssociateEntity(entityIndex);
+    m_Associations.insert({ entityIndex, descIndex });
 }
 
 void CEntityDictionary::BuildDescriptionsTree()
@@ -72,7 +87,7 @@ void CEntityDictionary::ParseEntityData()
     std::vector<char> key;
     std::vector<char> value;
     std::vector<char> token;
-    const int bufferSize = 1024;
+    const int bufferSize = 2048;
 
     key.resize(bufferSize, '\0');
     value.resize(bufferSize, '\0');
@@ -111,53 +126,4 @@ void CEntityDictionary::ParseEntityData()
             }
         }
     }
-}
-
-// Finds associations between entity descriptions and actual game entities
-void CEntityDictionary::FindEntityAssociations()
-{
-    const int entityCount = GetClientMaxEntities();
-    const int maxClients = g_pClientEngfuncs->GetMaxClients();
-    if (entityCount > 0)
-    {
-        for (int i = maxClients; i < entityCount; ++i)
-        {
-            CBoundingBox entityBoundingBox;
-            Utils::GetEntityBoundingBox(i, entityBoundingBox);
-            for (auto it = m_EntityDescList.begin(); it != m_EntityDescList.end(); ++it)
-            {
-                CEntityDescription &entityDesc = *it;
-                const CBoundingBox &descBoundingBox = entityDesc.GetBoundingBox();
-                const vec3_t diffMin = entityBoundingBox.GetMins() - descBoundingBox.GetMins();
-                const vec3_t diffMax = entityBoundingBox.GetMaxs() - descBoundingBox.GetMaxs();
-                if (diffMin.Length() < 1.0f && diffMax.Length() < 1.0f)
-                {
-                    entityDesc.AssociateEntity(i);
-                    break;
-                }
-            }
-        }
-    }
-}
-
-// Very non-optimal, but there is no way to get this directly from engine
-int CEntityDictionary::GetClientMaxEntities()
-{
-    int leftBound = 0;
-    int rightBound = 65536;
-    const int maxClients = g_pClientEngfuncs->GetMaxClients();
-    while (true)
-    {
-        int center = (leftBound + rightBound) / 2;
-        if (g_pClientEngfuncs->GetEntityByIndex(center))
-            leftBound = center;
-        else
-            rightBound = center;
-
-        if (abs(leftBound - rightBound) < 2)
-        {
-            return rightBound;
-        }
-    }
-    return -1;
 }
