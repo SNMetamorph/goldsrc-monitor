@@ -275,14 +275,15 @@ void Utils::DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const v
     glEnable(GL_TEXTURE_2D);
 }
 
-void Utils::DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b)
+int Utils::DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b)
 {
     int screenX, screenY;
     const SCREENINFO &screenInfo = g_Application.GetScreenInfo();
     if (Utils::WorldToScreen(screenInfo.iWidth, screenInfo.iHeight, screenX, screenY, origin))
     {
-        g_pClientEngfuncs->pfnDrawString(screenX, screenY, text, r, g, b);
+        return g_pClientEngfuncs->pfnDrawString(screenX, screenY, text, r, g, b);
     }
+    return 0;
 }
 
 void Utils::GetEntityModelName(int entityIndex, std::string &modelName)
@@ -377,6 +378,17 @@ bool Utils::IsGameDirEquals(const char *gameDir)
 {
     const char *gameDirReal = g_pClientEngfuncs->pfnGetGameDirectory();
     return strcmp(gameDirReal, gameDir) == 0;
+}
+
+void Utils::Snprintf(std::string &result, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int stringSize = std::vsnprintf(nullptr, 0, format, args);
+    result.assign(stringSize + 2, '\0');
+    std::vsnprintf(result.data(), stringSize + 1, format, args);
+    result.assign(result.data());
+    va_end(args);
 }
 
 void Utils::TraceLine(vec3_t &origin, vec3_t &dir, float lineLen, pmtrace_t *traceData, int ignoredEnt)

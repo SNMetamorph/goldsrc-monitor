@@ -27,13 +27,14 @@ namespace Utils
     bool WorldToScreen(int w, int h, int &x, int &y, const vec3_t &origin);
     void DrawStringStack(int marginRight, int marginUp, const CStringStack &stringStack);
     void DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size, Color color);
-    void DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b);
+    int DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b);
     void GetEntityModelName(int entityIndex, std::string &modelName);
     std::string GetCurrentMapName();
     const char *GetMovetypeName(int moveType);
     const char *GetRenderModeName(int renderMode);
     const char *GetRenderFxName(int renderFx);
     bool IsGameDirEquals(const char *gameDir);
+    void Snprintf(std::string &result, const char *format, ...);
 
     vec3_t GetEntityVelocityApprox(int entityIndex, int approxStep = 22);
     void GetEntityBoundingBox(int entityIndex, CBoundingBox &bbox);
