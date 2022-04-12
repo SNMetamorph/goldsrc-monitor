@@ -163,7 +163,7 @@ void CModeMeasurement::PrintLineLength(int screenWidth, int screenHeight, vec3_t
     std::string lengthStr;
     vec3_t lineMiddle = (pointStart + pointEnd) / 2.f;
     const int textColorR = 255;
-    const int textColorG = 20;
+    const int textColorG = 255;
     const int textColorB = 20;
 
     float distance = (pointStart - pointEnd).Length();
@@ -215,8 +215,8 @@ void CModeMeasurement::DrawLineProjections(int screenWidth, int screenHeight, fl
     const float lineLenght = 24.0f;
     const float lineSpeed = 5.0f;
     const float lineColorR = 1.0f;
-    const float lineColorG = 1.0f;
-    const float lineColorB = 0.0f;
+    const float lineColorG = 0.08f;
+    const float lineColorB = 0.08f;
     const float lineBrightness = 1.2f;
     const vec3_t *pointsList[2] = { &m_vecPointA, &m_vecPointB };
 
