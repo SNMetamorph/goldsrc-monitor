@@ -22,7 +22,7 @@ private:
     void GetSurfaceBoundingBox(EngineTypes::msurface_t *surf, CBoundingBox &bbox);
     void DrawFaceOutline(EngineTypes::msurface_t *surf);
     void DrawSurfaceBounds(EngineTypes::msurface_t *surf);
-    bool IsSurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p1, vec3_t p2);
+    bool SurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p1, vec3_t p2, float &distance);
     bool GetLightmapProbe(EngineTypes::msurface_t *surf, const vec3_t &point, color24 &probe);
     EngineTypes::mleaf_t *PointInLeaf(vec3_t point, EngineTypes::mnode_t *node);
     EngineTypes::msurface_t *TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect);

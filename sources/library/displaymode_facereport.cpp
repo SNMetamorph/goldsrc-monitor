@@ -179,11 +179,16 @@ void CModeFaceReport::DrawSurfaceBounds(EngineTypes::msurface_t *surf)
     );
 }
 
-bool CModeFaceReport::IsSurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p1, vec3_t p2)
+bool CModeFaceReport::SurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p1, vec3_t p2, float &distance)
 {
+    float fraction;
     CBoundingBox surfaceBounds;
+
     GetSurfaceBoundingBox(surf, surfaceBounds);
-    if (Utils::TraceBBoxLine(surfaceBounds, p1, p2) < 1.0f) {
+    fraction = Utils::TraceBBoxLine(surfaceBounds, p1, p2);
+    if (fraction < 1.0f) 
+    {
+        distance = (p1 - p2).Length() * fraction;
         return true;
     }
     return false;
@@ -231,6 +236,8 @@ bool CModeFaceReport::GetLightmapProbe(EngineTypes::msurface_t *surf, const vec3
 
 EngineTypes::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect)
 {
+    int surfaceCount = 0;
+    EngineTypes::msurface_t *surfaceList = nullptr;
     int entityIndex = TraceEntity(origin, dir, distance, intersect);
     cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
     model_t *worldModel = g_pClientEngfuncs->hudGetModelByIndex(1);
@@ -247,24 +254,50 @@ EngineTypes::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir
         EngineTypes::mleaf_t *leaf = PointInLeaf(intersect, (EngineTypes::mnode_t *)m_pCurrentModel->nodes);
         if (leaf)
         {
-            for (int i = 0; i < leaf->nummarksurfaces; ++i)
-            {
-                EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)leaf->firstmarksurface[i];
-                if (IsSurfaceIntersected(surf, origin, origin + dir * distance)) {
-                    return surf;
-                }
-            }
+            surfaceCount = leaf->nummarksurfaces;
+            surfaceList = (EngineTypes::msurface_t *)leaf->firstmarksurface[0];
         }
     }
     else
     {
-        for (int i = 0; i < m_pCurrentModel->nummodelsurfaces; ++i)
-        {
-            int surfIndex = m_pCurrentModel->firstmodelsurface + i;
-            EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)m_pCurrentModel->surfaces + surfIndex;
-            if (IsSurfaceIntersected(surf, origin, origin + dir * distance)) {
-                return surf;
+        surfaceCount = m_pCurrentModel->nummodelsurfaces;
+        surfaceList = (EngineTypes::msurface_t *)m_pCurrentModel->surfaces + m_pCurrentModel->firstmodelsurface;
+    }
+
+    if (surfaceCount > 0)
+    {
+        // iterate all surfaces and push intersected to list
+        float surfDistance;
+        std::vector<float> facesDistance;
+        std::vector<EngineTypes::msurface_t *> intersectedFaces;
+
+        facesDistance.reserve(32);
+        intersectedFaces.reserve(32);
+        for (int i = 0; i < surfaceCount; ++i)
+        {  
+            EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)surfaceList + i;
+            if (SurfaceIntersected(surf, origin, origin + dir * distance, surfDistance))
+            {
+                facesDistance.push_back(surfDistance);
+                intersectedFaces.push_back(surf);
             }
+        }
+
+        if (!intersectedFaces.empty())
+        {
+            // select closest surface from all intersected surfaces
+            float closestDistance = facesDistance[0];
+            EngineTypes::msurface_t *closestSurface = intersectedFaces[0];
+            for (int i = 0; i < facesDistance.size(); ++i)
+            {
+                surfDistance = facesDistance[i];
+                if (surfDistance < closestDistance)
+                {
+                    closestDistance = surfDistance;
+                    closestSurface = intersectedFaces[i];
+                }
+            }
+            return closestSurface;
         }
     }
 
