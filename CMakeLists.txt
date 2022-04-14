@@ -20,7 +20,7 @@ endif()
 option(BUILD_LOADER "Build loader" ON)
 option(BUILD_LIBRARY "Build library" ON)
 option(BUILD_WRAPPER "Build library as wrapper for game library" OFF)
-option(ENABLE_WINXP_SUPPORT "Enable Windows XP support" ON)
+option(ENABLE_WINXP_SUPPORT "Enable Windows XP support" OFF)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(ENABLE_WINXP_SUPPORT FALSE)
