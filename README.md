@@ -1,4 +1,10 @@
 # GoldSrc Monitor
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/SNMetamorph/goldsrc-monitor/nightly-builds/master)
+![GitHub release (by tag)](https://img.shields.io/github/downloads/SNMetamorph/goldsrc-monitor/total)
+![GitHub top language](https://img.shields.io/github/languages/top/SNMetamorph/goldsrc-monitor)
+![GitHub repo size](https://img.shields.io/github/repo-size/SNMetamorph/goldsrc-monitor)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SNMetamorph/goldsrc-monitor)
+
 Simple utility for mapping/scripting or researching games based on GoldSrc/![Xash3D](https://github.com/FWGS/xash3d-fwgs) engine.<br>
 Download this program and read description you can on [Gamebanana Page](https://gamebanana.com/gamefiles/8977)
 <br>
