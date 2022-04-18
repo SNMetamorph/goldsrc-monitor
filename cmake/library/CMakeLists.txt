@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.3)
 
 project(library CXX)
-include(cotire)
 include(CompilerRuntime)
 include(SupportWinXP)
 
@@ -73,9 +72,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_STANDARD_REQUIRED YES
 	CXX_EXTENSIONS NO
 )
-
-set_target_properties(${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "../../sources/library/stdafx.h")
-cotire(${PROJECT_NAME})
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
