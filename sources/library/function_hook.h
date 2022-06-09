@@ -4,12 +4,10 @@
 
 #if APP_SUPPORT_64BIT
 #include <polyhook2/Detour/x64Detour.hpp>
-#define ARCH_DETOUR     x64Detour
-#define ARCH_ZYDIS_MODE x64
+typedef PLH::x64Detour PolyhookDetourType_t;
 #else
 #include <polyhook2/Detour/x86Detour.hpp>
-#define ARCH_DETOUR     x86Detour
-#define ARCH_ZYDIS_MODE x86
+typedef PLH::x86Detour PolyhookDetourType_t;
 #endif
 
 template <class T> class CFunctionHook
@@ -25,11 +23,10 @@ public:
         if (origFunc == nullptr) {
             return false;
         }
-        m_pDetour = new PLH::ARCH_DETOUR(
-            reinterpret_cast<char *>(origFunc),
-            reinterpret_cast<char *>(callbackFunc),
-            &m_pfnTrampoline,
-            m_Disassembler
+        m_pDetour = new PolyhookDetourType_t(
+            reinterpret_cast<uint64_t>(origFunc),
+            reinterpret_cast<uint64_t>(callbackFunc),
+            &m_pfnTrampoline 
         );
         m_isHooked = m_pDetour->hook();
         return m_isHooked;
@@ -53,7 +50,5 @@ public:
 private:
     bool m_isHooked = false;
     uint64_t m_pfnTrampoline = 0;
-    PLH::ARCH_DETOUR *m_pDetour = nullptr;
-    static PLH::ZydisDisassembler m_Disassembler;
+    PolyhookDetourType_t *m_pDetour = nullptr;
 };
-template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::ARCH_ZYDIS_MODE);
