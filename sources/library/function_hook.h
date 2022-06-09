@@ -1,17 +1,18 @@
 #pragma once
 
 #include <polyhook2/ZydisDisassembler.hpp>
-
-#if APP_SUPPORT_64BIT
 #include <polyhook2/Detour/x64Detour.hpp>
-typedef PLH::x64Detour PolyhookDetourType_t;
-#else
 #include <polyhook2/Detour/x86Detour.hpp>
-typedef PLH::x86Detour PolyhookDetourType_t;
-#endif
 
 template <class T> class CFunctionHook
 {
+private:
+#if APP_SUPPORT_64BIT
+    typedef PLH::x64Detour PolyhookDetourType_t;
+#else
+    typedef PLH::x86Detour PolyhookDetourType_t;
+#endif
+
 public:
     CFunctionHook() {};
     ~CFunctionHook() {};
