@@ -84,15 +84,13 @@ float CModeMeasurement::GetPointsDistance() const
 
 bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
 {
-    int currentMode;
     vec3_t viewDir;
     vec3_t viewOrigin;
     vec3_t viewAngles;
     pmtrace_t traceData;
     const float traceLen = 64000.f;
 
-    currentMode = (int)ConVars::gsm_mode->value;
-    if (currentMode != DISPLAYMODE_MEASUREMENT || !isKeyDown)
+    if (Utils::GetCurrentDisplayMode() != DISPLAYMODE_MEASUREMENT || !isKeyDown)
         return true;
 
     if (keyCode >= K_MOUSE1 && keyCode <= K_MOUSE3)
