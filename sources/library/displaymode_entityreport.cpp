@@ -202,8 +202,7 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
 bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenText)
 {
     int debugMode = ConVars::gsm_debug->value;
-
-    if (!entityIndex)
+    if (entityIndex < 1)
     {
         std::string mapName = Utils::GetCurrentMapName();
         screenText.Push("Entity not found");
@@ -233,7 +232,7 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
                 screenText.PushPrintf("Targetname: %s", targetname.c_str());
         }
 
-        if (entity->model->type == mod_studio)
+        if (entity && entity->model->type == mod_studio)
         {
             std::string modelName;
             Utils::GetEntityModelName(entityIndex, modelName);
@@ -280,33 +279,35 @@ void CModeEntityReport::PrintEntityCommonInfo(int entityIndex, CStringStack &scr
 {
     CBoundingBox entityBbox;
     cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-    vec3_t entityVelocity = Utils::GetEntityVelocityApprox(entityIndex);
-    const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
+    if (entity)
+    {
+        vec3_t entityVelocity = Utils::GetEntityVelocityApprox(entityIndex);
+        vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
+        vec3_t entityAngles = entity->curstate.angles;
+        vec3_t entityOrigin = entity->origin + centerOffset;
+        Utils::GetEntityBoundingBox(entityIndex, entityBbox);
 
-    vec3_t entityAngles = entity->curstate.angles;
-    vec3_t entityOrigin = entity->origin + centerOffset;
-    Utils::GetEntityBoundingBox(entityIndex, entityBbox);
-
-    screenText.PushPrintf("Entity Index: %d", entityIndex);
-    screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
-        entityOrigin.x, entityOrigin.y, entityOrigin.z);
-    screenText.PushPrintf("Distance: %.1f units",
-        GetEntityDistance(entityIndex));
-    screenText.PushPrintf("Velocity: %.2f u/s (%.1f; %.1f; %.1f)",
-        entityVelocity.Length2D(), entityVelocity.x, entityVelocity.y, entityVelocity.z);
-    screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
-        entityAngles.x, entityAngles.y, entityAngles.z);
-    screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
-        entityBbox.GetSize().x, entityBbox.GetSize().y, entityBbox.GetSize().z);
-    screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
-    screenText.PushPrintf("Render Mode: %s", Utils::GetRenderModeName(entity->curstate.rendermode));
-    screenText.PushPrintf("Render FX: %s", Utils::GetRenderFxName(entity->curstate.renderfx));
-    screenText.PushPrintf("Render Amount: %d", entity->curstate.renderamt);
-    screenText.PushPrintf("Render Color: %d %d %d",
-        entity->curstate.rendercolor.r,
-        entity->curstate.rendercolor.g,
-        entity->curstate.rendercolor.b
-    );
+        screenText.PushPrintf("Entity Index: %d", entityIndex);
+        screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
+            entityOrigin.x, entityOrigin.y, entityOrigin.z);
+        screenText.PushPrintf("Distance: %.1f units",
+            GetEntityDistance(entityIndex));
+        screenText.PushPrintf("Velocity: %.2f u/s (%.1f; %.1f; %.1f)",
+            entityVelocity.Length2D(), entityVelocity.x, entityVelocity.y, entityVelocity.z);
+        screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
+            entityAngles.x, entityAngles.y, entityAngles.z);
+        screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
+            entityBbox.GetSize().x, entityBbox.GetSize().y, entityBbox.GetSize().z);
+        screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
+        screenText.PushPrintf("Render Mode: %s", Utils::GetRenderModeName(entity->curstate.rendermode));
+        screenText.PushPrintf("Render FX: %s", Utils::GetRenderFxName(entity->curstate.renderfx));
+        screenText.PushPrintf("Render Amount: %d", entity->curstate.renderamt);
+        screenText.PushPrintf("Render Color: %d %d %d",
+            entity->curstate.rendercolor.r,
+            entity->curstate.rendercolor.g,
+            entity->curstate.rendercolor.b
+        );
+    }
 }
 
 int CModeEntityReport::GetActualEntityIndex()
