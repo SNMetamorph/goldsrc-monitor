@@ -12,109 +12,19 @@
 
 void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    vec3_t entityOrigin;
-    vec3_t entityAngles;
-    CBoundingBox entityBbox;
     int debugMode = ConVars::gsm_debug->value;
-
     if (!g_EntityDictionary.IsInitialized())
         g_EntityDictionary.Initialize();
 
     screenText.Clear();
     m_iEntityIndex = TraceEntity();
-    if (!m_iEntityIndex)
+    if (!PrintEntityInfo(GetActualEntityIndex(), screenText))
     {
-        std::string mapName = Utils::GetCurrentMapName();
-        screenText.Push("Entity not found");
-        screenText.PushPrintf("Map: %s", mapName.c_str());
-        screenText.PushPrintf("Entity descriptions: %d", g_EntityDictionary.GetDescriptionsCount());
-    }
-    else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_pPlayerMove->iuser3 != 3)
-    {
-        // disable print in non free-look spectating modes
-        screenText.Push("Print enabled only in free look mode");
+        // disable hull highlighting for this entity
         m_iEntityIndex = 0;
     }
-    else
-    {
-        int iterCount;
-        CEntityDescription entityDesc;
-        cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
-        vec3_t entityVelocity = Utils::GetEntityVelocityApprox(m_iEntityIndex);
-        bool isDescFound = g_EntityDictionary.FindDescription(m_iEntityIndex, entityDesc, iterCount);
-        const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
 
-        entityAngles = entity->curstate.angles;
-        entityOrigin = entity->origin + centerOffset;
-        Utils::GetEntityBoundingBox(m_iEntityIndex, entityBbox);
-
-        screenText.PushPrintf("Entity Index: %d", m_iEntityIndex);
-        screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
-            entityOrigin.x, entityOrigin.y, entityOrigin.z);
-        screenText.PushPrintf("Distance: %.1f units",
-            GetEntityDistance(m_iEntityIndex));
-        screenText.PushPrintf("Velocity: %.2f u/s (%.1f; %.1f; %.1f)", 
-            entityVelocity.Length2D(), entityVelocity.x, entityVelocity.y, entityVelocity.z);
-        screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
-            entityAngles.x, entityAngles.y, entityAngles.z);
-        screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
-            entityBbox.GetSize().x, entityBbox.GetSize().y, entityBbox.GetSize().z);
-        screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
-        screenText.PushPrintf("Render Mode: %s", Utils::GetRenderModeName(entity->curstate.rendermode));
-        screenText.PushPrintf("Render FX: %s", Utils::GetRenderFxName(entity->curstate.renderfx));
-        screenText.PushPrintf("Render Amount: %d", entity->curstate.renderamt);
-        screenText.PushPrintf("Render Color: %d %d %d", 
-            entity->curstate.rendercolor.r, 
-            entity->curstate.rendercolor.g, 
-            entity->curstate.rendercolor.b
-        );
-
-        if (isDescFound)
-        {
-            const std::string &classname = entityDesc.GetClassname();
-            const std::string &targetname = entityDesc.GetTargetname();
-            screenText.PushPrintf("Classname: %s", classname.c_str()); 
-            if (targetname.length() > 0)
-                screenText.PushPrintf("Targetname: %s", targetname.c_str()); 
-        }
-
-        if (entity->model->type == mod_studio)
-        {
-            std::string modelName;
-            Utils::GetEntityModelName(m_iEntityIndex, modelName);
-            screenText.PushPrintf("Model Name: %s", modelName.c_str());
-            screenText.PushPrintf("Anim. Frame: %.1f", entity->curstate.frame);
-            screenText.PushPrintf("Anim. Sequence: %d", entity->curstate.sequence);
-            screenText.PushPrintf("Bodygroup Number: %d", entity->curstate.body);
-            screenText.PushPrintf("Skin Number: %d", entity->curstate.skin);
-        }
-
-        if (isDescFound)
-        {
-            if (debugMode == 2) {
-                screenText.PushPrintf("Search iteration count: %d", iterCount);
-            }
-
-            const int propsCount = entityDesc.GetPropertiesCount();
-            if (propsCount > 0)
-            {
-                std::string propsString;
-                screenText.Push("Entity Properties");
-                for (int i = 0; i < propsCount; ++i)
-                {
-                    entityDesc.GetPropertyString(i, propsString);
-                    screenText.PushPrintf("    %s", propsString.c_str());
-                }
-            }
-            else {
-                screenText.Push("No entity properties");
-            }
-        }
-        else
-            screenText.Push("Entity properties not found");
-    }
-
-    if (debugMode == 2) {
+    if (debugMode == 2) { 
         g_EntityDictionary.VisualizeTree(true);
     }
 
@@ -127,9 +37,9 @@ void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &scre
 
 void CModeEntityReport::Render3D()
 {
-    cl_entity_t *entity;
     CBoundingBox entityBbox;
     int debugMode = ConVars::gsm_debug->value;
+    int currentEntity = GetActualEntityIndex();
     const Color colorGreen = Color(0.f, 1.f, 0.f, 1.f);
 
     if (debugMode == 1) {
@@ -139,13 +49,38 @@ void CModeEntityReport::Render3D()
         g_EntityDictionary.VisualizeTree(false);
     }
 
-    if (m_iEntityIndex > 0 && !g_EngineModule.IsSoftwareRenderer())
+    if (currentEntity > 0 && !g_EngineModule.IsSoftwareRenderer())
     {
-        entity = g_pClientEngfuncs->GetEntityByIndex(m_iEntityIndex);
-        Utils::GetEntityBoundingBox(m_iEntityIndex, entityBbox);
+        cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(currentEntity);
+        Utils::GetEntityBoundingBox(currentEntity, entityBbox);
         vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
         Utils::DrawCuboid(entity->origin, centerOffset, entity->angles, entityBbox.GetSize(), colorGreen);
     }
+}
+
+bool CModeEntityReport::KeyInput(int keyDown, int keyCode, const char *bindName)
+{
+    if (Utils::GetCurrentDisplayMode() != DISPLAYMODE_ENTITYREPORT || !keyDown) {
+        return true;
+    }
+
+    if (keyCode == 'v')
+    {
+        if (m_iEntityIndex > 0) {
+            if (m_iEntityIndex == m_iLockedEntityIndex) {
+                m_iLockedEntityIndex = 0;
+            }
+            else {
+                m_iLockedEntityIndex = m_iEntityIndex;
+            }
+        }
+        else {
+            m_iLockedEntityIndex = 0;
+        }
+        g_pClientEngfuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
+        return false;
+    }
+    return true;
 }
 
 void CModeEntityReport::HandleChangelevel()
@@ -262,4 +197,124 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
         return (pointInBbox - viewOrigin).Length();
     }
     return 0.0f;
+}
+
+bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenText)
+{
+    int debugMode = ConVars::gsm_debug->value;
+
+    if (!entityIndex)
+    {
+        std::string mapName = Utils::GetCurrentMapName();
+        screenText.Push("Entity not found");
+        screenText.PushPrintf("Map: %s", mapName.c_str());
+        screenText.PushPrintf("Entity descriptions: %d", g_EntityDictionary.GetDescriptionsCount());
+    }
+    else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_pPlayerMove->iuser3 != 3)
+    {
+        // disable print in non free-look spectating modes
+        screenText.Push("Print enabled only in free look mode");
+        return false;
+    }
+    else
+    {
+        int iterCount;
+        CEntityDescription entityDesc;
+        cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+        bool isDescFound = g_EntityDictionary.FindDescription(entityIndex, entityDesc, iterCount);
+
+        PrintEntityCommonInfo(entityIndex, screenText);
+        if (isDescFound)
+        {
+            const std::string &classname = entityDesc.GetClassname();
+            const std::string &targetname = entityDesc.GetTargetname();
+            screenText.PushPrintf("Classname: %s", classname.c_str());
+            if (targetname.length() > 0)
+                screenText.PushPrintf("Targetname: %s", targetname.c_str());
+        }
+
+        if (entity->model->type == mod_studio)
+        {
+            std::string modelName;
+            Utils::GetEntityModelName(entityIndex, modelName);
+            screenText.PushPrintf("Model Name: %s", modelName.c_str());
+            screenText.PushPrintf("Anim. Frame: %.1f", entity->curstate.frame);
+            screenText.PushPrintf("Anim. Sequence: %d", entity->curstate.sequence);
+            screenText.PushPrintf("Bodygroup Number: %d", entity->curstate.body);
+            screenText.PushPrintf("Skin Number: %d", entity->curstate.skin);
+        }
+
+        if (isDescFound)
+        {
+            if (debugMode == 2) {
+                screenText.PushPrintf("Search iteration count: %d", iterCount);
+            }
+
+            const int propsCount = entityDesc.GetPropertiesCount();
+            if (propsCount > 0)
+            {
+                std::string propsString;
+                screenText.Push("Entity Properties");
+                for (int i = 0; i < propsCount; ++i)
+                {
+                    entityDesc.GetPropertyString(i, propsString);
+                    screenText.PushPrintf("    %s", propsString.c_str());
+                }
+            }
+            else {
+                screenText.Push("No entity properties");
+            }
+        }
+        else {
+            screenText.Push("Entity properties not found");
+        }
+
+        if (!m_iLockedEntityIndex) {
+            screenText.Push("Press V to hold on current entity");
+        }
+    }
+    return true;
+}
+
+void CModeEntityReport::PrintEntityCommonInfo(int entityIndex, CStringStack &screenText)
+{
+    CBoundingBox entityBbox;
+    cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
+    vec3_t entityVelocity = Utils::GetEntityVelocityApprox(entityIndex);
+    const vec3_t centerOffset = (entity->curstate.mins + entity->curstate.maxs) / 2.f;
+
+    vec3_t entityAngles = entity->curstate.angles;
+    vec3_t entityOrigin = entity->origin + centerOffset;
+    Utils::GetEntityBoundingBox(entityIndex, entityBbox);
+
+    screenText.PushPrintf("Entity Index: %d", entityIndex);
+    screenText.PushPrintf("Origin: (%.1f; %.1f; %.1f)",
+        entityOrigin.x, entityOrigin.y, entityOrigin.z);
+    screenText.PushPrintf("Distance: %.1f units",
+        GetEntityDistance(entityIndex));
+    screenText.PushPrintf("Velocity: %.2f u/s (%.1f; %.1f; %.1f)",
+        entityVelocity.Length2D(), entityVelocity.x, entityVelocity.y, entityVelocity.z);
+    screenText.PushPrintf("Angles: (%.1f; %.1f; %.1f)",
+        entityAngles.x, entityAngles.y, entityAngles.z);
+    screenText.PushPrintf("Hull Size: (%.1f; %.1f; %.1f)",
+        entityBbox.GetSize().x, entityBbox.GetSize().y, entityBbox.GetSize().z);
+    screenText.PushPrintf("Movetype: %s", Utils::GetMovetypeName(entity->curstate.movetype));
+    screenText.PushPrintf("Render Mode: %s", Utils::GetRenderModeName(entity->curstate.rendermode));
+    screenText.PushPrintf("Render FX: %s", Utils::GetRenderFxName(entity->curstate.renderfx));
+    screenText.PushPrintf("Render Amount: %d", entity->curstate.renderamt);
+    screenText.PushPrintf("Render Color: %d %d %d",
+        entity->curstate.rendercolor.r,
+        entity->curstate.rendercolor.g,
+        entity->curstate.rendercolor.b
+    );
+}
+
+int CModeEntityReport::GetActualEntityIndex()
+{
+    if (m_iLockedEntityIndex > 0) {
+        return m_iLockedEntityIndex;
+    }
+    else {
+        return m_iEntityIndex;
+    }
 }
