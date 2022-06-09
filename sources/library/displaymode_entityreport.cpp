@@ -58,7 +58,7 @@ void CModeEntityReport::Render3D()
     }
 }
 
-bool CModeEntityReport::KeyInput(int keyDown, int keyCode, const char *bindName)
+bool CModeEntityReport::KeyInput(bool keyDown, int keyCode, const char *bindName)
 {
     if (Utils::GetCurrentDisplayMode() != DISPLAYMODE_ENTITYREPORT || !keyDown) {
         return true;

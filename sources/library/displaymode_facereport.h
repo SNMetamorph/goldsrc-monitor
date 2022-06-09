@@ -13,7 +13,7 @@ public:
 
     void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
     void Render3D() override;
-    bool KeyInput(int isKeyDown, int keyNum, const char *bindName) override;
+    bool KeyInput(bool keyDown, int keyCode, const char *bindName) override;
     void HandleChangelevel() override;
     DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_FACEREPORT; };
 

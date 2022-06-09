@@ -226,5 +226,5 @@ void CApplication::DisplayModeRender3D()
 
 bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)
 {
-    return m_pCurrentDisplayMode->KeyInput(keyDown, keyCode, bindName);
+    return m_pCurrentDisplayMode->KeyInput(keyDown != 0, keyCode, bindName);
 }

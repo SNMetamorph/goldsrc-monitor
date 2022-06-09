@@ -69,9 +69,9 @@ void CModeFaceReport::Render3D()
     }
 }
 
-bool CModeFaceReport::KeyInput(int isKeyDown, int keyNum, const char *bindName)
+bool CModeFaceReport::KeyInput(bool keyDown, int keyNum, const char *bindName)
 {
-    if (isKeyDown && keyNum == 'v')
+    if (keyDown && keyNum == 'v')
     {
         if (m_pCurrentFace)
         {

@@ -82,7 +82,7 @@ float CModeMeasurement::GetPointsDistance() const
     return (m_vecPointB - m_vecPointA).Length();
 }
 
-bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
+bool CModeMeasurement::KeyInput(bool keyDown, int keyCode, const char *)
 {
     vec3_t viewDir;
     vec3_t viewOrigin;
@@ -90,7 +90,7 @@ bool CModeMeasurement::KeyInput(int isKeyDown, int keyCode, const char *)
     pmtrace_t traceData;
     const float traceLen = 64000.f;
 
-    if (Utils::GetCurrentDisplayMode() != DISPLAYMODE_MEASUREMENT || !isKeyDown)
+    if (Utils::GetCurrentDisplayMode() != DISPLAYMODE_MEASUREMENT || !keyDown)
         return true;
 
     if (keyCode >= K_MOUSE1 && keyCode <= K_MOUSE3)

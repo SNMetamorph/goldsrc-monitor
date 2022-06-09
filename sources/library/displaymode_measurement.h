@@ -21,7 +21,7 @@ public:
 
     void Render2D(int screenWidth, int screenHeight, CStringStack &screenText) override;
     void Render3D() override {};
-    bool KeyInput(int isKeyDown, int keyCode, const char *) override;
+    bool KeyInput(bool keyDown, int keyCode, const char *) override;
     void HandleChangelevel() override;
     DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_MEASUREMENT; };
 
