@@ -30,6 +30,7 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/library/displaymode_measurement.cpp"
 	"../../sources/library/displaymode_speedometer.cpp"
 	"../../sources/library/entity_dictionary.cpp"
+	"../../sources/library/entity_info_request.cpp"
 	"../../sources/library/entity_description.cpp"
 	"../../sources/library/dll_main.cpp"
 	"../../sources/library/hooks.cpp"
