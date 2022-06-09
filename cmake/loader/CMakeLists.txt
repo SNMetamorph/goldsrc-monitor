@@ -53,7 +53,8 @@ if(MSVC)
 else()
 endif()
 
-set_compiler_runtime(${PROJECT_NAME} STATIC)
+# configure to use static runtime
+set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # linking libraries
 if(MSVC)

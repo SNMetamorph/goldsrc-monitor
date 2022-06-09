@@ -56,15 +56,17 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	"../../sources/library"
 )
 
-# Configure & add PolyHook library target
-set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
+# configure & add PolyHook library target
 set (POLYHOOK_DISASM_CAPSTONE OFF CACHE BOOL "")
 set (POLYHOOK_FEATURE_PE OFF CACHE BOOL "")
 set (POLYHOOK_FEATURE_VIRTUALS OFF CACHE BOOL "")
 set (POLYHOOK_FEATURE_EXCEPTION OFF CACHE BOOL "")
 
+# configure dependency libraries to use static runtime
+set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
+set (ASMJIT_STATIC ON CACHE BOOL "")
+
 add_subdirectory(../../external/polyhook polyhook)
-set_compiler_runtime(PolyHook_2 STATIC)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
 	OUTPUT_NAME "gsm-library"
@@ -98,7 +100,8 @@ if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/O1>) # enable optimizing to minimize size
 endif()
 
-set_compiler_runtime(${PROJECT_NAME} STATIC)
+# configure to use static runtime
+set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # linking libraries
 if(MSVC)
@@ -106,7 +109,6 @@ if(MSVC)
 		PolyHook_2
 		opengl32
 		psapi
-		libvcruntime
 	)
 else()
 endif()
