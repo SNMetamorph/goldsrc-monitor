@@ -3,6 +3,7 @@
 #include "string_stack.h"
 #include "memory_pattern.h"
 #include "bounding_box.h"
+#include "display_mode.h"
 #include "color.h"
 #include "stdafx.h"
 #include <stdint.h>
@@ -21,6 +22,7 @@ namespace Utils
     void *FindMemoryPointer(void *startAddr, void *endAddr, void *scanValue);
     void *FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern);
     float GetCurrentSysTime();
+    DisplayModeIndex GetCurrentDisplayMode();
 
     cvar_t *RegisterConVar(const char *name, const char *value, int flags);
     int GetStringWidth(const char *str);

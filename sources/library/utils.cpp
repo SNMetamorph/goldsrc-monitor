@@ -560,3 +560,8 @@ float Utils::GetCurrentSysTime()
     timeDiff = currentTime.QuadPart - clockStart.QuadPart;
     return (float)timeDiff / (float)perfFreq.QuadPart;
 }
+
+DisplayModeIndex Utils::GetCurrentDisplayMode()
+{
+    return static_cast<DisplayModeIndex>(ConVars::gsm_mode->value);
+}
