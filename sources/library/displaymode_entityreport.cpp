@@ -220,10 +220,10 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
         int iterCount;
         CEntityDescription entityDesc;
         cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-        bool isDescFound = g_EntityDictionary.FindDescription(entityIndex, entityDesc, iterCount);
+        bool descFound = g_EntityDictionary.FindDescription(entityIndex, entityDesc, iterCount);
 
         PrintEntityCommonInfo(entityIndex, screenText);
-        if (isDescFound)
+        if (descFound)
         {
             const std::string &classname = entityDesc.GetClassname();
             const std::string &targetname = entityDesc.GetTargetname();
@@ -232,7 +232,7 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
                 screenText.PushPrintf("Targetname: %s", targetname.c_str());
         }
 
-        if (entity && entity->model->type == mod_studio)
+        if (entity && entity->model && entity->model->type == mod_studio)
         {
             std::string modelName;
             Utils::GetEntityModelName(entityIndex, modelName);
@@ -243,7 +243,7 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
             screenText.PushPrintf("Skin Number: %d", entity->curstate.skin);
         }
 
-        if (isDescFound)
+        if (descFound)
         {
             if (debugMode == 2) {
                 screenText.PushPrintf("Search iteration count: %d", iterCount);
