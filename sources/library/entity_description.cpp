@@ -141,12 +141,7 @@ void CEntityDescription::ParseEntityData()
 model_t *CEntityDescription::FindModelByName(const char *name)
 {
     int modelIndex = g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(name);
-    if (modelIndex > 0) 
-    {
-        // https://github.com/FWGS/xash3d-fwgs/issues/518
-        if (g_EngineModule.IsXashEngine()) {
-            modelIndex -= 1;
-        }
+    if (modelIndex > 0) {
         return g_pClientEngfuncs->hudGetModelByIndex(modelIndex);
     }
     return nullptr;
