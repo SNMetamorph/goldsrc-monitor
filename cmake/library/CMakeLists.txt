@@ -101,7 +101,7 @@ if (MSVC)
 endif()
 
 # configure to use static runtime
-set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set_compiler_runtime(${PROJECT_NAME} STATIC)
 
 # linking libraries
 if(MSVC)
