@@ -78,6 +78,7 @@ void CHooks::Apply()
     pfnCameraOffset_t pfnCameraOffset = (pfnCameraOffset_t)g_ClientModule.GetFuncAddress("CL_CameraOffset");
     pfnVidInit_t pfnVidInit = (pfnVidInit_t)g_ClientModule.GetFuncAddress("HUD_VidInit");
 
+    InitializeLogger();
     g_hookRedraw.Hook(pfnRedraw, &HookRedraw);
     g_hookPlayerMove.Hook(pfnPlayerMove, &HookPlayerMove);
     g_hookKeyEvent.Hook(pfnKeyEvent, &HookKeyEvent);
@@ -123,8 +124,10 @@ void CHooks::Apply()
     );
     if (!isHookSuccessful)
     {
+        std::string errorLog;
+        WriteLogs(errorLog);
         RevertHooks();
-        EXCEPT("unable to hook desired functions");
+        EXCEPT("unable to hook desired functions, error log:\n" + errorLog);
     }
 }
 
@@ -134,6 +137,22 @@ void CHooks::Remove()
     if (GetModuleHandle("client.dll"))
     {
         RevertHooks();
+    }
+}
+
+void CHooks::InitializeLogger()
+{
+    m_pLogger = std::make_shared<PLH::ErrorLog>();
+    m_pLogger->setLogLevel(PLH::ErrorLevel::SEV);
+    PLH::Log::registerLogger(m_pLogger);
+}
+
+void CHooks::WriteLogs(std::string &errorLog)
+{
+    auto &logger = *m_pLogger;
+    errorLog.clear();
+    for (PLH::Error error = logger.pop(); !error.msg.empty(); error = logger.pop()) {
+        errorLog += error.msg;
     }
 }
 

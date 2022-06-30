@@ -1,5 +1,7 @@
 #pragma once
 #include "function_hook.h"
+#include <memory>
+#include <polyhook2/ErrorLog.hpp>
 
 class CHooks
 {
@@ -16,5 +18,9 @@ public:
     void Remove();
 
 private:
+    void InitializeLogger();
+    void WriteLogs(std::string &errorLog);
     void RevertHooks();
+
+    std::shared_ptr<PLH::ErrorLog> m_pLogger;
 };

@@ -21,9 +21,6 @@ public:
 
     bool Hook(T origFunc, T callbackFunc)
     {
-        if (origFunc == nullptr) {
-            return false;
-        }
         m_pDetour = new PolyhookDetourType_t(
             reinterpret_cast<uint64_t>(origFunc),
             reinterpret_cast<uint64_t>(callbackFunc),
@@ -32,6 +29,7 @@ public:
         m_isHooked = m_pDetour->hook();
         return m_isHooked;
     };
+
     bool Unhook()
     {
         if (m_pDetour && m_isHooked)
