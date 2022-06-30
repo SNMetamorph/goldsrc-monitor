@@ -56,6 +56,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	"../../sources/library"
 )
 
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+	OUTPUT_NAME "gsm-library"
+	CXX_STANDARD 17
+	CXX_STANDARD_REQUIRED YES
+	CXX_EXTENSIONS NO
+)
+
+add_subdirectory(../../external/polyhook polyhook)
+
 # configure & add PolyHook library target
 set (POLYHOOK_DISASM_CAPSTONE OFF CACHE BOOL "")
 set (POLYHOOK_FEATURE_PE OFF CACHE BOOL "")
@@ -65,17 +74,10 @@ set (POLYHOOK_FEATURE_EXCEPTION OFF CACHE BOOL "")
 # configure dependency libraries to use static runtime
 set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
 set (ASMJIT_STATIC ON CACHE BOOL "")
-
-add_subdirectory(../../external/polyhook polyhook)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES 
-	OUTPUT_NAME "gsm-library"
-	CXX_STANDARD 17
-	CXX_STANDARD_REQUIRED YES
-	CXX_EXTENSIONS NO
-)
+set_compiler_runtime(PolyHook_2 STATIC)
 
 if (MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /MP) # multi-process building
 	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
 	target_compile_definitions(${PROJECT_NAME} PRIVATE
 		_CRT_SECURE_NO_WARNINGS=1 # disable CRT warnings
@@ -98,6 +100,7 @@ if (MSVC)
 	# release mode compiler flags
 	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/Ob1>) # disable force function inlining, to prevent segfault in release mode
 	target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/O1>) # enable optimizing to minimize size
+else()
 endif()
 
 # configure to use static runtime
@@ -106,9 +109,10 @@ set_compiler_runtime(${PROJECT_NAME} STATIC)
 # linking libraries
 if(MSVC)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
-		PolyHook_2
-		opengl32
-		psapi
+		"PolyHook_2"
+		"opengl32"
+		"psapi"
+		"libvcruntime$<$<CONFIG:Debug>:d>"
 	)
 else()
 endif()
