@@ -63,8 +63,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_EXTENSIONS NO
 )
 
-add_subdirectory(../../external/polyhook polyhook)
-
 # configure & add PolyHook library target
 set (POLYHOOK_DISASM_CAPSTONE OFF CACHE BOOL "")
 set (POLYHOOK_FEATURE_PE OFF CACHE BOOL "")
@@ -74,10 +72,10 @@ set (POLYHOOK_FEATURE_EXCEPTION OFF CACHE BOOL "")
 # configure dependency libraries to use static runtime
 set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
 set (ASMJIT_STATIC ON CACHE BOOL "")
-set_compiler_runtime(PolyHook_2 STATIC)
+
+add_subdirectory("../../external/polyhook" polyhook)
 
 if (MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /MP) # multi-process building
 	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
 	target_compile_definitions(${PROJECT_NAME} PRIVATE
 		_CRT_SECURE_NO_WARNINGS=1 # disable CRT warnings
@@ -112,7 +110,6 @@ if(MSVC)
 		"PolyHook_2"
 		"opengl32"
 		"psapi"
-		"libvcruntime$<$<CONFIG:Debug>:d>"
 	)
 else()
 endif()

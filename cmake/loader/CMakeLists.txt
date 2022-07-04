@@ -59,8 +59,8 @@ set_compiler_runtime(${PROJECT_NAME} STATIC)
 # linking libraries
 if(MSVC)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
-		psapi 
-		shlwapi
+		"psapi" 
+		"shlwapi"
 	)
 else()
 endif()

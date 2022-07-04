@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.3)
 
-project(goldsrc-monitor)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-
 if(POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
 endif()
 
-cmake_policy(SET CMP0063 NEW)
+if(POLICY CMP0063)
+    cmake_policy(SET CMP0063 NEW)
+endif()
+
 if(POLICY CMP0091)
     cmake_policy(SET CMP0091 NEW)
 endif()
@@ -16,11 +17,16 @@ if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+project(goldsrc-monitor)
+
 # Build options
 option(BUILD_LOADER "Build loader" ON)
 option(BUILD_LIBRARY "Build library" ON)
 option(BUILD_WRAPPER "Build library as wrapper for game library" OFF)
 option(ENABLE_WINXP_SUPPORT "Enable Windows XP support" OFF)
+
+# multithreaded build flag for MSVC
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>) 
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(ENABLE_WINXP_SUPPORT FALSE)
