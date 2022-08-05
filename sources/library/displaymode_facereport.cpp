@@ -118,7 +118,7 @@ int CModeFaceReport::TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3
     return 0;
 }
 
-void CModeFaceReport::GetSurfaceBoundingBox(EngineTypes::msurface_t *surf, CBoundingBox &bbox)
+void CModeFaceReport::GetSurfaceBoundingBox(Engine::msurface_t *surf, CBoundingBox &bbox)
 {
     bbox = CBoundingBox();
     m_BoundPoints.reserve(surf->numedges * 2);
@@ -143,18 +143,18 @@ void CModeFaceReport::GetSurfaceBoundingBox(EngineTypes::msurface_t *surf, CBoun
     }
 }
 
-EngineTypes::mleaf_t *CModeFaceReport::PointInLeaf(vec3_t point, EngineTypes::mnode_t *node)
+Engine::mleaf_t *CModeFaceReport::PointInLeaf(vec3_t point, Engine::mnode_t *node)
 {
     for (;;)
     {
         if (node->contents < 0)
-            return (EngineTypes::mleaf_t *)node;
+            return (Engine::mleaf_t *)node;
         node = node->children[PlaneDiff(point, node->plane) <= 0];
     }
     return NULL;
 }
 
-void CModeFaceReport::DrawFaceOutline(EngineTypes::msurface_t *surf)
+void CModeFaceReport::DrawFaceOutline(Engine::msurface_t *surf)
 {
     const Color lineColor = Color(0.f, 1.f, 1.f, 1.f);
     g_pClientEngfuncs->pTriAPI->Begin(TRI_LINES);
@@ -171,7 +171,7 @@ void CModeFaceReport::DrawFaceOutline(EngineTypes::msurface_t *surf)
     g_pClientEngfuncs->pTriAPI->End();
 }
 
-void CModeFaceReport::DrawSurfaceBounds(EngineTypes::msurface_t *surf)
+void CModeFaceReport::DrawSurfaceBounds(Engine::msurface_t *surf)
 {
     CBoundingBox bounds;
     const vec3_t nullVec = vec3_t(0, 0, 0);
@@ -187,7 +187,7 @@ void CModeFaceReport::DrawSurfaceBounds(EngineTypes::msurface_t *surf)
     );
 }
 
-bool CModeFaceReport::SurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p1, vec3_t p2, float &distance)
+bool CModeFaceReport::SurfaceIntersected(Engine::msurface_t *surf, vec3_t p1, vec3_t p2, float &distance)
 {
     float fraction;
     CBoundingBox surfaceBounds;
@@ -202,7 +202,7 @@ bool CModeFaceReport::SurfaceIntersected(EngineTypes::msurface_t *surf, vec3_t p
     return false;
 }
 
-bool CModeFaceReport::GetLightmapProbe(EngineTypes::msurface_t *surf, const vec3_t &point, color24 &probe)
+bool CModeFaceReport::GetLightmapProbe(Engine::msurface_t *surf, const vec3_t &point, color24 &probe)
 {
     if (surf->flags & SURF_DRAWTILED)
         return false; // no lightmaps
@@ -242,73 +242,93 @@ bool CModeFaceReport::GetLightmapProbe(EngineTypes::msurface_t *surf, const vec3
     return false;
 }
 
-EngineTypes::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect)
+Engine::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect)
 {
-    int surfaceCount = 0;
-    EngineTypes::msurface_t *surfaceList = nullptr;
     int entityIndex = TraceEntity(origin, dir, distance, intersect);
     cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
     model_t *worldModel = g_pClientEngfuncs->hudGetModelByIndex(1);
+    Engine::mnode_t *firstNode = nullptr;
+    Engine::msurface_t *surf = nullptr;
 
-    if (entity->model->type != mod_brush) {
-        m_pCurrentModel = worldModel;
-    }
-    else {
-        m_pCurrentModel = entity->model;
-    }
-
-    if (m_pCurrentModel == worldModel)
+    if (entity)
     {
-        EngineTypes::mleaf_t *leaf = PointInLeaf(intersect, (EngineTypes::mnode_t *)m_pCurrentModel->nodes);
-        if (leaf)
-        {
-            surfaceCount = leaf->nummarksurfaces;
-            surfaceList = (EngineTypes::msurface_t *)leaf->firstmarksurface[0];
+        if (entity->model->type != mod_brush) {
+            m_pCurrentModel = worldModel;
         }
-    }
-    else
-    {
-        surfaceCount = m_pCurrentModel->nummodelsurfaces;
-        surfaceList = (EngineTypes::msurface_t *)m_pCurrentModel->surfaces + m_pCurrentModel->firstmodelsurface;
-    }
-
-    if (surfaceCount > 0)
-    {
-        // iterate all surfaces and push intersected to list
-        float surfDistance;
-        std::vector<float> facesDistance;
-        std::vector<EngineTypes::msurface_t *> intersectedFaces;
-
-        facesDistance.reserve(32);
-        intersectedFaces.reserve(32);
-        for (int i = 0; i < surfaceCount; ++i)
-        {  
-            EngineTypes::msurface_t *surf = (EngineTypes::msurface_t *)surfaceList + i;
-            if (SurfaceIntersected(surf, origin, origin + dir * distance, surfDistance))
-            {
-                facesDistance.push_back(surfDistance);
-                intersectedFaces.push_back(surf);
-            }
+        else {
+            m_pCurrentModel = entity->model;
         }
 
-        if (!intersectedFaces.empty())
-        {
-            // select closest surface from all intersected surfaces
-            float closestDistance = facesDistance[0];
-            EngineTypes::msurface_t *closestSurface = intersectedFaces[0];
-            for (int i = 0; i < facesDistance.size(); ++i)
-            {
-                surfDistance = facesDistance[i];
-                if (surfDistance < closestDistance)
-                {
-                    closestDistance = surfDistance;
-                    closestSurface = intersectedFaces[i];
-                }
-            }
-            return closestSurface;
+        firstNode = reinterpret_cast<Engine::mnode_t *>(m_pCurrentModel->nodes);
+        firstNode = m_pCurrentModel->hulls[0].firstclipnode + firstNode;
+
+        vec3_t endPoint = origin + (dir * distance);
+        surf = SurfaceAtPoint(m_pCurrentModel, firstNode, origin, endPoint, intersect);
+        if (surf) {
+            return surf;
         }
     }
 
     m_pCurrentModel = nullptr;
     return nullptr;
+}
+
+Engine::msurface_t *CModeFaceReport::SurfaceAtPoint(model_t *pModel, Engine::mnode_t *node, vec3_t start, vec3_t end, vec3_t &intersect)
+{
+    mplane_t    *plane;
+    vec3_t		mid;
+    mtexinfo_t  *tex;
+    Engine::msurface_t *surf;
+    
+    if (node->contents < 0) {
+        return nullptr;
+    }
+
+    plane = node->plane;
+    float front = DotProduct(start, plane->normal) - plane->dist;
+    float back = DotProduct(end, plane->normal) - plane->dist;
+    int side = front < 0;
+
+    if ((back < 0) == side) {
+        return SurfaceAtPoint(pModel, node->children[side], start, end, intersect);
+    }
+
+    float frac = front / (front - back);
+    mid[0] = start[0] + (end[0] - start[0]) * frac;
+    mid[1] = start[1] + (end[1] - start[1]) * frac;
+    mid[2] = start[2] + (end[2] - start[2]) * frac;
+
+    surf = SurfaceAtPoint(pModel, node->children[side], start, mid, intersect);
+    if (surf) {
+        intersect = mid;
+        return surf;
+    }
+
+    if ((back < 0) == side) {
+        return nullptr;
+    }
+
+    surf = (Engine::msurface_t *)pModel->surfaces + node->firstsurface;
+    for (int i = 0; i < node->numsurfaces; i++, surf++)
+    {
+        tex = surf->texinfo;
+
+        int s = DotProduct(mid, tex->vecs[0]) + tex->vecs[0][3];
+        int t = DotProduct(mid, tex->vecs[1]) + tex->vecs[1][3];
+
+        if (s < surf->texturemins[0] || t < surf->texturemins[1]) {
+            continue;
+        }
+
+        int ds = s - surf->texturemins[0];
+        int dt = t - surf->texturemins[1];
+
+        if (ds > surf->extents[0] || dt > surf->extents[1]) {
+            continue;
+        }
+
+        intersect = mid;
+        return surf;
+    }
+    return SurfaceAtPoint(pModel, node->children[!side], mid, end, intersect);
 }

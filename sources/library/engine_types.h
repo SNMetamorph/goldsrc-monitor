@@ -6,10 +6,10 @@
 * incompatible versions: for software and hardware renderers.
 * In this header presented only hardware renderer structures (they also present in Xash3D)
 * By default in HLSDK presented only software renderer structures.
-* To prevent collision with HLSDK these structures located in separate "bsp" namespace.
+* To prevent collision with HLSDK these structures located in separate "Engine" namespace.
 */
 
-namespace EngineTypes
+namespace Engine
 {
 	struct mnode_t
 	{
