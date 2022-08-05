@@ -28,10 +28,10 @@
 	"game_specific_builds_info": [
 		{
 			"process_name": "svencoop.exe",
-			"description": "Sven Co-op (build 8832, 10:50:19 Jan 9 2021)",
+			"description": "Sven Co-op (build 8948, 11:20:57 Jun 12 2021)",
 			"signatures": {
-                "SPR_Load": "E9 AB 6B 00 00 CC CC CC CC",
-                "SPR_Frames": "E9 BB 6C 00 00 CC CC CC CC"
+                "SPR_Load": "53 8B 5C 24 08 55 56 57 85 DB 0F 84 D8",
+                "SPR_Frames": "8B 44 24 04 83 C0 FF 78 1B"
             }
         },
         {
