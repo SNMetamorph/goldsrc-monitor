@@ -87,4 +87,9 @@ namespace Engine
 		struct texture_s *alternate_anims;  // bmodels in frmae 1 use these
 		unsigned    offsets[MIPLEVELS];     // four mip maps stored
 	};
+
+	inline Engine::mnode_t *CastType(::mnode_t *origType) { return reinterpret_cast<Engine::mnode_t *>(origType); }
+	inline Engine::mleaf_t *CastType(::mleaf_t *origType) { return reinterpret_cast<Engine::mleaf_t *>(origType); }
+	inline Engine::msurface_t *CastType(::msurface_t *origType) { return reinterpret_cast<Engine::msurface_t *>(origType); }
+	inline Engine::texture_t *CastType(::texture_t *origType) { return reinterpret_cast<Engine::texture_t *>(origType); }
 };

@@ -32,7 +32,7 @@ void CModeFaceReport::Render2D(int scrWidth, int scrHeight, CStringStack &screen
     if (m_pCurrentFace)
     {
         const mplane_t *plane = m_pCurrentFace->plane;
-        const texture_t *texture = m_pCurrentFace->texinfo->texture;
+        const Engine::texture_t *texture = Engine::CastType(m_pCurrentFace->texinfo->texture);
         vec3_t planeCenter = plane->normal * plane->dist;
         m_ColorProbe = { 0 };
 
@@ -148,7 +148,7 @@ Engine::mleaf_t *CModeFaceReport::PointInLeaf(vec3_t point, Engine::mnode_t *nod
     for (;;)
     {
         if (node->contents < 0)
-            return (Engine::mleaf_t *)node;
+            return reinterpret_cast<Engine::mleaf_t *>(node);
         node = node->children[PlaneDiff(point, node->plane) <= 0];
     }
     return NULL;
@@ -259,7 +259,7 @@ Engine::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, flo
             m_pCurrentModel = entity->model;
         }
 
-        firstNode = reinterpret_cast<Engine::mnode_t *>(m_pCurrentModel->nodes);
+        firstNode = Engine::CastType(m_pCurrentModel->nodes);
         firstNode = m_pCurrentModel->hulls[0].firstclipnode + firstNode;
 
         vec3_t endPoint = origin + (dir * distance);
@@ -308,7 +308,7 @@ Engine::msurface_t *CModeFaceReport::SurfaceAtPoint(model_t *pModel, Engine::mno
         return nullptr;
     }
 
-    surf = (Engine::msurface_t *)pModel->surfaces + node->firstsurface;
+    surf = Engine::CastType(pModel->surfaces) + node->firstsurface;
     for (int i = 0; i < node->numsurfaces; i++, surf++)
     {
         tex = surf->texinfo;
