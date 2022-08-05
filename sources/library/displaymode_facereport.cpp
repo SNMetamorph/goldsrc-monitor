@@ -300,7 +300,6 @@ Engine::msurface_t *CModeFaceReport::SurfaceAtPoint(model_t *pModel, Engine::mno
 
     surf = SurfaceAtPoint(pModel, node->children[side], start, mid, intersect);
     if (surf) {
-        intersect = mid;
         return surf;
     }
 
