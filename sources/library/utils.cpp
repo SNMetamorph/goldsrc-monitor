@@ -38,6 +38,35 @@ void *Utils::FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPat
     return nullptr;
 }
 
+void *Utils::FindJmpFromAddress(void *startAddr, void *endAddr, void *targetAddress)
+{
+#ifndef APP_SUPPORT_64BIT
+    size_t patternLen = 5; // jmp instuction is 5 bytes length on x86
+    uint8_t *totalEndAddr = (uint8_t *)endAddr - patternLen;
+    for (uint8_t *i = (uint8_t *)startAddr; i <= totalEndAddr; ++i)
+    {
+        // check for jmp opcode (x86)
+        if (i[0] == 0xE9) 
+        { 
+            uint8_t *destAddress = Utils::UnwrapJmp(i);
+            if (destAddress == reinterpret_cast<uint8_t*>(targetAddress)) {
+                return i;
+            }
+        }
+    }
+    return nullptr;
+#else
+    // now this function works only on x86
+    return nullptr;
+#endif
+}
+
+uint8_t *Utils::UnwrapJmp(uint8_t *opcodeAddr)
+{
+    int32_t relativeOffset = *(int32_t *)(opcodeAddr + 1);
+    return reinterpret_cast<uint8_t*>(relativeOffset + opcodeAddr + 5);
+}
+
 bool Utils::GetLibraryDirectory(std::wstring &workingDir)
 {
     workingDir.resize(MAX_PATH);

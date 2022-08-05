@@ -59,30 +59,47 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
             EXCEPT("SPR_Frames() address not found");
         }
     }
-
+    
+    bool fallbackMethod = false;
+    uint8_t *targetAddr = pfnSPR_Load;
     while (true)
     {
         coincidenceAddr = (uint8_t *)Utils::FindMemoryPointer(
             scanStartAddr,
             moduleEndAddr,
-            pfnSPR_Load
+            targetAddr
         );
         if (!coincidenceAddr || scanStartAddr >= moduleEndAddr)
-            EXCEPT("valid reference to SPR_Load() not found");
-        else
+        {
+            // try to use fallback method
+            targetAddr = (uint8_t *)Utils::FindJmpFromAddress(moduleAddr, moduleEndAddr, pfnSPR_Load);
+            if (!targetAddr || fallbackMethod) {
+                break;
+            }
+            else
+            {
+                fallbackMethod = true;
+                scanStartAddr = moduleAddr;
+                continue;
+            }
+        }
+        else {
             scanStartAddr = coincidenceAddr + pointerSize;
+        }
 
         // check for module range to avoid segfault
         probeAddr = *(uint8_t **)(coincidenceAddr + pointerSize);
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
-            if (probeAddr == pfnSPR_Frames) 
+            if (probeAddr == pfnSPR_Frames || (fallbackMethod && Utils::UnwrapJmp(probeAddr) == pfnSPR_Frames))
             {
                 g_pClientEngfuncs = (cl_enginefunc_t *)coincidenceAddr;
                 return true; 
             }
         }
     }
+
+    EXCEPT("valid reference to SPR_Load() not found");
     return false;
 }
 

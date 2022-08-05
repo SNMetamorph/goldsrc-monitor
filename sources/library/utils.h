@@ -21,6 +21,8 @@ namespace Utils
     HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName);
     void *FindMemoryPointer(void *startAddr, void *endAddr, void *scanValue);
     void *FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern);
+    void *FindJmpFromAddress(void *startAddr, void *endAddr, void *targetAddress);
+    uint8_t *UnwrapJmp(uint8_t *opcodeAddr);
     float GetCurrentSysTime();
     DisplayModeIndex GetCurrentDisplayMode();
 
