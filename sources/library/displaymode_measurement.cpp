@@ -7,6 +7,15 @@
 // HLSDK
 #include "keydefs.h"
 
+CModeMeasurement::CModeMeasurement()
+{
+    const vec3_t zeroVector = { 0.0f, 0.0f, 0.0f };
+    m_vecPointA = zeroVector;
+    m_vecPointB = zeroVector;
+    m_iLineSprite = 0;
+    m_iSnapMode = SNAPMODE_FREE;
+}
+
 void CModeMeasurement::UpdatePointOrigin(vec3_t &linePoint, const vec3_t &targetPoint)
 {
     if (m_iSnapMode != SNAPMODE_ALONGLINE)

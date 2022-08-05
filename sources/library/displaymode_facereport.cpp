@@ -12,6 +12,14 @@
 #define SURF_DRAWTILED		0x20
 #define SURF_DRAWBACKGROUND	0x40
 
+CModeFaceReport::CModeFaceReport()
+{
+    m_ColorProbe = { 0 };
+    m_pCurrentModel = nullptr;
+    m_pCurrentFace = nullptr;
+    m_BoundPoints = {};
+}
+
 void CModeFaceReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     const float lineLen = 11590.0f;

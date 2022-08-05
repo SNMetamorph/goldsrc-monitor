@@ -6,7 +6,7 @@
 class CModeEntityReport : public IDisplayMode
 {
 public: 
-    CModeEntityReport() {};
+    CModeEntityReport();
     virtual ~CModeEntityReport() {};
 
     void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -24,8 +24,8 @@ private:
     void PrintEntityCommonInfo(int entityIndex, CStringStack &screenText);
     int GetActualEntityIndex();
 
-    int m_iEntityIndex = 0;
-    int m_iLockedEntityIndex = 0;
+    int m_iEntityIndex;
+    int m_iLockedEntityIndex;
     std::vector<int> m_EntityIndexList;
     std::vector<float> m_EntityDistanceList;
 };

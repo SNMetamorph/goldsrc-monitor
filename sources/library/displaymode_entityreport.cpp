@@ -10,6 +10,14 @@
 #include <algorithm>
 #include <iterator> 
 
+CModeEntityReport::CModeEntityReport()
+{
+    m_iEntityIndex = 0;
+    m_iLockedEntityIndex = 0;
+    m_EntityIndexList = {};
+    m_EntityDistanceList = {};
+}
+
 void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     int debugMode = ConVars::gsm_debug->value;

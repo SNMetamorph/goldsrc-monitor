@@ -4,6 +4,13 @@
 #include "utils.h"
 #include "local_player.h"
 
+CModeFull::CModeFull()
+{
+    m_flFrameTime = 0.0f;
+    m_flLastFrameTime = 0.0f;
+    m_flLastSysTime = 0.0f;
+}
+
 void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
     float frameTime             = GetSmoothFrameTime();
@@ -59,19 +66,16 @@ void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 
 float CModeFull::GetSmoothFrameTime()
 {
-    static float lastSysTime;
-    static float frameTime      = 0;
-    static float lastFrameTime  = 0;
     const float smoothFactor    = 0.24f;
     const float diffThreshold   = 0.13f;
     float currSysTime           = Utils::GetCurrentSysTime();
-    float timeDelta             = currSysTime - lastSysTime;
+    float timeDelta             = currSysTime - m_flLastSysTime;
 
-    if ((timeDelta - lastFrameTime) > diffThreshold)
-        timeDelta = lastFrameTime;
+    if ((timeDelta - m_flLastFrameTime) > diffThreshold)
+        timeDelta = m_flLastFrameTime;
 
-    frameTime       += (timeDelta - frameTime) * smoothFactor;
-    lastFrameTime   = frameTime;
-    lastSysTime     = currSysTime;
-    return frameTime;
+    m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
+    m_flLastFrameTime   = m_flFrameTime;
+    m_flLastSysTime     = currSysTime;
+    return m_flFrameTime;
 }

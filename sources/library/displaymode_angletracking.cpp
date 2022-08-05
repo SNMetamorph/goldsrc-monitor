@@ -3,26 +3,26 @@
 #include "client_module.h"
 #include "local_player.h"
 
+CModeAngleTracking::CModeAngleTracking()
+{
+    m_vecLastAngles = Vector(0.0f, 0.0f, 0.0f);
+    m_flTrackStartTime = 0.0f;
+    m_flLastYawVelocity = 0.0f;
+    m_flLastPitchVelocity = 0.0f;
+}
+
 void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    int stringWidth;
-    float yawVelocity;
-    float pitchVelocity;
-    static vec3_t lastAngles;
     const float threshold = 0.001f;
-    static float trackStartTime;
-    static float lastYawVelocity;
-    static float lastPitchVelocity;
     const vec3_t &currAngles = g_LocalPlayer.GetAngles();
-
-    pitchVelocity = (currAngles.x - lastAngles.x) / g_pPlayerMove->frametime;
-    yawVelocity = (currAngles.y - lastAngles.y) / g_pPlayerMove->frametime;
+    float pitchVelocity = (currAngles.x - m_vecLastAngles.x) / g_pPlayerMove->frametime;
+    float yawVelocity = (currAngles.y - m_vecLastAngles.y) / g_pPlayerMove->frametime;
 
     screenText.Clear();
     screenText.PushPrintf("   up : %.2f deg/s", -pitchVelocity);
     screenText.PushPrintf("right : %.2f deg/s", -yawVelocity);
-    stringWidth = Utils::GetStringWidth(screenText.StringAt(0));
 
+    const int stringWidth = Utils::GetStringWidth(screenText.StringAt(0));
     const int marginDown = 35;
     Utils::DrawStringStack(
         (scrWidth / 2) + stringWidth / 2, 
@@ -31,21 +31,23 @@ void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &scr
     );
 
     // check for start
-    if (fabs(lastPitchVelocity) < threshold && fabs(pitchVelocity) > threshold)
-        trackStartTime = g_pClientEngfuncs->GetClientTime();
+    if (fabs(m_flLastPitchVelocity) < threshold && fabs(pitchVelocity) > threshold) {
+        m_flTrackStartTime = g_pClientEngfuncs->GetClientTime();
+    }
 
     if (fabs(pitchVelocity) > threshold)
     {
         g_pClientEngfuncs->Con_Printf("(%.5f; %.2f)\n",
-            (g_pClientEngfuncs->GetClientTime() - trackStartTime), -pitchVelocity
+            (g_pClientEngfuncs->GetClientTime() - m_flTrackStartTime), -pitchVelocity
         );
     }
 
     // check for end
-    if (fabs(pitchVelocity) < threshold && fabs(lastPitchVelocity) > threshold)
+    if (fabs(pitchVelocity) < threshold && fabs(m_flLastPitchVelocity) > threshold) {
         g_pClientEngfuncs->Con_Printf("\n");
+    }
 
-    lastAngles = currAngles;
-    lastPitchVelocity = pitchVelocity;
-    lastYawVelocity = yawVelocity;
+    m_vecLastAngles = currAngles;
+    m_flLastPitchVelocity = pitchVelocity;
+    m_flLastYawVelocity = yawVelocity;
 }

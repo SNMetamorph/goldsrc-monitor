@@ -4,7 +4,7 @@
 class CModeFull : public IDisplayMode
 {
 public: 
-    CModeFull() {};
+    CModeFull();
     virtual ~CModeFull() {};
 
     void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -15,4 +15,8 @@ public:
 
 private:
     float GetSmoothFrameTime();
+
+    float m_flFrameTime;
+    float m_flLastFrameTime;
+    float m_flLastSysTime;
 };

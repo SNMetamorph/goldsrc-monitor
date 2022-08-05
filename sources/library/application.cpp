@@ -51,25 +51,18 @@ void CApplication::Run()
 
 void CApplication::InitializeDisplayModes()
 {
-    static CModeFull modeFull;
-    static CModeSpeedometer modeSpeedometer;
-    static CModeEntityReport modeEntityReport;
-    static CModeMeasurement modeMeasurement;
-    static CModeAngleTracking modeAngleTracking;
-    static CModeFaceReport modeFaceReport;
-
     m_pDisplayModes.clear();
-    m_pDisplayModes.push_back(&modeFull);
-    m_pDisplayModes.push_back(&modeSpeedometer);
-    m_pDisplayModes.push_back(&modeEntityReport);
-    m_pDisplayModes.push_back(&modeMeasurement);
-    m_pDisplayModes.push_back(&modeAngleTracking);
-    m_pDisplayModes.push_back(&modeFaceReport);
+    m_pDisplayModes.push_back(std::make_shared<CModeFull>());
+    m_pDisplayModes.push_back(std::make_shared<CModeSpeedometer>());
+    m_pDisplayModes.push_back(std::make_shared<CModeEntityReport>());
+    m_pDisplayModes.push_back(std::make_shared<CModeMeasurement>());
+    m_pDisplayModes.push_back(std::make_shared<CModeFaceReport>());
+    m_pDisplayModes.push_back(std::make_shared<CModeAngleTracking>());
 }
 
 void CApplication::HandleChangelevel()
 {
-    for (IDisplayMode *mode : m_pDisplayModes) {
+    for (auto &mode : m_pDisplayModes) {
         mode->HandleChangelevel();
     }
 }
@@ -193,8 +186,8 @@ void CApplication::InitializeConVars(ModuleInfo &engineLib)
 
 void CApplication::SetCurrentDisplayMode()
 {
-    DisplayModeIndex displayMode = static_cast<DisplayModeIndex>((int)ConVars::gsm_mode->value);
-    for (IDisplayMode *mode : m_pDisplayModes) 
+    DisplayModeIndex displayMode = Utils::GetCurrentDisplayMode();
+    for (auto &mode : m_pDisplayModes) 
     {
         if (mode->GetModeIndex() == displayMode) 
         {

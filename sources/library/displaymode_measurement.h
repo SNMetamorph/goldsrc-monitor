@@ -16,7 +16,7 @@ public:
     };
 
 public:
-    CModeMeasurement() {};
+    CModeMeasurement();
     virtual ~CModeMeasurement() {};
 
     void Render2D(int screenWidth, int screenHeight, CStringStack &screenText) override;
@@ -45,5 +45,5 @@ private:
     vec3_t       m_vecPointA;
     vec3_t       m_vecPointB;
     HLSPRITE     m_iLineSprite;
-    int          m_iSnapMode = SNAPMODE_FREE;
+    int          m_iSnapMode;
 };

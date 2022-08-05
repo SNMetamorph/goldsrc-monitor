@@ -8,6 +8,7 @@
 #include "display_mode.h"
 #include "string_stack.h"
 #include <vector>
+#include <memory>
 #include <stdint.h>
 
 class CApplication
@@ -38,7 +39,7 @@ private:
     CBuildInfo m_BuildInfo;
     SCREENINFO m_ScreenInfo = { 0 };
     CStringStack m_StringStack = CStringStack(128);
-    IDisplayMode *m_pCurrentDisplayMode = nullptr;
-    std::vector<IDisplayMode *> m_pDisplayModes;
+    std::shared_ptr<IDisplayMode> m_pCurrentDisplayMode = nullptr;
+    std::vector<std::shared_ptr<IDisplayMode>> m_pDisplayModes;
 };
 extern CApplication &g_Application;

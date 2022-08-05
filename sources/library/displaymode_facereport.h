@@ -8,7 +8,7 @@
 class CModeFaceReport : public IDisplayMode
 {
 public: 
-    CModeFaceReport() {};
+    CModeFaceReport();
     virtual ~CModeFaceReport() {};
 
     void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -27,8 +27,8 @@ private:
     EngineTypes::mleaf_t *PointInLeaf(vec3_t point, EngineTypes::mnode_t *node);
     EngineTypes::msurface_t *TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect);
 
-    color24 m_ColorProbe = { 0 };
+    color24 m_ColorProbe;
+    model_t *m_pCurrentModel;
+    EngineTypes::msurface_t *m_pCurrentFace;
     std::vector<vec3_t> m_BoundPoints;
-    model_t *m_pCurrentModel = nullptr;
-    EngineTypes::msurface_t *m_pCurrentFace = nullptr;
 };
