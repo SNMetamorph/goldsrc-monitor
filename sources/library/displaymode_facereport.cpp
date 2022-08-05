@@ -36,11 +36,14 @@ void CModeFaceReport::Render2D(int scrWidth, int scrHeight, CStringStack &screen
         vec3_t planeCenter = plane->normal * plane->dist;
         m_ColorProbe = { 0 };
 
+        screenText.PushPrintf("Model Name: %s", m_pCurrentModel->name);
         screenText.PushPrintf("Texture Name: %s", texture->name);
         screenText.PushPrintf("Width: %d", texture->width);
         screenText.PushPrintf("Height: %d", texture->height);
         screenText.PushPrintf("Edges: %d", m_pCurrentFace->numedges);
+        screenText.PushPrintf("Surfaces: %d", m_pCurrentModel->nummodelsurfaces);
         screenText.PushPrintf("Normal: (%.1f; %.1f; %.1f)", plane->normal.x, plane->normal.y, plane->normal.z);
+        screenText.PushPrintf("Intersect point: (%.1f; %.1f; %.1f)", intersectPoint.x, intersectPoint.y, intersectPoint.z);
 
         if (GetLightmapProbe(m_pCurrentFace, intersectPoint, m_ColorProbe)) 
         {
