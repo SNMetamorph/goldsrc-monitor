@@ -19,7 +19,7 @@ public:
     inline size_t   GetSize() const         { return m_ModuleInfo.imageSize; }
 
 private:
-    CClientModule() {};
+    CClientModule();
     CClientModule(const CClientModule&) = delete;
     CClientModule& operator=(const CClientModule&) = delete;
 

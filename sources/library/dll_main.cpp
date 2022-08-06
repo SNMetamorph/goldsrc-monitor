@@ -22,7 +22,7 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
                 errorMsg.capacity(),
                 "ERROR [%s:%d]: %s\nReport about error to the project page.\n"
                 "Link: github.com/SNMetamorph/goldsrc-monitor/issues/1",
-                ex.GetFileName(),
+                ex.GetFileName().c_str(),
                 ex.GetLineNumber(),
                 ex.GetDescription().c_str()
             );

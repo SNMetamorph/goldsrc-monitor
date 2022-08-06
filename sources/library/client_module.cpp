@@ -107,3 +107,10 @@ uint8_t* CClientModule::GetFuncAddress(const char *funcName)
 {
     return reinterpret_cast<uint8_t*>(GetProcAddress(GetHandle(), funcName));
 }
+
+CClientModule::CClientModule()
+{
+    m_ModuleInfo.baseAddress = nullptr;
+    m_ModuleInfo.entryPointAddress = nullptr;
+    m_ModuleInfo.imageSize = 0;
+}
