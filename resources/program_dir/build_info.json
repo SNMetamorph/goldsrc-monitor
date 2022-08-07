@@ -4,9 +4,9 @@
         "55 8B EC 83 EC 08 A1 ?? ?? ?? ?? 56 33 F6 85 C0 0F 85"
     ],
     "engine_builds_info": [
-	    {
+        {
             "number": 8196,
-			"description": "GoldSrc Engine Build #8196 (Steam)",
+            "description": "GoldSrc Engine Build #8196 (Steam)",
             "signatures": {
                 "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45 08 83 C4 04 85 C0 0F 84",
                 "SPR_Frames": "55 8B EC 8D 45 08 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8 ?? ?? ?? ?? 83 C4 08 85 C0",
@@ -16,7 +16,7 @@
         },
         {
             "number": 4554,
-			"description": "GoldSrc Engine Build #4554",
+            "description": "GoldSrc Engine Build #4554",
             "signatures": {
                 "SPR_Load": "56 8D 44 24 08 57 50 FF 15 ?? ?? ?? ?? 8B 44 24 10",
                 "SPR_Frames": "8D 44 24 04 50 FF 15 ?? ?? ?? ?? 8B 4C 24 08 51 E8 ?? ?? ?? ?? 83 C4 08 85 C0 74 04 8B 40 08",
@@ -25,19 +25,19 @@
             }
         }
     ],
-	"game_specific_builds_info": [
-		{
-			"process_name": "svencoop.exe",
-			"description": "Sven Co-op (build 8948, 11:20:57 Jun 12 2021)",
-			"signatures": {
+    "game_specific_builds_info": [
+        {
+            "process_name": "svencoop.exe",
+            "description": "Sven Co-op (build 8948, 11:20:57 Jun 12 2021)",
+            "signatures": {
                 "SPR_Load": "53 8B 5C 24 08 55 56 57 85 DB 0F 84 D8",
                 "SPR_Frames": "8B 44 24 04 83 C0 FF 78 1B"
             }
         },
         {
             "process_name": "bdef.exe",
-			"description": "Base Defence (build 7561, 09:10:05 Jul  7 2017)",
-			"signatures": {
+            "description": "Base Defence (build 7561, 09:10:05 Jul  7 2017)",
+            "signatures": {
                 "SPR_Load": "55 8B EC 56 8D 45 08 57 50 FF 15 ?? ?? ?? ?? 8B 45",
                 "SPR_Frames": "55 8B EC 8D 45 ?? 50 FF 15 ?? ?? ?? ?? 8B 4D 08 51 E8 ?? ?? ?? ?? 83 C4 08 85"
             }
@@ -50,5 +50,5 @@
                 "SPR_Frames": "55 8B EC 51 8D 45 08 50 FF 15 ?? ?? ?? ?? 83 C4 04 8B 4D 08 51 E8 ?? ?? ?? ?? 83 C4 04 89 45 FC 83 7D FC 00 74 08 8B 55 FC 8B 42 08"
             }
         }
-	]
+    ]
 }
