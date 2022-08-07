@@ -73,7 +73,7 @@ set (POLYHOOK_FEATURE_EXCEPTION OFF CACHE BOOL "")
 set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
 set (ASMJIT_STATIC ON CACHE BOOL "")
 
-add_subdirectory("../../external/polyhook" polyhook)
+add_subdirectory("../../external/polyhook" polyhook EXCLUDE_FROM_ALL)
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
@@ -113,3 +113,11 @@ if(MSVC)
 	)
 else()
 endif()
+
+# copy compiled binaries to install directory
+install( TARGETS ${PROJECT_NAME}
+	DESTINATION "${CMAKE_INSTALL_PREFIX}"
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	    GROUP_READ GROUP_EXECUTE
+		WORLD_READ WORLD_EXECUTE 
+)
