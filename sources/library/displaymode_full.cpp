@@ -6,10 +6,14 @@
 
 CModeFull::CModeFull()
 {
+    m_flFrameTime = 0.0f;
+    m_flLastFrameTime = 0.0f;
+    m_flLastSysTime = 0.0f;
 }
 
 void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
+    float timeDelta             = GetSmoothSystemFrametime();
     float velocityNum           = g_LocalPlayer.GetVelocityHorz();
     const vec3_t &origin        = g_LocalPlayer.GetOrigin();
     const vec3_t &velocity      = g_LocalPlayer.GetVelocity();
@@ -19,9 +23,9 @@ void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringSt
     const vec3_t &viewOffset    = g_LocalPlayer.GetViewOffset();
 
     screenText.Clear();
-    screenText.PushPrintf("FPS: %.1f", 1.f / frameTime);
+    screenText.PushPrintf("FPS: %.1f", 1.f / timeDelta);
     screenText.PushPrintf("Time: %.2f seconds", g_pClientEngfuncs->GetClientTime());
-    screenText.PushPrintf("Frame Time: %.1f ms\n", frameTime * 1000.f);
+    screenText.PushPrintf("Frame Time: %.1f ms\n", timeDelta * 1000.f);
 
     screenText.PushPrintf("Velocity: %.2f u/s (%.2f, %.2f, %.2f)", velocityNum, velocity.x, velocity.y, velocity.z);
     screenText.PushPrintf("Origin: (%.2f, %.2f, %.2f)", origin.x, origin.y, origin.z);
@@ -58,4 +62,20 @@ void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringSt
         static_cast<int>(ConVars::gsm_margin_up->value),
         screenText
     );
+}
+
+float CModeFull::GetSmoothSystemFrametime()
+{
+    const float smoothFactor    = 0.24f;
+    const float diffThreshold   = 0.13f;
+    float currSysTime           = Utils::GetCurrentSysTime();
+    float timeDelta             = currSysTime - m_flLastSysTime;
+
+    if ((timeDelta - m_flLastFrameTime) > diffThreshold)
+        timeDelta = m_flLastFrameTime;
+
+    m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
+    m_flLastFrameTime   = m_flFrameTime;
+    m_flLastSysTime     = currSysTime;
+    return m_flFrameTime;
 }

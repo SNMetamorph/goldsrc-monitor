@@ -209,15 +209,15 @@ void CApplication::UpdateSmoothFrametime()
 {
     const float smoothFactor    = 0.24f;
     const float diffThreshold   = 0.13f;
-    float currSysTime           = Utils::GetCurrentSysTime();
-    float timeDelta             = currSysTime - m_flLastSysTime;
+    float currentTime           = Utils::GetCurrentSysTime();
+    float timeDelta             = currentTime - m_flLastClientTime;
 
     if ((timeDelta - m_flLastFrameTime) > diffThreshold)
         timeDelta = m_flLastFrameTime;
 
     m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
     m_flLastFrameTime   = m_flFrameTime;
-    m_flLastSysTime     = currSysTime;
+    m_flLastClientTime  = currentTime;
 }
 
 void CApplication::DisplayModeRender2D()

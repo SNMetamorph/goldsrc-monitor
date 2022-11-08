@@ -38,7 +38,7 @@ private:
 
     float m_flFrameTime;
     float m_flLastFrameTime;
-    float m_flLastSysTime;
+    float m_flLastClientTime;
     CHooks m_Hooks;
     CBuildInfo m_BuildInfo;
     SCREENINFO m_ScreenInfo = { 0 };
