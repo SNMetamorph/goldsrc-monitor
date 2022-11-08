@@ -1,5 +1,6 @@
 #pragma once
 #include "display_mode.h"
+#include "hlsdk.h"
 
 class CModeSpeedometer : public IDisplayMode
 {
@@ -14,5 +15,9 @@ public:
     DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_SPEEDOMETER; };
 
 private:
+    void CalculateVelocity(float frameTime);
     void DrawVelocityBar(int scrWidth, int scrHeight, float velocity);
+
+    float m_flVelocity;
+    float m_flLastUpdateTime;
 };
