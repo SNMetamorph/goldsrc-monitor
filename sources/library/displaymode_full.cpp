@@ -8,9 +8,8 @@ CModeFull::CModeFull()
 {
 }
 
-void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
+void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    float frameTime             = GetSmoothFrameTime();
     float velocityNum           = g_LocalPlayer.GetVelocityHorz();
     const vec3_t &origin        = g_LocalPlayer.GetOrigin();
     const vec3_t &velocity      = g_LocalPlayer.GetVelocity();

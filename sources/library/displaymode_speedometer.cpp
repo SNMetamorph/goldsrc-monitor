@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "local_player.h"
 
-void CModeSpeedometer::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
+void CModeSpeedometer::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
     int stringWidth;
     const int centerX = scrWidth / 2;

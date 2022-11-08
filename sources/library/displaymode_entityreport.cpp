@@ -18,7 +18,7 @@ CModeEntityReport::CModeEntityReport()
     m_EntityDistanceList = {};
 }
 
-void CModeEntityReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
+void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
     int debugMode = ConVars::gsm_debug->value;
     if (!g_EntityDictionary.IsInitialized())

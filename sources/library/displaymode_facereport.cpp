@@ -20,7 +20,7 @@ CModeFaceReport::CModeFaceReport()
     m_BoundPoints = {};
 }
 
-void CModeFaceReport::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
+void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
     const float lineLen = 11590.0f;
     vec3_t intersectPoint;

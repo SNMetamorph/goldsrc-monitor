@@ -9,7 +9,7 @@ public:
     CModeEntityReport();
     virtual ~CModeEntityReport() {};
 
-    void Render2D(int scrWidth, int scrHeight, CStringStack &screenText) override;
+    void Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText) override;
     void Render3D() override;
     bool KeyInput(bool keyDown, int keyCode, const char *bindName) override;
     void HandleChangelevel() override;

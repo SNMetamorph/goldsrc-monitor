@@ -11,7 +11,7 @@ CModeAngleTracking::CModeAngleTracking()
     m_flLastPitchVelocity = 0.0f;
 }
 
-void CModeAngleTracking::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
+void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
     const float threshold = 0.001f;
     const vec3_t &currAngles = g_LocalPlayer.GetAngles();

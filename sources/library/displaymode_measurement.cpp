@@ -269,7 +269,7 @@ void CModeMeasurement::LoadLineSprite()
     m_iLineSprite = g_pClientEngfuncs->pEventAPI->EV_FindModelIndex(spritePath);
 }
 
-void CModeMeasurement::Render2D(int screenWidth, int screenHeight, CStringStack &screenText)
+void CModeMeasurement::Render2D(float frameTime, int screenWidth, int screenHeight, CStringStack &screenText)
 {
     const vec3_t &originPointA = GetPointOriginA();
     const vec3_t &originPointB = GetPointOriginB();

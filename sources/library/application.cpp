@@ -225,7 +225,7 @@ void CApplication::DisplayModeRender2D()
     SetCurrentDisplayMode();
     UpdateSmoothFrametime();
     UpdateScreenInfo();
-    m_pCurrentDisplayMode->Render2D(m_ScreenInfo.iWidth, m_ScreenInfo.iHeight, m_StringStack);
+    m_pCurrentDisplayMode->Render2D(m_flFrameTime, m_ScreenInfo.iWidth, m_ScreenInfo.iHeight, m_StringStack);
 }
 
 void CApplication::DisplayModeRender3D()

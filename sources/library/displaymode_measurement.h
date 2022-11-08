@@ -19,7 +19,7 @@ public:
     CModeMeasurement();
     virtual ~CModeMeasurement() {};
 
-    void Render2D(int screenWidth, int screenHeight, CStringStack &screenText) override;
+    void Render2D(float frameTime, int screenWidth, int screenHeight, CStringStack &screenText) override;
     void Render3D() override {};
     bool KeyInput(bool keyDown, int keyCode, const char *) override;
     void HandleChangelevel() override;
