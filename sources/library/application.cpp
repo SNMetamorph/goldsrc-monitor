@@ -204,9 +204,26 @@ void CApplication::UpdateScreenInfo()
     g_pClientEngfuncs->pfnGetScreenInfo(&m_ScreenInfo);
 }
 
+// should be updated only once in frame
+void CApplication::UpdateSmoothFrametime()
+{
+    const float smoothFactor    = 0.24f;
+    const float diffThreshold   = 0.13f;
+    float currSysTime           = Utils::GetCurrentSysTime();
+    float timeDelta             = currSysTime - m_flLastSysTime;
+
+    if ((timeDelta - m_flLastFrameTime) > diffThreshold)
+        timeDelta = m_flLastFrameTime;
+
+    m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
+    m_flLastFrameTime   = m_flFrameTime;
+    m_flLastSysTime     = currSysTime;
+}
+
 void CApplication::DisplayModeRender2D()
 {
     SetCurrentDisplayMode();
+    UpdateSmoothFrametime();
     UpdateScreenInfo();
     m_pCurrentDisplayMode->Render2D(m_ScreenInfo.iWidth, m_ScreenInfo.iHeight, m_StringStack);
 }

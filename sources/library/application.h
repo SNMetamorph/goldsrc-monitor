@@ -34,7 +34,11 @@ private:
     void InitializeConVars(ModuleInfo &engineLib);
     void SetCurrentDisplayMode();
     void UpdateScreenInfo();
+    void UpdateSmoothFrametime();
 
+    float m_flFrameTime;
+    float m_flLastFrameTime;
+    float m_flLastSysTime;
     CHooks m_Hooks;
     CBuildInfo m_BuildInfo;
     SCREENINFO m_ScreenInfo = { 0 };

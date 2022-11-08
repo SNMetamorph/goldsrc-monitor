@@ -6,9 +6,6 @@
 
 CModeFull::CModeFull()
 {
-    m_flFrameTime = 0.0f;
-    m_flLastFrameTime = 0.0f;
-    m_flLastSysTime = 0.0f;
 }
 
 void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
@@ -62,20 +59,4 @@ void CModeFull::Render2D(int scrWidth, int scrHeight, CStringStack &screenText)
         static_cast<int>(ConVars::gsm_margin_up->value),
         screenText
     );
-}
-
-float CModeFull::GetSmoothFrameTime()
-{
-    const float smoothFactor    = 0.24f;
-    const float diffThreshold   = 0.13f;
-    float currSysTime           = Utils::GetCurrentSysTime();
-    float timeDelta             = currSysTime - m_flLastSysTime;
-
-    if ((timeDelta - m_flLastFrameTime) > diffThreshold)
-        timeDelta = m_flLastFrameTime;
-
-    m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
-    m_flLastFrameTime   = m_flFrameTime;
-    m_flLastSysTime     = currSysTime;
-    return m_flFrameTime;
 }
