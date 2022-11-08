@@ -95,6 +95,9 @@ ipch/
 *.vspx
 *.sap
 
+# Visual Studio Edit-and-Continue temporary foled
+enc_temp_folder/
+
 # TFS 2012 Local Workspace
 $tf/
 
