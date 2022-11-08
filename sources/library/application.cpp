@@ -16,6 +16,10 @@
 #include "displaymode_facereport.h"
 #include <stdint.h>
 
+//#define FILTER_AVG_EXPONENTIAL
+#define FILTER_AVG_SIMPLE
+#define FILTER_SIZE 5
+
 CApplication &g_Application = CApplication::GetInstance();
 CApplication &CApplication::GetInstance()
 {
@@ -207,17 +211,43 @@ void CApplication::UpdateScreenInfo()
 // should be updated only once in frame
 void CApplication::UpdateSmoothFrametime()
 {
-    const float smoothFactor    = 0.24f;
+#ifdef FILTER_AVG_EXPONENTIAL
+    // exponential running average filter
+    // less k - more smooth result will be
+    const float k               = 0.24f;
     const float diffThreshold   = 0.13f;
-    float currentTime           = Utils::GetCurrentSysTime();
+    float currentTime           = g_pClientEngfuncs->GetClientTime();
     float timeDelta             = currentTime - m_flLastClientTime;
 
     if ((timeDelta - m_flLastFrameTime) > diffThreshold)
         timeDelta = m_flLastFrameTime;
 
-    m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
+    m_flFrameTime       += (timeDelta - m_flFrameTime) * k;
     m_flLastFrameTime   = m_flFrameTime;
     m_flLastClientTime  = currentTime;
+#elif defined(FILTER_AVG_SIMPLE)
+    float currentTime = g_pClientEngfuncs->GetClientTime();
+    float timeDelta = currentTime - m_flLastClientTime;
+    static float buffer[FILTER_SIZE];
+    double sum = 0.0;
+
+    for (int i = FILTER_SIZE - 2; i >= 0; --i) {
+        buffer[i + 1] = buffer[i];
+    }
+
+    buffer[0] = timeDelta;
+    for (int i = 0; i < 5; ++i) {
+        sum += buffer[i];
+    }
+
+    m_flLastClientTime = currentTime;
+    m_flFrameTime = sum / (double)FILTER_SIZE;
+#else
+    float currentTime = g_pClientEngfuncs->GetClientTime();
+    float timeDelta = currentTime - m_flLastClientTime;
+    m_flFrameTime = timeDelta;
+    m_flLastClientTime = currentTime;
+#endif
 }
 
 void CApplication::DisplayModeRender2D()
