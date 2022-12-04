@@ -5,11 +5,11 @@
       "name": "Windows-x86-Debug",
       "displayName": "Windows x86 Debug",
       "description": " ",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "architecture": {
-        "value": "win32",
-        "strategy": "set"
+        "value": "x86",
+        "strategy": "external"
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -20,11 +20,11 @@
       "name": "Windows-x86-Release",
       "displayName": "Windows x86 Release",
       "description": " ",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "architecture": {
-        "value": "win32",
-        "strategy": "set"
+        "value": "x86",
+        "strategy": "external"
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
@@ -35,11 +35,11 @@
       "name": "Windows-x64-Debug",
       "displayName": "Windows x64 Debug",
       "description": " ",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "architecture": {
         "value": "x64",
-        "strategy": "set"
+        "strategy": "external"
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -50,11 +50,11 @@
       "name": "Windows-x64-Release",
       "displayName": "Windows x64 Release",
       "description": " ",
-      "generator": "Visual Studio 16 2019",
+      "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "architecture": {
         "value": "x64",
-        "strategy": "set"
+        "strategy": "external"
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo"
