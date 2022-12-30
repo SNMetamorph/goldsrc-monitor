@@ -6,22 +6,18 @@
 
 CMemoryPattern::CMemoryPattern(const std::string &pattern)
 {
-    Allocate();
     InitFromString(pattern);
 }
 
 CMemoryPattern::CMemoryPattern(const char *pattern, int byteCount, uint8_t wildmark)
 {
-    Allocate();
     InitFromBytes((uint8_t*)pattern, byteCount, wildmark);
 }
 
-void CMemoryPattern::Allocate()
+void CMemoryPattern::ReserveElements(size_t elemCount)
 {
-    // to avoid extra allocations
-    const int approxSize = 32;
-    m_Mask.reserve(approxSize);
-    m_Signature.reserve(approxSize);
+    m_Mask.reserve(elemCount);
+    m_Signature.reserve(elemCount);
 }
 
 void CMemoryPattern::Reset()
@@ -39,6 +35,8 @@ void CMemoryPattern::AddByte(uint8_t value, bool shouldCheck)
 void CMemoryPattern::InitFromBytes(uint8_t *pattern, int byteCount, uint8_t wildmark)
 {
     Reset();
+    ReserveElements(byteCount);
+
     for (int i = 0; i < byteCount; ++i)
     {
         uint8_t *currentByte = pattern + i;
@@ -64,7 +62,10 @@ void CMemoryPattern::InitFromString(const std::string &pattern)
         std::istream_iterator<std::string, char>(pattern_stream),
         {}
     );
+
     Reset();
+    ReserveElements(128); // pre-allocate some elements
+
     try {
         for (const std::string &token : tokens)
         {
@@ -75,6 +76,9 @@ void CMemoryPattern::InitFromString(const std::string &pattern)
                 AddByte(0x0, false);
             }
         }
+
+        m_Mask.shrink_to_fit();
+        m_Signature.shrink_to_fit();
     }
     catch (std::exception &ex)
     {

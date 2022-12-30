@@ -22,7 +22,7 @@ public:
     inline const uint8_t *GetSignatureAddress() const { return m_Signature.data(); };
     
 private:
-    void Allocate();
+    void ReserveElements(size_t elemCount);
     void Reset();
 
     std::vector<int> m_Mask;
