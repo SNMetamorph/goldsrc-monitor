@@ -1,5 +1,5 @@
 # GoldSrc Monitor
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/SNMetamorph/goldsrc-monitor/nightly-builds/master)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/SNMetamorph/goldsrc-monitor/nightly-builds.yml?branch=master)
 ![GitHub release (by tag)](https://img.shields.io/github/downloads/SNMetamorph/goldsrc-monitor/total)
 ![GitHub top language](https://img.shields.io/github/languages/top/SNMetamorph/goldsrc-monitor)
 ![GitHub repo size](https://img.shields.io/github/repo-size/SNMetamorph/goldsrc-monitor)
