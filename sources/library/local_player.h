@@ -6,7 +6,7 @@ class CLocalPlayer
 {
 public:
     static CLocalPlayer &GetInstance();
-    void Setup(playermove_t *pmove);
+    void UpdatePlayerMove(playermove_t *pmove);
     playermove_t* &GetPlayerMove();
 
     const vec3_t &GetOrigin() const;
@@ -19,10 +19,12 @@ public:
     vec3_t GetViewOrigin() const;
     vec3_t GetViewDirection() const;
 
+    bool PlayerMoveAvailable() const;
     bool IsSpectate() const;
     int GetSpectateTargetIndex() const;
     bool IsThirdPersonForced() const;
     float GetThirdPersonCameraDist() const;
+
 private:
     CLocalPlayer() : m_pPlayerMove(nullptr) {};
     ~CLocalPlayer() {};

@@ -30,7 +30,7 @@ void CModeSpeedometer::Render2D(float frameTime, int scrWidth, int scrHeight, CS
     );
 }
 
-void CModeSpeedometer::DrawVelocityBar(int centerX, int centerY, float velocity)
+void CModeSpeedometer::DrawVelocityBar(int centerX, int centerY, float velocity) const
 {
     const int barHeight = 15;
     const int barMargin = 60;
@@ -46,14 +46,56 @@ void CModeSpeedometer::DrawVelocityBar(int centerX, int centerY, float velocity)
 
 void CModeSpeedometer::CalculateVelocity(float frameTime)
 {
-    if (g_LocalPlayer.IsSpectate())
-    {
-        int targetIndex = g_LocalPlayer.GetSpectateTargetIndex();
-        if (g_pClientEngfuncs->GetEntityByIndex(targetIndex) != nullptr) {
-            m_flVelocity = Utils::GetEntityVelocityApprox(targetIndex).Length2D();
-        }
+    if (LocalPlayerSpectating()) {
+        m_flVelocity = GetEntityVelocityApprox(GetSpectatedTargetIndex());
     }
     else {
-        m_flVelocity = (g_pPlayerMove->velocity + g_pPlayerMove->basevelocity).Length2D();
+        m_flVelocity = GetLocalPlayerVelocity();
+    }
+}
+
+float CModeSpeedometer::GetEntityVelocityApprox(int entityIndex) const
+{           
+    if (g_pClientEngfuncs->GetEntityByIndex(entityIndex)) {
+        return Utils::GetEntityVelocityApprox(entityIndex).Length2D();
+    }
+    return 0.0f;
+}
+
+int CModeSpeedometer::GetSpectatedTargetIndex() const
+{
+    if (g_LocalPlayer.PlayerMoveAvailable()) {
+        return g_LocalPlayer.GetSpectateTargetIndex();
+    }
+    else 
+    {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return localPlayer->curstate.iuser2;
+    }
+}
+
+bool CModeSpeedometer::LocalPlayerSpectating() const
+{
+    if (g_LocalPlayer.PlayerMoveAvailable()) {
+        return g_LocalPlayer.IsSpectate();
+    }
+    else 
+    {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        int specMode = localPlayer->curstate.iuser1;
+        int targetIndex = localPlayer->curstate.iuser2;
+        return specMode != 0 && targetIndex != 0;
+    }
+}
+
+float CModeSpeedometer::GetLocalPlayerVelocity() const
+{
+    if (g_LocalPlayer.PlayerMoveAvailable()) {
+        return (g_pPlayerMove->velocity + g_pPlayerMove->basevelocity).Length2D();
+    }
+    else 
+    {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return Utils::GetEntityVelocityApprox(localPlayer->index).Length2D();
     }
 }

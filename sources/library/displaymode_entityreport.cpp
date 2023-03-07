@@ -20,6 +20,9 @@ CModeEntityReport::CModeEntityReport()
 
 void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
+    if (!g_LocalPlayer.PlayerMoveAvailable())
+        return;
+
     int debugMode = ConVars::gsm_debug->value;
     if (!g_EntityDictionary.IsInitialized())
         g_EntityDictionary.Initialize();

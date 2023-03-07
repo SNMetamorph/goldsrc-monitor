@@ -13,6 +13,9 @@ CModeFull::CModeFull()
 
 void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
+    if (!g_LocalPlayer.PlayerMoveAvailable())
+        return;
+
     float timeDelta             = GetSmoothSystemFrametime();
     float velocityNum           = g_LocalPlayer.GetVelocityHorz();
     const vec3_t &origin        = g_LocalPlayer.GetOrigin();

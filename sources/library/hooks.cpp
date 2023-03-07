@@ -17,18 +17,14 @@ NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
     // call original function
     PLH::FnCast(g_hookRedraw.GetTrampolineAddr(), CHooks::pfnRedraw_t())(time, intermission);
-    if (g_pPlayerMove)
-    {
-        bool isIntermission = intermission != 0;
-        g_Application.DisplayModeRender2D();
-    }
+    g_Application.DisplayModeRender2D();
     return 1;
 }
 
 NOINLINE static void __cdecl HookPlayerMove(playermove_t *pmove, int server)
 {
     PLH::FnCast(g_hookPlayerMove.GetTrampolineAddr(), CHooks::pfnPlayerMove_t())(pmove, server);
-    g_LocalPlayer.Setup(pmove);
+    g_LocalPlayer.UpdatePlayerMove(pmove);
 }
 
 NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *bindName)
@@ -36,7 +32,7 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *b
     int returnCode = PLH::FnCast(g_hookKeyEvent.GetTrampolineAddr(), CHooks::pfnKeyEvent_t())(
         keyDown, keyCode, bindName
     );
-    return returnCode && g_Application.KeyInput(keyDown, keyCode, bindName);
+    return (returnCode && g_Application.KeyInput(keyDown, keyCode, bindName)) ? 1 : 0;
 }
 
 NOINLINE static void __cdecl HookDrawTriangles()
@@ -48,7 +44,7 @@ NOINLINE static void __cdecl HookDrawTriangles()
 NOINLINE static int __cdecl HookIsThirdPerson()
 {
     int returnCode = PLH::FnCast(g_hookIsThirdPerson.GetTrampolineAddr(), CHooks::pfnIsThirdPerson_t())();
-    return returnCode || g_LocalPlayer.IsThirdPersonForced();
+    return (returnCode || g_LocalPlayer.IsThirdPersonForced()) ? 1 : 0;
 }
 
 NOINLINE static void __cdecl HookCameraOffset(float *cameraOffset)

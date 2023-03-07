@@ -10,7 +10,7 @@ CLocalPlayer &CLocalPlayer::GetInstance()
     return instance;
 }
 
-void CLocalPlayer::Setup(playermove_t *pmove)
+void CLocalPlayer::UpdatePlayerMove(playermove_t *pmove)
 {
     m_pPlayerMove = pmove;
 }
@@ -83,12 +83,17 @@ float CLocalPlayer::GetThirdPersonCameraDist() const
     return maxDist * traceInfo.fraction;
 }
 
+bool CLocalPlayer::PlayerMoveAvailable() const
+{
+    // we can't use player move when demo playing
+    bool demoPlaying = g_pClientEngfuncs->pDemoAPI->IsPlayingback() != 0;
+    return m_pPlayerMove != nullptr && !demoPlaying;
+}
+
 bool CLocalPlayer::IsSpectate() const
 {
-    /*
-    assume that it's valid only for cs 1.6/hl1
-    because other mods can use iuser variables for other purposes
-    */
+    // assume that it's valid only for cs 1.6/hl1
+    // because other mods can use iuser variables for other purposes
     int specMode = m_pPlayerMove->iuser1;
     int targetIndex = m_pPlayerMove->iuser2;
     return specMode != 0 && targetIndex != 0;

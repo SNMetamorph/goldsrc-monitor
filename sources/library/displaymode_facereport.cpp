@@ -22,6 +22,9 @@ CModeFaceReport::CModeFaceReport()
 
 void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
+    if (!g_LocalPlayer.PlayerMoveAvailable())
+        return;
+
     const float lineLen = 11590.0f;
     vec3_t intersectPoint;
     vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();

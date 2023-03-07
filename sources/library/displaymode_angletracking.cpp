@@ -13,6 +13,9 @@ CModeAngleTracking::CModeAngleTracking()
 
 void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
+    if (!g_LocalPlayer.PlayerMoveAvailable())
+        return;
+
     const float threshold = 0.001f;
     const vec3_t &currAngles = g_LocalPlayer.GetAngles();
     float pitchVelocity = (currAngles.x - m_vecLastAngles.x) / g_pPlayerMove->frametime;
