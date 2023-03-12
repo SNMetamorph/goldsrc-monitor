@@ -16,7 +16,7 @@ void CLocalPlayer::UpdatePlayerMove(playermove_t *pmove)
 
 vec3_t CLocalPlayer::GetOrigin() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->origin;
     }
     else {
@@ -27,7 +27,7 @@ vec3_t CLocalPlayer::GetOrigin() const
 
 vec3_t CLocalPlayer::GetAngles() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->angles;
     }
     else 
@@ -40,13 +40,13 @@ vec3_t CLocalPlayer::GetAngles() const
 
 vec3_t CLocalPlayer::GetPunchAngles() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->punchangle;
 }
 
 vec3_t CLocalPlayer::GetVelocity() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->velocity;
     }
     else {
@@ -57,7 +57,7 @@ vec3_t CLocalPlayer::GetVelocity() const
 
 vec3_t CLocalPlayer::GetBaseVelocity() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->basevelocity;
     }
     else {
@@ -67,7 +67,7 @@ vec3_t CLocalPlayer::GetBaseVelocity() const
 
 vec3_t CLocalPlayer::GetViewOffset() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->view_ofs;
     }
     else {
@@ -92,19 +92,19 @@ vec3_t CLocalPlayer::GetViewDirection() const
 
 float CLocalPlayer::GetMaxSpeed() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->maxspeed;
 }
 
 float CLocalPlayer::GetClientMaxSpeed() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->clientmaxspeed;
 }
 
 float CLocalPlayer::GetGravity() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->gravity;
     }
     else {
@@ -115,7 +115,7 @@ float CLocalPlayer::GetGravity() const
 
 float CLocalPlayer::GetFriction() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->friction;
     }
     else {
@@ -126,26 +126,26 @@ float CLocalPlayer::GetFriction() const
 
 float CLocalPlayer::GetDuckTime() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->flDuckTime;
 }
 
 bool CLocalPlayer::IsDucking() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->bInDuck;
 }
 
 bool CLocalPlayer::OnGround() const
 {
     // TODO implement this for case when prediction data unavailable?
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->onground != -1;
 }
 
 int CLocalPlayer::GetMovetype() const
 {
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         return m_pPlayerMove->movetype;
     }
     else {
@@ -156,49 +156,49 @@ int CLocalPlayer::GetMovetype() const
 
 int CLocalPlayer::GetFlags() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->flags;
 }
 
 int CLocalPlayer::GetHullType() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->usehull;
 }
 
 const physent_t *CLocalPlayer::GetPhysents() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->physents;
 }
 
 const physent_t *CLocalPlayer::GetVisents() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->visents;
 }
 
 const physent_t *CLocalPlayer::GetMoveents() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->moveents;
 }
 
 int CLocalPlayer::GetPhysentsCount() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->numphysent;
 }
 
 int CLocalPlayer::GetVisentsCount() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->numvisent;
 }
 
 int CLocalPlayer::GetMoveentsCount() const
 {
-    assert(PlayerMoveAvailable());
+    assert(PredictionDataValid());
     return m_pPlayerMove->nummoveent;
 }
 
@@ -206,7 +206,7 @@ int CLocalPlayer::GetIntUserVar(size_t index) const
 {
     int *p;
     assert(index >= 1 && index <= 4);
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         p = &m_pPlayerMove->iuser1;
     }
     else {
@@ -220,7 +220,7 @@ float CLocalPlayer::GetFloatUserVar(size_t index) const
 {
     float *p;
     assert(index >= 1 && index <= 4);
-    if (PlayerMoveAvailable()) {
+    if (PredictionDataValid()) {
         p = &m_pPlayerMove->fuser1;
     }
     else {
@@ -232,7 +232,7 @@ float CLocalPlayer::GetFloatUserVar(size_t index) const
 
 bool CLocalPlayer::IsThirdPersonForced() const
 {
-    bool playerDead = PlayerMoveAvailable() ? m_pPlayerMove->dead : false;
+    bool playerDead = PredictionDataValid() ? m_pPlayerMove->dead : false;
     return ConVars::gsm_thirdperson->value > 0.0f && playerDead;
 }
 
@@ -246,7 +246,7 @@ float CLocalPlayer::GetThirdPersonCameraDist() const
     return maxDist * traceInfo.fraction;
 }
 
-bool CLocalPlayer::PlayerMoveAvailable() const
+bool CLocalPlayer::PredictionDataValid() const
 {
     // we can't use prediction data when demo playing
     bool demoPlaying = g_pClientEngfuncs->pDemoAPI->IsPlayingback() != 0;
@@ -258,7 +258,7 @@ bool CLocalPlayer::IsSpectate() const
     // assume that it's valid only for cs 1.6/hl1
     // because other mods can use iuser variables for other purposes
     int specMode, targetIndex;
-    if (PlayerMoveAvailable())
+    if (PredictionDataValid())
     {
         specMode = m_pPlayerMove->iuser1;
         targetIndex = m_pPlayerMove->iuser2;
@@ -274,7 +274,7 @@ bool CLocalPlayer::IsSpectate() const
 
 SpectatingMode CLocalPlayer::GetSpectatingMode() const
 {
-    if (PlayerMoveAvailable())
+    if (PredictionDataValid())
     {
         return static_cast<SpectatingMode>(m_pPlayerMove->iuser3);
     }
@@ -289,7 +289,7 @@ int CLocalPlayer::GetSpectateTargetIndex() const
 {
     if (IsSpectate())
     {
-        if (PlayerMoveAvailable()) {
+        if (PredictionDataValid()) {
             return m_pPlayerMove->iuser2;
         }
         else 

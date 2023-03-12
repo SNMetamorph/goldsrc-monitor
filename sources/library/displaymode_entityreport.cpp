@@ -20,7 +20,7 @@ CModeEntityReport::CModeEntityReport()
 
 void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PlayerMoveAvailable())
+    if (!g_LocalPlayer.PredictionDataValid())
         return;
 
     int debugMode = ConVars::gsm_debug->value;

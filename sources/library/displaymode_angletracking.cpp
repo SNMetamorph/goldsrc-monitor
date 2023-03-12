@@ -13,7 +13,7 @@ CModeAngleTracking::CModeAngleTracking()
 
 void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PlayerMoveAvailable())
+    if (!g_LocalPlayer.PredictionDataValid())
         return;
 
     const float threshold = 0.001f;

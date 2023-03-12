@@ -271,7 +271,7 @@ void CModeMeasurement::LoadLineSprite()
 
 void CModeMeasurement::Render2D(float frameTime, int screenWidth, int screenHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PlayerMoveAvailable())
+    if (!g_LocalPlayer.PredictionDataValid())
         return;
 
     const vec3_t &originPointA = GetPointOriginA();

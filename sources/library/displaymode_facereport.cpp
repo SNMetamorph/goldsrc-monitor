@@ -22,7 +22,7 @@ CModeFaceReport::CModeFaceReport()
 
 void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PlayerMoveAvailable())
+    if (!g_LocalPlayer.PredictionDataValid())
         return;
 
     const float lineLen = 11590.0f;

@@ -18,7 +18,7 @@ class CLocalPlayer
 public:
     static CLocalPlayer &GetInstance();
     void UpdatePlayerMove(playermove_t *pmove);
-    bool PlayerMoveAvailable() const;
+    bool PredictionDataValid() const;
 
     vec3_t GetOrigin() const;
     vec3_t GetAngles() const;

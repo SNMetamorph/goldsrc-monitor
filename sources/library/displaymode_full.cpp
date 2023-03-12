@@ -13,7 +13,7 @@ CModeFull::CModeFull()
 
 void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PlayerMoveAvailable())
+    if (!g_LocalPlayer.PredictionDataValid())
         return;
 
     float timeDelta             = GetSmoothSystemFrametime();
