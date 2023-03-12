@@ -18,8 +18,8 @@ void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, 
 
     const float threshold = 0.001f;
     const vec3_t &currAngles = g_LocalPlayer.GetAngles();
-    float pitchVelocity = (currAngles.x - m_vecLastAngles.x) / g_pPlayerMove->frametime;
-    float yawVelocity = (currAngles.y - m_vecLastAngles.y) / g_pPlayerMove->frametime;
+    float pitchVelocity = (currAngles.x - m_vecLastAngles.x) / frameTime;
+    float yawVelocity = (currAngles.y - m_vecLastAngles.y) / frameTime;
 
     screenText.Clear();
     screenText.PushPrintf("   up : %.2f deg/s", -pitchVelocity);

@@ -63,9 +63,9 @@ void CModeMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
     }
 }
 
-void CModeMeasurement::DrawVisualization(int screenWidth, int screenHeight)
+void CModeMeasurement::DrawVisualization(float frameTime, int screenWidth, int screenHeight)
 {
-    float lifeTime = min(0.05f, g_pPlayerMove->frametime);
+    float lifeTime = min(0.05f, frameTime);
     DrawMeasurementLine(lifeTime);
     DrawLineProjections(screenWidth, screenHeight, lifeTime);
     PrintPointHints(screenWidth, screenHeight);
@@ -307,7 +307,7 @@ void CModeMeasurement::Render2D(float frameTime, int screenWidth, int screenHeig
 
     LoadLineSprite();
     if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f) {
-        DrawVisualization(screenWidth, screenHeight);
+        DrawVisualization(frameTime, screenWidth, screenHeight);
     }
 
     Utils::DrawStringStack(

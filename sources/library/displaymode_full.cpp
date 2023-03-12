@@ -17,7 +17,7 @@ void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringSt
         return;
 
     float timeDelta             = GetSmoothSystemFrametime();
-    float velocityNum           = g_LocalPlayer.GetVelocityHorz();
+    float velocityNum           = g_LocalPlayer.GetVelocity().Length2D();
     const vec3_t &origin        = g_LocalPlayer.GetOrigin();
     const vec3_t &velocity      = g_LocalPlayer.GetVelocity();
     const vec3_t &angles        = g_LocalPlayer.GetAngles();
@@ -34,30 +34,29 @@ void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringSt
     screenText.PushPrintf("Origin: (%.2f, %.2f, %.2f)", origin.x, origin.y, origin.z);
     screenText.PushPrintf("Angles: (%.2f, %.2f, %.2f)", angles.x, angles.y, angles.z);
     screenText.PushPrintf("Base Velocity: (%.2f, %.2f, %.2f)", baseVelocity.x, baseVelocity.y, baseVelocity.z);
-    screenText.PushPrintf("Max Velocity: %.2f (client %.2f)", g_pPlayerMove->maxspeed, g_pPlayerMove->clientmaxspeed);
-    screenText.PushPrintf("Movetype: %s\n", Utils::GetMovetypeName(g_pPlayerMove->movetype));
+    screenText.PushPrintf("Max Velocity: %.2f (client %.2f)", g_LocalPlayer.GetMaxSpeed(), g_LocalPlayer.GetClientMaxSpeed());
+    screenText.PushPrintf("Movetype: %s\n", Utils::GetMovetypeName(g_LocalPlayer.GetMovetype()));
 
     screenText.PushPrintf("View Offset: (%.2f, %.2f, %.2f)", viewOffset.x, viewOffset.y, viewOffset.z);
     screenText.PushPrintf("Punch Angle: (%.2f, %.2f, %.2f)", punchAngle.x, punchAngle.y, punchAngle.z);
-    screenText.PushPrintf("Duck Time: %.2f", g_pPlayerMove->flDuckTime);
-    screenText.PushPrintf("In Duck Process: %s", g_pPlayerMove->bInDuck ? "yes" : "no");
-    screenText.PushPrintf("Player Flags: %d", g_pPlayerMove->flags);
-    screenText.PushPrintf("Hull Type: %d", g_pPlayerMove->usehull);
-    screenText.PushPrintf("Gravity: %.2f", g_pPlayerMove->gravity);
-    screenText.PushPrintf("Friction: %.2f", g_pPlayerMove->friction);
-    screenText.PushPrintf("On Ground: %s", g_pPlayerMove->onground != -1 ? "yes" : "no");
-    screenText.PushPrintf("Texture Name: %s", g_pPlayerMove->sztexturename);
+    screenText.PushPrintf("Duck Time: %.2f", g_LocalPlayer.GetDuckTime());
+    screenText.PushPrintf("In Duck Process: %s", g_LocalPlayer.IsDucking() ? "yes" : "no");
+    screenText.PushPrintf("Player Flags: %d", g_LocalPlayer.GetFlags());
+    screenText.PushPrintf("Hull Type: %d", g_LocalPlayer.GetHullType());
+    screenText.PushPrintf("Gravity: %.2f", g_LocalPlayer.GetGravity());
+    screenText.PushPrintf("Friction: %.2f", g_LocalPlayer.GetFriction());
+    screenText.PushPrintf("On Ground: %s", g_LocalPlayer.OnGround() ? "yes" : "no");
     screenText.PushPrintf("fuserX: %.2f / %.2f / %.2f / %.2f",
-        g_pPlayerMove->fuser1, 
-        g_pPlayerMove->fuser2, 
-        g_pPlayerMove->fuser3, 
-        g_pPlayerMove->fuser4
+        g_LocalPlayer.GetFloatUserVar(1),
+        g_LocalPlayer.GetFloatUserVar(2), 
+        g_LocalPlayer.GetFloatUserVar(3), 
+        g_LocalPlayer.GetFloatUserVar(4)
     );
     screenText.PushPrintf("iuserX: %d / %d / %d / %d",
-        g_pPlayerMove->iuser1, 
-        g_pPlayerMove->iuser2, 
-        g_pPlayerMove->iuser3, 
-        g_pPlayerMove->iuser4
+        g_LocalPlayer.GetIntUserVar(1), 
+        g_LocalPlayer.GetIntUserVar(2), 
+        g_LocalPlayer.GetIntUserVar(3), 
+        g_LocalPlayer.GetIntUserVar(4)
     );
 
     Utils::DrawStringStack(

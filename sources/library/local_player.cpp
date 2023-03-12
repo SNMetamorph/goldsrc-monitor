@@ -3,7 +3,6 @@
 #include "client_module.h"
 
 CLocalPlayer &g_LocalPlayer = CLocalPlayer::GetInstance();
-playermove_t *&g_pPlayerMove = g_LocalPlayer.GetPlayerMove();
 CLocalPlayer &CLocalPlayer::GetInstance()
 {
     static CLocalPlayer instance;
@@ -15,49 +14,72 @@ void CLocalPlayer::UpdatePlayerMove(playermove_t *pmove)
     m_pPlayerMove = pmove;
 }
 
-playermove_t* &CLocalPlayer::GetPlayerMove()
+vec3_t CLocalPlayer::GetOrigin() const
 {
-    return m_pPlayerMove;
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->origin;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return localPlayer->origin;
+    }
 }
 
-const vec3_t &CLocalPlayer::GetOrigin() const
+vec3_t CLocalPlayer::GetAngles() const
 {
-    return m_pPlayerMove->origin;
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->angles;
+    }
+    else 
+    {
+        vec3_t angles;
+        g_pClientEngfuncs->GetViewAngles(angles);
+        return angles;
+    }
 }
 
-const vec3_t &CLocalPlayer::GetAngles() const
+vec3_t CLocalPlayer::GetPunchAngles() const
 {
-    return m_pPlayerMove->angles;
-}
-
-const vec3_t &CLocalPlayer::GetPunchAngles() const
-{
+    assert(PlayerMoveAvailable());
     return m_pPlayerMove->punchangle;
 }
 
-const vec3_t &CLocalPlayer::GetVelocity() const
+vec3_t CLocalPlayer::GetVelocity() const
 {
-    return m_pPlayerMove->velocity;
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->velocity;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return Utils::GetEntityVelocityApprox(localPlayer->index);
+    }
 }
 
-const vec3_t &CLocalPlayer::GetBaseVelocity() const
+vec3_t CLocalPlayer::GetBaseVelocity() const
 {
-    return m_pPlayerMove->basevelocity;
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->basevelocity;
+    }
+    else {
+        return vec3_t(0.f, 0.f, 0.f);
+    }
 }
 
-float CLocalPlayer::GetVelocityHorz() const
+vec3_t CLocalPlayer::GetViewOffset() const
 {
-    return m_pPlayerMove->velocity.Length2D();
-}
-
-const vec3_t &CLocalPlayer::GetViewOffset() const
-{
-    return m_pPlayerMove->view_ofs;
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->view_ofs;
+    }
+    else {
+        vec3_t viewOffset;
+        g_pClientEngfuncs->pEventAPI->EV_LocalPlayerViewheight(viewOffset);
+        return viewOffset;
+    }
 }
 
 vec3_t CLocalPlayer::GetViewOrigin() const
 {
-    return m_pPlayerMove->origin + m_pPlayerMove->view_ofs;
+    return GetOrigin() + GetViewOffset();
 }
 
 vec3_t CLocalPlayer::GetViewDirection() const
@@ -68,16 +90,157 @@ vec3_t CLocalPlayer::GetViewDirection() const
     return viewDir;
 }
 
+float CLocalPlayer::GetMaxSpeed() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->maxspeed;
+}
+
+float CLocalPlayer::GetClientMaxSpeed() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->clientmaxspeed;
+}
+
+float CLocalPlayer::GetGravity() const
+{
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->gravity;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return localPlayer->curstate.gravity;
+    }
+}
+
+float CLocalPlayer::GetFriction() const
+{
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->friction;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return localPlayer->curstate.friction;
+    }
+}
+
+float CLocalPlayer::GetDuckTime() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->flDuckTime;
+}
+
+bool CLocalPlayer::IsDucking() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->bInDuck;
+}
+
+bool CLocalPlayer::OnGround() const
+{
+    // TODO implement this for case when prediction data unavailable?
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->onground != -1;
+}
+
+int CLocalPlayer::GetMovetype() const
+{
+    if (PlayerMoveAvailable()) {
+        return m_pPlayerMove->movetype;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return localPlayer->curstate.movetype;
+    }
+}
+
+int CLocalPlayer::GetFlags() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->flags;
+}
+
+int CLocalPlayer::GetHullType() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->usehull;
+}
+
+const physent_t *CLocalPlayer::GetPhysents() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->physents;
+}
+
+const physent_t *CLocalPlayer::GetVisents() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->visents;
+}
+
+const physent_t *CLocalPlayer::GetMoveents() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->moveents;
+}
+
+int CLocalPlayer::GetPhysentsCount() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->numphysent;
+}
+
+int CLocalPlayer::GetVisentsCount() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->numvisent;
+}
+
+int CLocalPlayer::GetMoveentsCount() const
+{
+    assert(PlayerMoveAvailable());
+    return m_pPlayerMove->nummoveent;
+}
+
+int CLocalPlayer::GetIntUserVar(size_t index) const
+{
+    int *p;
+    assert(index >= 1 && index <= 4);
+    if (PlayerMoveAvailable()) {
+        p = &m_pPlayerMove->iuser1;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        p = &localPlayer->curstate.iuser1;
+    }
+    return p[index - 1];
+}
+
+float CLocalPlayer::GetFloatUserVar(size_t index) const
+{
+    float *p;
+    assert(index >= 1 && index <= 4);
+    if (PlayerMoveAvailable()) {
+        p = &m_pPlayerMove->fuser1;
+    }
+    else {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        p = &localPlayer->curstate.fuser1;
+    }
+    return p[index - 1];
+}
+
 bool CLocalPlayer::IsThirdPersonForced() const
 {
-    return ConVars::gsm_thirdperson->value > 0.0f && !m_pPlayerMove->dead;
+    bool playerDead = PlayerMoveAvailable() ? m_pPlayerMove->dead : false;
+    return ConVars::gsm_thirdperson->value > 0.0f && playerDead;
 }
 
 float CLocalPlayer::GetThirdPersonCameraDist() const
 {
     pmtrace_t traceInfo;
     vec3_t viewDir = GetViewDirection();
-    vec3_t viewOrigin = m_pPlayerMove->origin + m_pPlayerMove->view_ofs;
+    vec3_t viewOrigin = GetViewOrigin();
     float maxDist = ConVars::gsm_thirdperson_dist->value;
     Utils::TraceLine(viewOrigin, -viewDir, maxDist, &traceInfo);
     return maxDist * traceInfo.fraction;
@@ -85,7 +248,7 @@ float CLocalPlayer::GetThirdPersonCameraDist() const
 
 bool CLocalPlayer::PlayerMoveAvailable() const
 {
-    // we can't use player move when demo playing
+    // we can't use prediction data when demo playing
     bool demoPlaying = g_pClientEngfuncs->pDemoAPI->IsPlayingback() != 0;
     return m_pPlayerMove != nullptr && !demoPlaying;
 }
@@ -94,16 +257,46 @@ bool CLocalPlayer::IsSpectate() const
 {
     // assume that it's valid only for cs 1.6/hl1
     // because other mods can use iuser variables for other purposes
-    int specMode = m_pPlayerMove->iuser1;
-    int targetIndex = m_pPlayerMove->iuser2;
+    int specMode, targetIndex;
+    if (PlayerMoveAvailable())
+    {
+        specMode = m_pPlayerMove->iuser1;
+        targetIndex = m_pPlayerMove->iuser2;
+    }
+    else
+    {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        specMode = localPlayer->curstate.iuser1;
+        targetIndex = localPlayer->curstate.iuser2;
+    }
     return specMode != 0 && targetIndex != 0;
+}
+
+SpectatingMode CLocalPlayer::GetSpectatingMode() const
+{
+    if (PlayerMoveAvailable())
+    {
+        return static_cast<SpectatingMode>(m_pPlayerMove->iuser3);
+    }
+    else
+    {
+        cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+        return static_cast<SpectatingMode>(localPlayer->curstate.iuser3);
+    }
 }
 
 int CLocalPlayer::GetSpectateTargetIndex() const
 {
     if (IsSpectate())
     {
-        return m_pPlayerMove->iuser2;
+        if (PlayerMoveAvailable()) {
+            return m_pPlayerMove->iuser2;
+        }
+        else 
+        {
+            cl_entity_t *localPlayer = g_pClientEngfuncs->GetLocalPlayer();
+            return localPlayer->curstate.iuser2;
+        }
     }
     return -1;
 }

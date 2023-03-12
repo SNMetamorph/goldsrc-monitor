@@ -17,9 +17,6 @@ public:
 private:
     void CalculateVelocity(float frameTime);
     float GetEntityVelocityApprox(int entityIndex) const;
-    int GetSpectatedTargetIndex() const;
-    bool LocalPlayerSpectating() const;
-    float GetLocalPlayerVelocity() const;
     void DrawVelocityBar(int scrWidth, int scrHeight, float velocity) const;
 
     float m_flVelocity;

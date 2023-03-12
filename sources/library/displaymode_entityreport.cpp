@@ -126,8 +126,17 @@ int CModeEntityReport::TraceEntity()
     }
 
     const int listCount = 3;
-    physent_t *physEntLists[listCount] = { g_pPlayerMove->visents, g_pPlayerMove->physents, g_pPlayerMove->moveents };
-    int physEntListsLen[listCount] = { g_pPlayerMove->numvisent, g_pPlayerMove->numphysent, g_pPlayerMove->nummoveent };
+    const physent_t *physEntLists[listCount] = { 
+        g_LocalPlayer.GetVisents(), 
+        g_LocalPlayer.GetPhysents(), 
+        g_LocalPlayer.GetMoveents() 
+    };
+    int physEntListsLen[listCount] = { 
+        g_LocalPlayer.GetVisentsCount(), 
+        g_LocalPlayer.GetPhysentsCount(), 
+        g_LocalPlayer.GetMoveentsCount() 
+    };
+
     for (int i = 0; i < listCount; ++i)
     {
         int physEntIndex = TracePhysEntList(physEntLists[i], physEntListsLen[i], viewOrigin, viewDir, lineLen);
@@ -169,7 +178,7 @@ float CModeEntityReport::TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrig
     return Utils::TraceBBoxLine(entityBbox, viewOrigin, lineEnd);
 }
 
-int CModeEntityReport::TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
+int CModeEntityReport::TracePhysEntList(const physent_t *list, int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen)
 {
     int entIndex = 0;
     float minFraction = 1.0f;
@@ -220,7 +229,7 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
         screenText.PushPrintf("Map: %s", mapName.c_str());
         screenText.PushPrintf("Entity descriptions: %d", g_EntityDictionary.GetDescriptionsCount());
     }
-    else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_pPlayerMove->iuser3 != 3)
+    else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_LocalPlayer.GetSpectatingMode() != SpectatingMode::Roaming)
     {
         // disable print in non free-look spectating modes
         screenText.Push("Print enabled only in free look mode");

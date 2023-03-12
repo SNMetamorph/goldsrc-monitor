@@ -18,7 +18,7 @@ public:
 private:
     int TraceEntity();
     float TracePhysEnt(const physent_t &physEnt, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
-    int TracePhysEntList(physent_t list[], int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
+    int TracePhysEntList(const physent_t *list, int count, vec3_t &viewOrigin, vec3_t &viewDir, float lineLen);
     float GetEntityDistance(int entityIndex);
     bool PrintEntityInfo(int entityIndex, CStringStack &screenText);
     void PrintEntityCommonInfo(int entityIndex, CStringStack &screenText);
