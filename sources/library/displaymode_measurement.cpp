@@ -271,43 +271,48 @@ void CModeMeasurement::LoadLineSprite()
 
 void CModeMeasurement::Render2D(float frameTime, int screenWidth, int screenHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PredictionDataValid())
-        return;
+    if (g_LocalPlayer.PredictionDataValid())
+    {
+        const vec3_t &originPointA = GetPointOriginA();
+        const vec3_t &originPointB = GetPointOriginB();
+        float pointsDistance = GetPointsDistance();
+        float elevationAngle = GetLineElevationAngle();
+        const char *snapModeName = GetSnapModeName();
 
-    const vec3_t &originPointA = GetPointOriginA();
-    const vec3_t &originPointB = GetPointOriginB();
-    float pointsDistance = GetPointsDistance();
-    float elevationAngle = GetLineElevationAngle();
-    const char *snapModeName = GetSnapModeName();
+        const float roundThreshold = 0.08f;
+        float fractionalPart = fmodf(pointsDistance, 1.f);
+        if (fractionalPart >= (1.f - roundThreshold))
+            pointsDistance += (1.f - fractionalPart);
+        else if (fractionalPart <= roundThreshold)
+            pointsDistance -= fractionalPart;
 
-    const float roundThreshold = 0.08f;
-    float fractionalPart = fmodf(pointsDistance, 1.f);
-    if (fractionalPart >= (1.f - roundThreshold))
-        pointsDistance += (1.f - fractionalPart);
-    else if (fractionalPart <= roundThreshold)
-        pointsDistance -= fractionalPart;
-
-    screenText.Clear();
-    if (originPointA.Length() < 0.0001f)
-        screenText.Push("Point A not set");
-    else
-        screenText.PushPrintf("Point A origin: (%.2f, %.2f, %.2f)",
+        screenText.Clear();
+        if (originPointA.Length() < 0.0001f)
+            screenText.Push("Point A not set");
+        else
+            screenText.PushPrintf("Point A origin: (%.2f, %.2f, %.2f)",
             originPointA.x, originPointA.y, originPointA.z);
 
-    if (originPointB.Length() < 0.0001f)
-        screenText.Push("Point B not set");
-    else
-        screenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)",
+        if (originPointB.Length() < 0.0001f)
+            screenText.Push("Point B not set");
+        else
+            screenText.PushPrintf("Point B origin: (%.2f, %.2f, %.2f)",
             originPointB.x, originPointB.y, originPointB.z);
 
-    screenText.PushPrintf("Points Distance: %.1f (%.3f meters)",
-        pointsDistance, pointsDistance / 39.37f);
-    screenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
-    screenText.PushPrintf("Snap Mode: %s", snapModeName);
+        screenText.PushPrintf("Points Distance: %.1f (%.3f meters)",
+            pointsDistance, pointsDistance / 39.37f);
+        screenText.PushPrintf("Elevation Angle: %.2f deg", elevationAngle);
+        screenText.PushPrintf("Snap Mode: %s", snapModeName);
 
-    LoadLineSprite();
-    if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f) {
-        DrawVisualization(frameTime, screenWidth, screenHeight);
+        LoadLineSprite();
+        if (m_vecPointA.Length() > 0.0001f && m_vecPointB.Length() > 0.0001f) {
+            DrawVisualization(frameTime, screenWidth, screenHeight);
+        }
+    }
+    else
+    {
+        screenText.Clear();
+        screenText.Push("This mode unavailable when playing demo");
     }
 
     Utils::DrawStringStack(

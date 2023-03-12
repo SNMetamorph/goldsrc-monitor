@@ -20,23 +20,28 @@ CModeEntityReport::CModeEntityReport()
 
 void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PredictionDataValid())
-        return;
-
-    int debugMode = ConVars::gsm_debug->value;
-    if (!g_EntityDictionary.IsInitialized())
-        g_EntityDictionary.Initialize();
-
-    screenText.Clear();
-    m_iEntityIndex = TraceEntity();
-    if (!PrintEntityInfo(GetActualEntityIndex(), screenText))
+    if (g_LocalPlayer.PredictionDataValid())
     {
-        // disable hull highlighting for this entity
-        m_iEntityIndex = 0;
-    }
+        int debugMode = ConVars::gsm_debug->value;
+        if (!g_EntityDictionary.IsInitialized())
+            g_EntityDictionary.Initialize();
 
-    if (debugMode == 2) { 
-        g_EntityDictionary.VisualizeTree(true);
+        screenText.Clear();
+        m_iEntityIndex = TraceEntity();
+        if (!PrintEntityInfo(GetActualEntityIndex(), screenText))
+        {
+            // disable hull highlighting for this entity
+            m_iEntityIndex = 0;
+        }
+
+        if (debugMode == 2) {
+            g_EntityDictionary.VisualizeTree(true);
+        }
+    }
+    else
+    {
+        screenText.Clear();
+        screenText.Push("This mode unavailable when playing demo");
     }
 
     Utils::DrawStringStack(
