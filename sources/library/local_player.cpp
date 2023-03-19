@@ -1,6 +1,7 @@
 #include "local_player.h"
 #include "utils.h"
 #include "client_module.h"
+#include <assert.h>
 
 CLocalPlayer &g_LocalPlayer = CLocalPlayer::GetInstance();
 CLocalPlayer &CLocalPlayer::GetInstance()

@@ -19,6 +19,7 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/library/utils.cpp"
 	"../../sources/library/cvars.cpp"
 	"../../sources/library/build_info.cpp"
+	"../../sources/library/build_info_impl.cpp"
 	"../../sources/library/build_info_entry.cpp"
 	"../../sources/library/memory_pattern.cpp"
 	"../../sources/library/display_mode.h"
