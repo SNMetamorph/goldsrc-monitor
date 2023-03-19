@@ -1,11 +1,13 @@
+#include "build_info.h"
 #include "build_info_entry.h"
 
-bool CBuildInfoEntry::Validate() const
+bool CBuildInfo::Entry::Validate() const
 {
-    if (m_iClientEngfuncsOffset > 0)
+    if (m_iClientEngfuncsOffset > 0) {
         return true;
+    }
 
-    for (int i = 0; i < FUNCTYPE_PRECACHE_MODEL; ++i) // check only client-side functions
+    for (size_t i = 0; i < static_cast<size_t>(FunctionType::PrecacheModel); ++i) // check only client-side functions
     {
         const CMemoryPattern &pattern = m_FunctionPatterns[i];
         if (!pattern.IsInitialized()) {

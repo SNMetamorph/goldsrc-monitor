@@ -1,4 +1,5 @@
 #include "build_info_impl.h"
+#include "build_info_entry.h"
 #include "utils.h"
 #include "exception.h"
 #include <string>
@@ -132,7 +133,7 @@ void CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
     const rapidjson::Value &engineBuilds = doc["engine_builds_info"];
     for (size_t i = 0; i < engineBuilds.Size(); ++i)
     {
-        CBuildInfoEntry infoEntry;
+        CBuildInfo::Entry infoEntry;
         ParseBuildInfoEntry(infoEntry, engineBuilds[i]);
         m_InfoEntries.push_back(infoEntry);
     }
@@ -142,7 +143,7 @@ void CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
         const rapidjson::Value &gameSpecificBuilds = doc["game_specific_builds_info"];
         for (size_t i = 0; i < gameSpecificBuilds.Size(); ++i)
         {
-            CBuildInfoEntry infoEntry;
+            CBuildInfo::Entry infoEntry;
             const rapidjson::Value &entryObject = gameSpecificBuilds[i];
             if (entryObject.HasMember("process_name")) 
             {
@@ -157,7 +158,7 @@ void CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
     }
 }
 
-void CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rapidjson::Value &jsonObject)
+void CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfo::Entry &destEntry, const rapidjson::Value &jsonObject)
 {
     if (jsonObject.HasMember("number")) {
         destEntry.SetBuildNumber(jsonObject["number"].GetInt());
@@ -171,13 +172,13 @@ void CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfoEntry &destEntry, const rap
     if (jsonObject.HasMember("signatures"))
     {
         const rapidjson::Value &signatures = jsonObject["signatures"];
-        destEntry.SetFunctionPattern(FUNCTYPE_SPR_LOAD, CMemoryPattern(signatures["SPR_Load"].GetString()));
-        destEntry.SetFunctionPattern(FUNCTYPE_SPR_FRAMES, CMemoryPattern(signatures["SPR_Frames"].GetString()));
+        destEntry.SetFunctionPattern(CBuildInfo::FunctionType::SPR_Load, CMemoryPattern(signatures["SPR_Load"].GetString()));
+        destEntry.SetFunctionPattern(CBuildInfo::FunctionType::SPR_Frames, CMemoryPattern(signatures["SPR_Frames"].GetString()));
         if (signatures.HasMember("PrecacheModel")) {
-            destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_MODEL, CMemoryPattern(signatures["PrecacheModel"].GetString()));
+            destEntry.SetFunctionPattern(CBuildInfo::FunctionType::PrecacheModel, CMemoryPattern(signatures["PrecacheModel"].GetString()));
         }
         if (signatures.HasMember("PrecacheSound")) {
-            destEntry.SetFunctionPattern(FUNCTYPE_PRECACHE_SOUND, CMemoryPattern(signatures["PrecacheSound"].GetString()));
+            destEntry.SetFunctionPattern(CBuildInfo::FunctionType::PrecacheSound, CMemoryPattern(signatures["PrecacheSound"].GetString()));
         }
     }
 
@@ -253,7 +254,7 @@ int CBuildInfo::Impl::FindActualInfoEntry()
         Utils::GetGameProcessName(processName);
         for (size_t i = 0; i < m_InfoEntries.size(); ++i)
         {
-            const CBuildInfoEntry &buildInfo = m_InfoEntries[i];
+            const CBuildInfo::Entry &buildInfo = m_InfoEntries[i];
             const std::string &targetName = buildInfo.GetGameProcessName();
             if (targetName.length() > 0 && targetName.compare(processName) == 0) {
                 return i;
@@ -264,8 +265,8 @@ int CBuildInfo::Impl::FindActualInfoEntry()
         std::sort(m_InfoEntries.begin(), m_InfoEntries.end());
         for (int i = 0; i < lastEntryIndex; ++i)
         {
-            const CBuildInfoEntry &buildInfo = m_InfoEntries[i];
-            const CBuildInfoEntry &nextBuildInfo = m_InfoEntries[i + 1];
+            const CBuildInfo::Entry &buildInfo = m_InfoEntries[i];
+            const CBuildInfo::Entry &nextBuildInfo = m_InfoEntries[i + 1];
             const int nextBuildNumber = nextBuildInfo.GetBuildNumber();
             if (nextBuildNumber > currBuildNumber) // valid only if build info entries sorted ascending
             {

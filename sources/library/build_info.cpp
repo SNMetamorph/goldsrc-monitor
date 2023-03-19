@@ -1,4 +1,5 @@
 #include "build_info.h"
+#include "build_info_entry.h"
 #include "build_info_impl.h"
 #include "exception.h"
 #include "utils.h"
@@ -34,7 +35,7 @@ void CBuildInfo::Initialize(const ModuleInfo &engineModule)
     }
 }
 
-void *CBuildInfo::FindFunctionAddress(FunctionType funcType, void *startAddr, void *endAddr) const
+void *CBuildInfo::FindFunctionAddress(CBuildInfo::FunctionType funcType, void *startAddr, void *endAddr) const
 {
     CMemoryPattern funcPattern = m_pImpl->m_InfoEntries[m_pImpl->m_iActualEntryIndex].GetFunctionPattern(funcType);
     if (!endAddr)
@@ -47,7 +48,7 @@ void *CBuildInfo::FindFunctionAddress(FunctionType funcType, void *startAddr, vo
     );
 }
 
-const CBuildInfoEntry &CBuildInfo::GetInfoEntry() const
+const CBuildInfo::Entry &CBuildInfo::GetInfoEntry() const
 {
     return m_pImpl->m_InfoEntries[m_pImpl->m_iActualEntryIndex];
 }
