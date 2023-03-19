@@ -1,35 +1,28 @@
 #include "stdafx.h"
+#include "hooks_impl.h"
 #include "hooks.h"
 #include "application.h"
 #include "client_module.h"
 #include "exception.h"
 #include "local_player.h"
 
-static CFunctionHook<CHooks::pfnRedraw_t> g_hookRedraw;
-static CFunctionHook<CHooks::pfnPlayerMove_t> g_hookPlayerMove;
-static CFunctionHook<CHooks::pfnKeyEvent_t> g_hookKeyEvent;
-static CFunctionHook<CHooks::pfnDrawTriangles_t> g_hookDrawTriangles;
-static CFunctionHook<CHooks::pfnIsThirdPerson_t> g_hookIsThirdPerson;
-static CFunctionHook<CHooks::pfnCameraOffset_t> g_hookCameraOffset;
-static CFunctionHook<CHooks::pfnVidInit_t> g_hookVidInit;
-
 NOINLINE static int __cdecl HookRedraw(float time, int intermission)
 {
     // call original function
-    PLH::FnCast(g_hookRedraw.GetTrampolineAddr(), CHooks::pfnRedraw_t())(time, intermission);
+    PLH::FnCast(CHooks::Impl::m_hookRedraw.GetTrampolineAddr(), CHooks::Impl::pfnRedraw_t())(time, intermission);
     g_Application.DisplayModeRender2D();
     return 1;
 }
 
 NOINLINE static void __cdecl HookPlayerMove(playermove_t *pmove, int server)
 {
-    PLH::FnCast(g_hookPlayerMove.GetTrampolineAddr(), CHooks::pfnPlayerMove_t())(pmove, server);
+    PLH::FnCast(CHooks::Impl::m_hookPlayerMove.GetTrampolineAddr(), CHooks::Impl::pfnPlayerMove_t())(pmove, server);
     g_LocalPlayer.UpdatePlayerMove(pmove);
 }
 
 NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *bindName)
 {
-    int returnCode = PLH::FnCast(g_hookKeyEvent.GetTrampolineAddr(), CHooks::pfnKeyEvent_t())(
+    int returnCode = PLH::FnCast(CHooks::Impl::m_hookKeyEvent.GetTrampolineAddr(), CHooks::Impl::pfnKeyEvent_t())(
         keyDown, keyCode, bindName
     );
     return (returnCode && g_Application.KeyInput(keyDown, keyCode, bindName)) ? 1 : 0;
@@ -37,19 +30,19 @@ NOINLINE static int __cdecl HookKeyEvent(int keyDown, int keyCode, const char *b
 
 NOINLINE static void __cdecl HookDrawTriangles()
 {
-    PLH::FnCast(g_hookDrawTriangles.GetTrampolineAddr(), CHooks::pfnDrawTriangles_t())();
+    PLH::FnCast(CHooks::Impl::m_hookDrawTriangles.GetTrampolineAddr(), CHooks::Impl::pfnDrawTriangles_t())();
     g_Application.DisplayModeRender3D();
 }
 
 NOINLINE static int __cdecl HookIsThirdPerson()
 {
-    int returnCode = PLH::FnCast(g_hookIsThirdPerson.GetTrampolineAddr(), CHooks::pfnIsThirdPerson_t())();
+    int returnCode = PLH::FnCast(CHooks::Impl::m_hookIsThirdPerson.GetTrampolineAddr(), CHooks::Impl::pfnIsThirdPerson_t())();
     return (returnCode || g_LocalPlayer.IsThirdPersonForced()) ? 1 : 0;
 }
 
 NOINLINE static void __cdecl HookCameraOffset(float *cameraOffset)
 {
-    PLH::FnCast(g_hookCameraOffset.GetTrampolineAddr(), CHooks::pfnCameraOffset_t())(cameraOffset);
+    PLH::FnCast(CHooks::Impl::m_hookCameraOffset.GetTrampolineAddr(), CHooks::Impl::pfnCameraOffset_t())(cameraOffset);
     if (g_LocalPlayer.IsThirdPersonForced())
     {
         g_pClientEngfuncs->GetViewAngles(cameraOffset);
@@ -59,31 +52,40 @@ NOINLINE static void __cdecl HookCameraOffset(float *cameraOffset)
 
 NOINLINE static int __cdecl HookVidInit()
 {
-    int returnCode = PLH::FnCast(g_hookVidInit.GetTrampolineAddr(), CHooks::pfnVidInit_t())();
+    int returnCode = PLH::FnCast(CHooks::Impl::m_hookVidInit.GetTrampolineAddr(), CHooks::Impl::pfnVidInit_t())();
     g_Application.HandleChangelevel();
     return returnCode;
 }
 
+CHooks::CHooks()
+{
+    m_pImpl = std::make_unique<CHooks::Impl>();
+}
+
+CHooks::~CHooks()
+{
+}
+
 void CHooks::Apply()
 {
-    pfnRedraw_t pfnRedraw = (pfnRedraw_t)g_ClientModule.GetFuncAddress("HUD_Redraw");
-    pfnPlayerMove_t pfnPlayerMove = (pfnPlayerMove_t)g_ClientModule.GetFuncAddress("HUD_PlayerMove");
-    pfnKeyEvent_t pfnKeyEvent = (pfnKeyEvent_t)g_ClientModule.GetFuncAddress("HUD_Key_Event");
-    pfnDrawTriangles_t pfnDrawTriangles = (pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawTransparentTriangles");
-    pfnIsThirdPerson_t pfnIsThirdPerson = (pfnIsThirdPerson_t)g_ClientModule.GetFuncAddress("CL_IsThirdPerson");
-    pfnCameraOffset_t pfnCameraOffset = (pfnCameraOffset_t)g_ClientModule.GetFuncAddress("CL_CameraOffset");
-    pfnVidInit_t pfnVidInit = (pfnVidInit_t)g_ClientModule.GetFuncAddress("HUD_VidInit");
+    Impl::pfnRedraw_t pfnRedraw = (Impl::pfnRedraw_t)g_ClientModule.GetFuncAddress("HUD_Redraw");
+    Impl::pfnPlayerMove_t pfnPlayerMove = (Impl::pfnPlayerMove_t)g_ClientModule.GetFuncAddress("HUD_PlayerMove");
+    Impl::pfnKeyEvent_t pfnKeyEvent = (Impl::pfnKeyEvent_t)g_ClientModule.GetFuncAddress("HUD_Key_Event");
+    Impl::pfnDrawTriangles_t pfnDrawTriangles = (Impl::pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawTransparentTriangles");
+    Impl::pfnIsThirdPerson_t pfnIsThirdPerson = (Impl::pfnIsThirdPerson_t)g_ClientModule.GetFuncAddress("CL_IsThirdPerson");
+    Impl::pfnCameraOffset_t pfnCameraOffset = (Impl::pfnCameraOffset_t)g_ClientModule.GetFuncAddress("CL_CameraOffset");
+    Impl::pfnVidInit_t pfnVidInit = (Impl::pfnVidInit_t)g_ClientModule.GetFuncAddress("HUD_VidInit");
 
-    InitializeLogger();
-    g_hookRedraw.Hook(pfnRedraw, &HookRedraw);
-    g_hookPlayerMove.Hook(pfnPlayerMove, &HookPlayerMove);
-    g_hookKeyEvent.Hook(pfnKeyEvent, &HookKeyEvent);
-    g_hookDrawTriangles.Hook(pfnDrawTriangles, &HookDrawTriangles);
-    g_hookIsThirdPerson.Hook(pfnIsThirdPerson, &HookIsThirdPerson);
-    g_hookCameraOffset.Hook(pfnCameraOffset, &HookCameraOffset);
-    g_hookVidInit.Hook(pfnVidInit, &HookVidInit);
+    m_pImpl->InitializeLogger();
+    Impl::m_hookRedraw.Hook(pfnRedraw, &HookRedraw);
+    Impl::m_hookPlayerMove.Hook(pfnPlayerMove, &HookPlayerMove);
+    Impl::m_hookKeyEvent.Hook(pfnKeyEvent, &HookKeyEvent);
+    Impl::m_hookDrawTriangles.Hook(pfnDrawTriangles, &HookDrawTriangles);
+    Impl::m_hookIsThirdPerson.Hook(pfnIsThirdPerson, &HookIsThirdPerson);
+    Impl::m_hookCameraOffset.Hook(pfnCameraOffset, &HookCameraOffset);
+    Impl::m_hookVidInit.Hook(pfnVidInit, &HookVidInit);
 
-    if (!g_hookKeyEvent.IsHooked())
+    if (!Impl::m_hookKeyEvent.IsHooked())
     {
         g_pClientEngfuncs->Con_Printf(
             "WARNING: KeyEvent() hooking failed: "
@@ -91,10 +93,10 @@ void CHooks::Apply()
         );
     }
 
-    if (!g_hookDrawTriangles.IsHooked())
+    if (!Impl::m_hookDrawTriangles.IsHooked())
     {
-        pfnDrawTriangles = (pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawNormalTriangles");
-        if (!g_hookDrawTriangles.Hook(pfnDrawTriangles, &HookDrawTriangles))
+        pfnDrawTriangles = (Impl::pfnDrawTriangles_t)g_ClientModule.GetFuncAddress("HUD_DrawNormalTriangles");
+        if (!Impl::m_hookDrawTriangles.Hook(pfnDrawTriangles, &HookDrawTriangles))
         {
             g_pClientEngfuncs->Con_Printf(
                 "WARNING: DrawTriangles() hooking failed: entity "
@@ -103,10 +105,10 @@ void CHooks::Apply()
         }
     }
 
-    if (!g_hookIsThirdPerson.IsHooked() || !g_hookCameraOffset.IsHooked())
+    if (!Impl::m_hookIsThirdPerson.IsHooked() || !Impl::m_hookCameraOffset.IsHooked())
     {
-        g_hookIsThirdPerson.Unhook();
-        g_hookCameraOffset.Unhook();
+        Impl::m_hookIsThirdPerson.Unhook();
+        Impl::m_hookCameraOffset.Unhook();
         g_pClientEngfuncs->Con_Printf(
             "WARNING: IsThirdPerson() hooking failed: "
             "command gsm_thirdperson will not work.\n"
@@ -114,15 +116,15 @@ void CHooks::Apply()
     }
 
     bool isHookSuccessful = (
-        g_hookRedraw.IsHooked() && 
-        g_hookPlayerMove.IsHooked() &&
-        g_hookVidInit.IsHooked()
+        Impl::m_hookRedraw.IsHooked() && 
+        Impl::m_hookPlayerMove.IsHooked() &&
+        Impl::m_hookVidInit.IsHooked()
     );
     if (!isHookSuccessful)
     {
         std::string errorLog;
-        WriteLogs(errorLog);
-        RevertHooks();
+        m_pImpl->WriteLogs(errorLog);
+        m_pImpl->RevertHooks();
         EXCEPT("unable to hook desired functions, error log:\n" + errorLog);
     }
 }
@@ -130,35 +132,7 @@ void CHooks::Apply()
 void CHooks::Remove()
 {
     // check for client.dll not already unloaded from process
-    if (GetModuleHandle("client.dll"))
-    {
-        RevertHooks();
+    if (GetModuleHandle("client.dll")) {
+        m_pImpl->RevertHooks();
     }
-}
-
-void CHooks::InitializeLogger()
-{
-    m_pLogger = std::make_shared<PLH::ErrorLog>();
-    m_pLogger->setLogLevel(PLH::ErrorLevel::SEV);
-    PLH::Log::registerLogger(m_pLogger);
-}
-
-void CHooks::WriteLogs(std::string &errorLog)
-{
-    auto &logger = *m_pLogger;
-    errorLog.clear();
-    for (PLH::Error error = logger.pop(); !error.msg.empty(); error = logger.pop()) {
-        errorLog += error.msg;
-    }
-}
-
-void CHooks::RevertHooks()
-{
-    g_hookRedraw.Unhook();
-    g_hookPlayerMove.Unhook();
-    g_hookKeyEvent.Unhook();
-    g_hookDrawTriangles.Unhook();
-    g_hookIsThirdPerson.Unhook();
-    g_hookCameraOffset.Unhook();
-    g_hookVidInit.Unhook();
 }

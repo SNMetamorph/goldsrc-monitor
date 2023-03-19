@@ -32,6 +32,7 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/library/entity_description.cpp"
 	"../../sources/library/dll_main.cpp"
 	"../../sources/library/hooks.cpp"
+	"../../sources/library/hooks_impl.cpp"
 	"../../sources/library/stdafx.cpp"
 	"../../sources/library/library.rc"
 )
