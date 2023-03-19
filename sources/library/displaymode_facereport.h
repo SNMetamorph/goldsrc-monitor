@@ -22,7 +22,6 @@ private:
     void GetSurfaceBoundingBox(Engine::msurface_t *surf, CBoundingBox &bbox);
     void DrawFaceOutline(Engine::msurface_t *surf);
     void DrawSurfaceBounds(Engine::msurface_t *surf);
-    bool SurfaceIntersected(Engine::msurface_t *surf, vec3_t p1, vec3_t p2, float &distance);
     bool GetLightmapProbe(Engine::msurface_t *surf, const vec3_t &point, color24 &probe);
     Engine::mleaf_t *PointInLeaf(vec3_t point, Engine::mnode_t *node);
     Engine::msurface_t *TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect);
@@ -31,5 +30,6 @@ private:
     color24 m_ColorProbe;
     model_t *m_pCurrentModel;
     Engine::msurface_t *m_pCurrentFace;
+    CBoundingBox m_CurrentFaceBounds;
     std::vector<vec3_t> m_BoundPoints;
 };

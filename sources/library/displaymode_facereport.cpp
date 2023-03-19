@@ -22,46 +22,44 @@ CModeFaceReport::CModeFaceReport()
 
 void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (g_LocalPlayer.PredictionDataValid())
+    const float lineLen = 11590.0f;
+    vec3_t intersectPoint;
+    vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
+    vec3_t viewDir = g_LocalPlayer.GetViewDirection();
+    m_pCurrentFace = TraceSurface(viewOrigin, viewDir, lineLen, intersectPoint);
+
+    screenText.Clear();
+    if (m_pCurrentFace)
     {
-        const float lineLen = 11590.0f;
-        vec3_t intersectPoint;
-        vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
-        vec3_t viewDir = g_LocalPlayer.GetViewDirection();
-        m_pCurrentFace = TraceSurface(viewOrigin, viewDir, lineLen, intersectPoint);
+        const mplane_t *plane = m_pCurrentFace->plane;
+        const Engine::texture_t *texture = Engine::CastType(m_pCurrentFace->texinfo->texture);
+        vec3_t planeCenter = plane->normal * plane->dist;
+        int32_t lightmapWidth = (m_pCurrentFace->extents[0] >> 4) + 1;
+        int32_t lightmapHeight = (m_pCurrentFace->extents[1] >> 4) + 1;
 
-        screenText.Clear();
-        if (m_pCurrentFace)
+        m_ColorProbe = { 0 };
+        GetSurfaceBoundingBox(m_pCurrentFace, m_CurrentFaceBounds);
+        const vec3_t &surfSize = m_CurrentFaceBounds.GetSize();
+
+        screenText.PushPrintf("Model Name: %s", m_pCurrentModel->name);
+        screenText.PushPrintf("Texture Name: %s", texture->name);
+        screenText.PushPrintf("Texture Size: %d x %d", texture->width, texture->height);
+        screenText.PushPrintf("Lightmap Size: %d x %d", lightmapWidth, lightmapHeight);
+        screenText.PushPrintf("Edges: %d", m_pCurrentFace->numedges);
+        screenText.PushPrintf("Surfaces: %d", m_pCurrentModel->nummodelsurfaces);
+        screenText.PushPrintf("Bounds: (%.1f; %.1f; %.1f)", surfSize.x, surfSize.y, surfSize.z);
+        screenText.PushPrintf("Normal: (%.1f; %.1f; %.1f)", plane->normal.x, plane->normal.y, plane->normal.z);
+        screenText.PushPrintf("Intersect point: (%.1f; %.1f; %.1f)", intersectPoint.x, intersectPoint.y, intersectPoint.z);
+
+        if (GetLightmapProbe(m_pCurrentFace, intersectPoint, m_ColorProbe))
         {
-            const mplane_t *plane = m_pCurrentFace->plane;
-            const Engine::texture_t *texture = Engine::CastType(m_pCurrentFace->texinfo->texture);
-            vec3_t planeCenter = plane->normal * plane->dist;
-            m_ColorProbe = { 0 };
-
-            screenText.PushPrintf("Model Name: %s", m_pCurrentModel->name);
-            screenText.PushPrintf("Texture Name: %s", texture->name);
-            screenText.PushPrintf("Width: %d", texture->width);
-            screenText.PushPrintf("Height: %d", texture->height);
-            screenText.PushPrintf("Edges: %d", m_pCurrentFace->numedges);
-            screenText.PushPrintf("Surfaces: %d", m_pCurrentModel->nummodelsurfaces);
-            screenText.PushPrintf("Normal: (%.1f; %.1f; %.1f)", plane->normal.x, plane->normal.y, plane->normal.z);
-            screenText.PushPrintf("Intersect point: (%.1f; %.1f; %.1f)", intersectPoint.x, intersectPoint.y, intersectPoint.z);
-
-            if (GetLightmapProbe(m_pCurrentFace, intersectPoint, m_ColorProbe))
-            {
-                screenText.PushPrintf("Lightmap Color: %d %d %d",
-                    m_ColorProbe.r, m_ColorProbe.g, m_ColorProbe.b);
-                screenText.Push("Press V to print lightmap info");
-            }
-        }
-        else {
-            screenText.Push("Surface not found");
+            screenText.PushPrintf("Lightmap Color: %d %d %d",
+                m_ColorProbe.r, m_ColorProbe.g, m_ColorProbe.b);
+            screenText.Push("Press V to print lightmap info");
         }
     }
-    else 
-    {
-        screenText.Clear();
-        screenText.Push("This mode unavailable when playing demo");
+    else {
+        screenText.Push("Surface not found");
     }
 
     Utils::DrawStringStack(
@@ -196,21 +194,6 @@ void CModeFaceReport::DrawSurfaceBounds(Engine::msurface_t *surf)
         bounds.GetSize(), 
         boxColor
     );
-}
-
-bool CModeFaceReport::SurfaceIntersected(Engine::msurface_t *surf, vec3_t p1, vec3_t p2, float &distance)
-{
-    float fraction;
-    CBoundingBox surfaceBounds;
-
-    GetSurfaceBoundingBox(surf, surfaceBounds);
-    fraction = Utils::TraceBBoxLine(surfaceBounds, p1, p2);
-    if (fraction < 1.0f) 
-    {
-        distance = (p1 - p2).Length() * fraction;
-        return true;
-    }
-    return false;
 }
 
 bool CModeFaceReport::GetLightmapProbe(Engine::msurface_t *surf, const vec3_t &point, color24 &probe)
