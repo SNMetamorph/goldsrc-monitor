@@ -39,13 +39,6 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-	"../../external/polyhook"
-	"../../external/polyhook/asmjit"
-	"../../external/polyhook/zydis/msvc"
-	"../../external/polyhook/zydis/include"
-	"../../external/polyhook/zydis/dependencies/zycore/include"
-	"../../external/polyhook"
-	"../../external/rapidjson/include"
 	"../../external/hlsdk/common"
 	"../../external/hlsdk/pm_shared"
 	"../../external/hlsdk/engine"
@@ -64,18 +57,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 	CXX_STANDARD_REQUIRED YES
 	CXX_EXTENSIONS NO
 )
-
-# configure & add PolyHook library target
-set (POLYHOOK_DISASM_CAPSTONE OFF CACHE BOOL "")
-set (POLYHOOK_FEATURE_PE OFF CACHE BOOL "")
-set (POLYHOOK_FEATURE_VIRTUALS OFF CACHE BOOL "")
-set (POLYHOOK_FEATURE_EXCEPTION OFF CACHE BOOL "")
-
-# configure dependency libraries to use static runtime
-set (POLYHOOK_BUILD_STATIC_RUNTIME ON CACHE BOOL "")
-set (ASMJIT_STATIC ON CACHE BOOL "")
-
-add_subdirectory("../../external/polyhook" polyhook EXCLUDE_FROM_ALL)
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /wd4005) # macro redefinition warning disable
@@ -109,12 +90,17 @@ set_compiler_runtime(${PROJECT_NAME} STATIC)
 # linking libraries
 if(MSVC)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
-		"PolyHook_2"
 		"opengl32"
 		"psapi"
 	)
 else()
 endif()
+
+find_package(PolyHook_2 CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE PolyHook_2::PolyHook_2)
+
+find_package(RapidJSON CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE rapidjson)
 
 # copy compiled binaries to install directory
 install( TARGETS ${PROJECT_NAME}
