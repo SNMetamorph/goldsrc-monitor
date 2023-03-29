@@ -24,7 +24,8 @@ public:
         m_pDetour = new PolyhookDetourType_t(
             reinterpret_cast<uint64_t>(origFunc),
             reinterpret_cast<uint64_t>(callbackFunc),
-            &m_pfnTrampoline 
+            &m_pfnTrampoline,
+            m_Disassembler
         );
         m_isHooked = m_pDetour->hook();
         return m_isHooked;
@@ -50,4 +51,11 @@ private:
     bool m_isHooked = false;
     uint64_t m_pfnTrampoline = 0;
     PolyhookDetourType_t *m_pDetour = nullptr;
+    static PLH::ZydisDisassembler m_Disassembler;
 };
+
+#if APP_SUPPORT_64BIT
+template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::x64);
+#else
+template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::x86);
+#endif
