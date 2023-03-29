@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "goldsrc-monitor",
+  "version": "3.0",
+  "dependencies": [
+    {
+      "name": "polyhook2",
+      "default-features": false,
+      "features": [ "zydis", "detours", "inlinentd" ]
+    },
+    "rapidjson"
+  ]
+}
