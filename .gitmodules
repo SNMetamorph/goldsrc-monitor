@@ -1,9 +1,6 @@
 [submodule "external/hlsdk"]
 	path = external/hlsdk
 	url = https://github.com/alliedmodders/hlsdk.git
-[submodule "external/rapidjson"]
-	path = external/rapidjson
-	url = https://github.com/Tencent/rapidjson
 [submodule "external/vcpkg"]
 	path = external/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
