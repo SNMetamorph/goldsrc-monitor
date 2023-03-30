@@ -23,6 +23,7 @@ else()
     set(VCPKG_TARGET_TRIPLET "x86-windows-static")
 endif()
 
+set(VCPKG_OVERLAY_PORTS "${CMAKE_SOURCE_DIR}/vcpkg/overlay_ports")
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake")
 project(goldsrc-monitor)
 
