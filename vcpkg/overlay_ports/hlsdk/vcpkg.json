@@ -1,0 +1,5 @@
+{
+    "name": "hlsdk",
+    "version-string": "2.3",
+    "description": "Fork of Half-Life 1 SDK, made by AlliedModders community. This package provides only header files."
+}
