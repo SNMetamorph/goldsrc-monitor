@@ -38,15 +38,16 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/library/library.rc"
 )
 
+find_path(HLSDK_DIRECTORY "cl_dll/GameStudioModelRenderer.h" PATH_SUFFIXES "hlsdk")
 target_include_directories(${PROJECT_NAME} PRIVATE
-	"../../external/hlsdk/common"
-	"../../external/hlsdk/pm_shared"
-	"../../external/hlsdk/engine"
-	"../../external/hlsdk/game_shared"
-	"../../external/hlsdk/external"
-	"../../external/hlsdk/utils/vgui/include"
-	"../../external/hlsdk/public"
-	"../../external/hlsdk/cl_dll"
+	"${HLSDK_DIRECTORY}/common"
+	"${HLSDK_DIRECTORY}/pm_shared"
+	"${HLSDK_DIRECTORY}/engine"
+	"${HLSDK_DIRECTORY}/game_shared"
+	"${HLSDK_DIRECTORY}/external"
+	"${HLSDK_DIRECTORY}/utils/vgui/include"
+	"${HLSDK_DIRECTORY}/public"
+	"${HLSDK_DIRECTORY}/cl_dll"
 	"../../sources"
 	"../../sources/library"
 )
