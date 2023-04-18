@@ -6,7 +6,7 @@
     {
       "name": "polyhook2",
       "default-features": false,
-      "features": [ "zydis", "detours", "inlinentd" ]
+      "features": [ "detours", "inlinentd" ]
     },
     "rapidjson",
     "hlsdk"
