@@ -11,7 +11,7 @@ jobs:
       BUILD_TYPE: ${{ matrix.conf }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -44,7 +44,7 @@ jobs:
           move resources\program_dir\*.* publish\
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Windows
           path: |
@@ -57,7 +57,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/master' }}
     steps:
       - name: Fetch artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3.0.1
 
       - name: Repackage binaries
         run: |
