@@ -68,17 +68,16 @@ jobs:
         uses: dev-drprasad/delete-tag-and-release@v0.2.1
         with:
           delete_release: true
-          tag_name: continious
+          tag_name: continuous
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload new release
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v0.1.15
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file_glob: true
-          file: goldsrc-monitor*
-          tag: continious
-          overwrite: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: goldsrc-monitor*
+          tag_name: continuous
+          draft: false
           prerelease: true
-          release_name: GoldSrc Monitor Continuous Build
+          name: GoldSrc Monitor Continuous Build
