@@ -1,18 +1,10 @@
 #pragma once
 
 #include <polyhook2/ZydisDisassembler.hpp>
-#include <polyhook2/Detour/x64Detour.hpp>
-#include <polyhook2/Detour/x86Detour.hpp>
+#include <polyhook2/Detour/NatDetour.hpp>
 
 template <class T> class CFunctionHook
 {
-private:
-#if APP_SUPPORT_64BIT
-    typedef PLH::x64Detour PolyhookDetourType_t;
-#else
-    typedef PLH::x86Detour PolyhookDetourType_t;
-#endif
-
 public:
     CFunctionHook() {};
     ~CFunctionHook() {};
@@ -21,11 +13,10 @@ public:
 
     bool Hook(T origFunc, T callbackFunc)
     {
-        m_pDetour = new PolyhookDetourType_t(
+        m_pDetour = new PLH::NatDetour(
             reinterpret_cast<uint64_t>(origFunc),
             reinterpret_cast<uint64_t>(callbackFunc),
-            &m_pfnTrampoline,
-            m_Disassembler
+            &m_pfnTrampoline
         );
         m_isHooked = m_pDetour->hook();
         return m_isHooked;
@@ -50,12 +41,5 @@ public:
 private:
     bool m_isHooked = false;
     uint64_t m_pfnTrampoline = 0;
-    PolyhookDetourType_t *m_pDetour = nullptr;
-    static PLH::ZydisDisassembler m_Disassembler;
+    PLH::NatDetour *m_pDetour = nullptr;
 };
-
-#if APP_SUPPORT_64BIT
-template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::x64);
-#else
-template <class T> PLH::ZydisDisassembler CFunctionHook<T>::m_Disassembler(PLH::Mode::x86);
-#endif
