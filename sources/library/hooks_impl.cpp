@@ -1,4 +1,5 @@
 #include "hooks_impl.h"
+#include "hooks_logger.h"
 
 CFunctionHook<CHooks::Impl::pfnRedraw_t> CHooks::Impl::m_hookRedraw;
 CFunctionHook<CHooks::Impl::pfnPlayerMove_t> CHooks::Impl::m_hookPlayerMove;
@@ -10,18 +11,9 @@ CFunctionHook<CHooks::Impl::pfnVidInit_t> CHooks::Impl::m_hookVidInit;
 
 void CHooks::Impl::InitializeLogger()
 {
-    m_pLogger = std::make_shared<PLH::ErrorLog>();
-    m_pLogger->setLogLevel(PLH::ErrorLevel::SEV);
+    m_pLogger = std::make_shared<CHooks::Logger>();
+    m_pLogger->setLogLevel(PLH::ErrorLevel::WARN);
     PLH::Log::registerLogger(m_pLogger);
-}
-
-void CHooks::Impl::WriteLogs(std::string &errorLog)
-{
-    auto &logger = *m_pLogger;
-    errorLog.clear();
-    for (PLH::Error error = logger.pop(); !error.msg.empty(); error = logger.pop()) {
-        errorLog += error.msg;
-    }
 }
 
 void CHooks::Impl::RevertHooks()

@@ -5,6 +5,7 @@ class CHooks
 {
 public:
     class Impl;
+    class Logger;
 
     CHooks();
     ~CHooks();

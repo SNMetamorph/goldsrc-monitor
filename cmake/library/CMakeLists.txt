@@ -34,6 +34,7 @@ add_library(${PROJECT_NAME} SHARED
 	"../../sources/library/dll_main.cpp"
 	"../../sources/library/hooks.cpp"
 	"../../sources/library/hooks_impl.cpp"
+	"../../sources/library/hooks_logger.cpp"
 	"../../sources/library/stdafx.cpp"
 	"../../sources/library/library.rc"
 )

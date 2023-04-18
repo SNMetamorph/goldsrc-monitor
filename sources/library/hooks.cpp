@@ -122,10 +122,8 @@ void CHooks::Apply()
     );
     if (!isHookSuccessful)
     {
-        std::string errorLog;
-        m_pImpl->WriteLogs(errorLog);
         m_pImpl->RevertHooks();
-        EXCEPT("unable to hook desired functions, error log:\n" + errorLog);
+        EXCEPT("unable to hook desired functions, check logs\n");
     }
 }
 

@@ -2,7 +2,6 @@
 #include "hooks.h"
 #include "hlsdk.h"
 #include "function_hook.h"
-#include <polyhook2/ErrorLog.hpp>
 
 class CHooks::Impl
 {
@@ -16,10 +15,9 @@ public:
     typedef int(__cdecl *pfnVidInit_t)();
 
 	void InitializeLogger();
-    void WriteLogs(std::string &errorLog);
     void RevertHooks();
 
-	std::shared_ptr<PLH::ErrorLog> m_pLogger;
+	std::shared_ptr<CHooks::Logger> m_pLogger;
 	static CFunctionHook<pfnRedraw_t> m_hookRedraw;
 	static CFunctionHook<pfnPlayerMove_t> m_hookPlayerMove;
 	static CFunctionHook<pfnKeyEvent_t> m_hookKeyEvent;
