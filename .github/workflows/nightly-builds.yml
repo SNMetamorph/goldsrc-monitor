@@ -1,7 +1,5 @@
 name: nightly-builds
-on:
-  push:
-    branches: [master]
+on: push
 
 jobs:
   build-windows:
@@ -56,6 +54,7 @@ jobs:
     name: release-builds
     runs-on: ubuntu-latest
     needs: [build-windows]
+    if: ${{ github.ref == 'refs/heads/master' }}
     steps:
       - name: Fetch artifacts
         uses: actions/download-artifact@v2
