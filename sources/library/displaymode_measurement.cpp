@@ -65,7 +65,7 @@ void CModeMeasurement::TraceAlongNormal(pmtrace_t &traceData, float traceLength)
 
 void CModeMeasurement::DrawVisualization(float frameTime, int screenWidth, int screenHeight)
 {
-    float lifeTime = min(0.05f, frameTime);
+    float lifeTime = std::min(0.05f, frameTime);
     DrawMeasurementLine(lifeTime);
     DrawLineProjections(screenWidth, screenHeight, lifeTime);
     PrintPointHints(screenWidth, screenHeight);

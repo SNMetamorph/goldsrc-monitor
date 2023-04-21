@@ -216,9 +216,9 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
         Utils::GetEntityBoundingBox(entityIndex, entityBbox);
         const vec3_t &bboxMins = entityBbox.GetMins();
         const vec3_t &bboxMaxs = entityBbox.GetMaxs();
-        pointInBbox.x = max(min(viewOrigin.x, bboxMaxs.x), bboxMins.x);
-        pointInBbox.y = max(min(viewOrigin.y, bboxMaxs.y), bboxMins.y);
-        pointInBbox.z = max(min(viewOrigin.z, bboxMaxs.z), bboxMins.z);
+        pointInBbox.x = std::max(std::min(viewOrigin.x, bboxMaxs.x), bboxMins.x);
+        pointInBbox.y = std::max(std::min(viewOrigin.y, bboxMaxs.y), bboxMins.y);
+        pointInBbox.z = std::max(std::min(viewOrigin.z, bboxMaxs.z), bboxMins.z);
         return (pointInBbox - viewOrigin).Length();
     }
     return 0.0f;

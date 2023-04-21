@@ -132,7 +132,7 @@ void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &s
     {
         const char *textString = stringStack.StringAt(i);
         g_pClientEngfuncs->pfnDrawString(
-            screenInfo.iWidth - max(marginRight, maxStringWidth + 5),
+            screenInfo.iWidth - std::max(marginRight, maxStringWidth + 5),
             marginUp + (stringHeight * (i + linesSkipped)),
             textString,
             (int)ConVars::gsm_color_r->value,
@@ -402,10 +402,10 @@ float Utils::TraceBBoxLine(const CBoundingBox &bbox, const vec3_t &lineStart, co
     fractionMax.x   = (bboxMaxs.x - rayOrigin.x) * invertedDir.x;
     fractionMax.y   = (bboxMaxs.y - rayOrigin.y) * invertedDir.y;
 
-    fractionNear.x  = min(fractionMin.x, fractionMax.x);
-    fractionNear.y  = min(fractionMin.y, fractionMax.y);
-    fractionFar.x   = max(fractionMin.x, fractionMax.x);
-    fractionFar.y   = max(fractionMin.y, fractionMax.y);
+    fractionNear.x  = std::min(fractionMin.x, fractionMax.x);
+    fractionNear.y  = std::min(fractionMin.y, fractionMax.y);
+    fractionFar.x   = std::max(fractionMin.x, fractionMax.x);
+    fractionFar.y   = std::max(fractionMin.y, fractionMax.y);
 
     farDotFract     = fractionFar.x;
     nearDotFract    = fractionNear.x;
@@ -422,8 +422,8 @@ float Utils::TraceBBoxLine(const CBoundingBox &bbox, const vec3_t &lineStart, co
 
     fractionMin.z   = (bboxMins.z - rayOrigin.z) * invertedDir.z;
     fractionMax.z   = (bboxMaxs.z - rayOrigin.z) * invertedDir.z;
-    fractionFar.z   = max(fractionMin.z, fractionMax.z);
-    fractionNear.z  = min(fractionMin.z, fractionMax.z);
+    fractionFar.z   = std::max(fractionMin.z, fractionMax.z);
+    fractionNear.z  = std::min(fractionMin.z, fractionMax.z);
 
     // another one
     if (nearDotFract > fractionFar.z || fractionNear.z > farDotFract)
