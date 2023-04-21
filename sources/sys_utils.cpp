@@ -1,9 +1,12 @@
 #include "sys_utils.h"
 #include <vector>
 #include <cassert>
+#include <algorithm>
 
 #ifdef _WIN32
 #include <Psapi.h>
+#include <TlHelp32.h>
+#include <shlwapi.h>
 #endif
 
 static ModuleHandle g_CurrentModuleHandle = 0;
@@ -153,5 +156,103 @@ ModuleHandle SysUtils::FindModuleByExport(ProcessHandle procHandle, const char *
     return NULL;
 #else
     return 0;
+#endif
+}
+
+ModuleHandle SysUtils::FindModuleInProcess(ProcessHandle procHandle, const std::string &moduleName)
+{
+#ifdef _WIN32
+    size_t  modulesCount;
+    HMODULE moduleHandle;
+    std::string fileName;
+    std::vector<HMODULE> modulesList;
+    static char modulePath[MAX_PATH];
+
+    DWORD listSize = 0;
+    EnumProcessModules(procHandle, NULL, 0, &listSize);
+    moduleHandle = NULL;
+    modulesCount = listSize / sizeof(HMODULE);
+
+    if (modulesCount > 0) {
+        modulesList.resize(modulesCount);
+    }
+    else {
+        return NULL;
+    }
+
+    if (!EnumProcessModules(procHandle, modulesList.data(), listSize, &listSize)) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < modulesCount; ++i)
+    {
+        const size_t pathLength = sizeof(modulePath) / sizeof(modulePath[0]);
+        GetModuleFileNameExA(procHandle, modulesList[i], modulePath, pathLength);
+        fileName.assign(modulePath);
+        fileName.erase(0, fileName.find_last_of("/\\") + 1);
+
+        bool stringsEqual = true;
+        if (fileName.length() == moduleName.length())
+        {
+            for (size_t i = 0; i < fileName.length(); i++)
+            {
+                if (std::tolower(fileName[i]) != std::tolower(moduleName[i]))
+                {
+                    stringsEqual = false;
+                    break;
+                }
+            }
+        }
+        else {
+            stringsEqual = false;
+        }
+
+        if (stringsEqual)
+        {
+            moduleHandle = modulesList[i];
+            break;
+        }
+    }
+    return moduleHandle;
+#else
+    return 0;
+#endif
+}
+
+void SysUtils::FindProcessIdByName(const char *processName, std::vector<int32_t>& processIds)
+{
+#ifdef _WIN32
+#undef Process32First
+#undef Process32Next
+#undef PROCESSENTRY32
+    HANDLE			processSnap;
+    PROCESSENTRY32	processEntry;
+
+    processIds.clear();
+    processEntry.dwSize = sizeof(processEntry);
+    processSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    if (processSnap != INVALID_HANDLE_VALUE)
+    {
+        if (Process32First(processSnap, &processEntry))
+        {
+            do {
+                if (std::strncmp(processName, processEntry.szExeFile, sizeof(processEntry.szExeFile)) == 0) {
+                    processIds.push_back(processEntry.th32ProcessID);
+                }
+            } while (Process32Next(processSnap, &processEntry));
+        }
+        CloseHandle(processSnap);
+    }
+#else
+#endif
+}
+
+void *SysUtils::GetModuleFunction(ModuleHandle moduleHandle, const char *funcName)
+{
+#ifdef _WIN32
+    return GetProcAddress(moduleHandle, funcName);
+#else
+    return nullptr;
 #endif
 }

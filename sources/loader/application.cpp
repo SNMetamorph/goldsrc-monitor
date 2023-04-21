@@ -2,7 +2,11 @@
 #include "utils.h"
 #include "exception.h"
 #include "app_info.h"
+#include "sys_utils.h"
 #include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 CApplication &CApplication::GetInstance()
 {
@@ -12,9 +16,7 @@ CApplication &CApplication::GetInstance()
 
 int CApplication::Run(int argc, char *argv[])
 {
-    LPWSTR commandLine = GetCommandLineW();
-    LPWSTR *argvArray = CommandLineToArgvW(commandLine, &argc);
-    ParseParameters(argc, argvArray);
+    ParseParameters(argc, argv);
     StartMainLoop();
 
     std::cout << "Program will be closed 3 seconds later..." << std::endl;
@@ -22,26 +24,26 @@ int CApplication::Run(int argc, char *argv[])
     return 0;
 }
 
-void CApplication::ParseParameters(int argc, wchar_t *argv[])
+void CApplication::ParseParameters(int argc, char *argv[])
 {
     for (int i = 1; i < argc; ++i)
     {
-        std::wstring parameter = argv[i];
-        if (parameter.compare(L"+process_name") == 0)
+        std::string parameter = argv[i];
+        if (parameter.compare("+process_name") == 0)
         {
-            std::wstring argument = argv[++i];
+            std::string argument = argv[++i];
             m_szProcessName = argument;
             continue;
         }
-        else if (parameter.compare(L"+library_name") == 0)
+        else if (parameter.compare("+library_name") == 0)
         {
-            std::wstring argument = argv[++i];
+            std::string argument = argv[++i];
             m_szLibraryName = argument;
             continue;
         }
-        else if (parameter.compare(L"+inject_delay") == 0)
+        else if (parameter.compare("+inject_delay") == 0)
         {
-            std::wstring argument = argv[++i];
+            std::string argument = argv[++i];
             m_iInjectDelay = std::stoi(argument);
             continue;
         }
@@ -119,8 +121,7 @@ void CApplication::ReportError(const std::string &msg)
 
 bool CApplication::IsLibraryInjected(HANDLE procHandle)
 {
-    // TODO truncate library path and keep only library file name
-    return Utils::FindProcessModule(procHandle, m_szLibraryName.c_str()) != NULL;
+    return SysUtils::FindModuleInProcess(procHandle, m_szLibraryName.c_str()) != NULL;
 }
 
 bool CApplication::IsGameLoaded(HWND windowHandle, int timeout)
@@ -170,18 +171,18 @@ HANDLE CApplication::OpenGameProcess()
 
     while (true)
     {
-        Utils::FindProcessByName(m_szProcessName.c_str(), processIds);
+        SysUtils::FindProcessIdByName(m_szProcessName.c_str(), processIds);
         if (processIds.size() > 0)
         {
             int processID = processIds[0];
             if (processIds.size() > 1)
             {
                 size_t processNumber;
-                std::wcout << L"There are several processes with same name." << std::endl;
+                std::cout << "There are several processes with same name." << std::endl;
                 for (size_t i = 0; i < processIds.size(); ++i) {
-                    std::wcout << L"(" << i + 1 << L") " << m_szProcessName << " (PID: " << processIds[i] << ")" << std::endl;
+                    std::cout << "(" << i + 1 << L") " << m_szProcessName << " (PID: " << processIds[i] << ")" << std::endl;
                 }
-                std::wcout << L"Choose the required process: " << std::endl;
+                std::cout << "Choose the required process: " << std::endl;
                 while (true) // repeat until valid value arrives
                 {
                     std::cin >> processNumber;
@@ -203,21 +204,23 @@ HANDLE CApplication::OpenGameProcess()
     }
 }
 
-wchar_t *CApplication::WritePathString(HANDLE procHandle, const std::wstring &libPath)
+char *CApplication::WritePathString(HANDLE procHandle, const std::string &libPath)
 {
     size_t writtenBytes = 0;
-    wchar_t *pathRemoteAddr;
+    char *pathRemoteAddr;
 
     // allocating memory in game process for library path string
-    pathRemoteAddr = (wchar_t *)VirtualAllocEx(
+    pathRemoteAddr = reinterpret_cast<char*>(VirtualAllocEx(
         procHandle,
         NULL,
         libPath.capacity(),
         MEM_RESERVE | MEM_COMMIT,
         PAGE_READWRITE
-    );
-    if (!pathRemoteAddr)
+    ));
+
+    if (!pathRemoteAddr) {
         return nullptr;
+    }
 
     // writing string to game process
     WriteProcessMemory(
@@ -235,19 +238,19 @@ wchar_t *CApplication::WritePathString(HANDLE procHandle, const std::wstring &li
 
 void CApplication::InjectLibrary(HANDLE procHandle)
 {
-    std::wstring    libraryPath;
-    wchar_t         *pathStrRemote;
-    HMODULE         k32LocalHandle;
-    HMODULE			k32RemoteHandle;
-    ModuleInfo	k32Info;
+    fs::path        libraryPath;
+    char            *pathStrRemote;
+    ModuleHandle    k32LocalHandle;
+    ModuleHandle    k32RemoteHandle;
     HANDLE          threadHandle;
     size_t			funcOffset;
     uint8_t         *funcRemote;
+    SysUtils::ModuleInfo k32Info;
 
-    if (!Utils::FindLibraryPath(m_szLibraryName, libraryPath))
+    if (!Utils::FindLibraryAbsolutePath(m_szLibraryName, libraryPath))
         EXCEPT("library file not found, make sure that you unpacked program from archive");
 
-    pathStrRemote = WritePathString(procHandle, libraryPath);
+    pathStrRemote = WritePathString(procHandle, libraryPath.string());
     if (!pathStrRemote)
         EXCEPT("unable to write library path string in game process memory");
 
@@ -257,18 +260,20 @@ void CApplication::InjectLibrary(HANDLE procHandle)
     and it will work in most cases, if kernel32.dll from game process
     isn't differ with same kernel32.dll from loader process
     */
-    k32LocalHandle = GetModuleHandle(L"kernel32.dll");
-    k32RemoteHandle = Utils::FindProcessModule(procHandle, L"kernel32.dll");
+    k32LocalHandle = GetModuleHandleA("kernel32.dll");
+    k32RemoteHandle = SysUtils::FindModuleInProcess(procHandle, "kernel32.dll");
 
-    if (!k32RemoteHandle)
+    if (!k32RemoteHandle) {
         EXCEPT("kernel32.dll remote handle not found");
+    }
 
-    if (!Utils::GetModuleInfo(procHandle, k32RemoteHandle, k32Info))
+    if (!SysUtils::GetModuleInfo(procHandle, k32RemoteHandle, k32Info)) {
         EXCEPT("GetModuleInfo() for remote kernel32.dll failed");
+    }
 
     // creating thread in game process and invoking LoadLibrary()
     std::cout << "Starting injection thread in remote process..." << std::endl;
-    funcOffset = Utils::GetFunctionOffset(k32LocalHandle, "LoadLibraryW");
+    funcOffset = Utils::GetFunctionOffset(k32LocalHandle, "LoadLibraryA");
     funcRemote = k32Info.baseAddress + funcOffset;
     threadHandle = CreateRemoteThread(procHandle,
         0, 0,
@@ -276,12 +281,14 @@ void CApplication::InjectLibrary(HANDLE procHandle)
         0, 0
     );
 
-    if (!threadHandle)
+    if (!threadHandle) {
         EXCEPT("unable to create remote thread");
+    }
 
     // wait for thread in game process exits
-    if (WaitForSingleObject(threadHandle, 6000) == WAIT_TIMEOUT)
+    if (WaitForSingleObject(threadHandle, 6000) == WAIT_TIMEOUT) {
         EXCEPT("library injection thread timed out");
+    }
 
     int exitCode = Utils::GetThreadExitCode(threadHandle);
     if (exitCode && exitCode != 0xC0000005)

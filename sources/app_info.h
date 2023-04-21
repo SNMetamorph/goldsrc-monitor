@@ -2,8 +2,8 @@
 #define MACRO_TO_STRING2(s)     #s
 #define MACRO_TO_STRING(s)      MACRO_TO_STRING2(s)
 
-#define DEFAULT_LIBRARY_NAME    L"gsm-library.dll"
-#define DEFAULT_PROCESS_NAME    L"hl.exe";
+#define DEFAULT_LIBRARY_NAME    "gsm-library.dll"
+#define DEFAULT_PROCESS_NAME    "hl.exe";
 
 #define APP_TITLE_STR           "GoldSrc Monitor"
 #define APP_GITHUB_LINK         "https://github.com/SNMetamorph/goldsrc-monitor"

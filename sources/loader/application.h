@@ -14,18 +14,18 @@ private:
     CApplication() {};
     ~CApplication() {};
 
-    void ParseParameters(int argc, wchar_t *argv[]);
+    void ParseParameters(int argc, char *argv[]);
     void StartMainLoop();
     void ReportError(const std::string &msg);
     bool IsLibraryInjected(HANDLE procHandle);
     bool IsGameLoaded(HWND windowHandle, int timeout);
     HWND FindGameWindow(HANDLE procHandle);
     HANDLE OpenGameProcess();
-    wchar_t *WritePathString(HANDLE procHandle, const std::wstring &libPath);
+    char *WritePathString(HANDLE procHandle, const std::string &libPath);
     void InjectLibrary(HANDLE procHandle);
     void PrintTitleText();
 
     size_t m_iInjectDelay = 3000;
-    std::wstring m_szProcessName = DEFAULT_PROCESS_NAME;
-    std::wstring m_szLibraryName = DEFAULT_LIBRARY_NAME;
+    std::string m_szProcessName = DEFAULT_PROCESS_NAME;
+    std::string m_szLibraryName = DEFAULT_LIBRARY_NAME;
 };
