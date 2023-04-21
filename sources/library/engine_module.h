@@ -1,6 +1,5 @@
 #pragma once
 #include "sys_utils.h"
-#include <windows.h>
 #include <stdint.h>
 
 class CEngineModule 

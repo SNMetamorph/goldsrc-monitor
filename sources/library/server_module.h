@@ -2,7 +2,6 @@
 #include "hlsdk.h"
 #include "sys_utils.h"
 #include "build_info.h"
-#include <windows.h>
 #include <stdint.h>
 
 class CServerModule 
