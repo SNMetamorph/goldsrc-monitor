@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "hooks.h"
 #include "cvars.h"
+#include "sys_utils.h"
 #include "app_info.h"
 #include "exception.h"
 #include "build_info.h"
@@ -29,9 +30,9 @@ private:
     ~CApplication() {};
 
     void InitializeDisplayModes();
-    void FindTimescaleConVar(const ModuleInfo &engineLib);
+    void FindTimescaleConVar(const SysUtils::ModuleInfo &engineLib);
     void PrintTitleText();
-    void InitializeConVars(ModuleInfo &engineLib);
+    void InitializeConVars(const SysUtils::ModuleInfo &engineLib);
     void SetCurrentDisplayMode();
     void UpdateScreenInfo();
     void UpdateSmoothFrametime();

@@ -1,15 +1,11 @@
 #include "utils.h"
-#include "module_info.h"
 #include "client_module.h"
 #include "studio.h"
 #include "application.h"
 #include "matrix.h"
-
 #include <stdint.h>
 #include <cstring>
 #include <vector>
-#include <Windows.h>
-#include <Psapi.h>
 #include <gl/GL.h>
 
 void *Utils::FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern)
@@ -65,83 +61,6 @@ uint8_t *Utils::UnwrapJmp(uint8_t *opcodeAddr)
 {
     int32_t relativeOffset = *(int32_t *)(opcodeAddr + 1);
     return reinterpret_cast<uint8_t*>(relativeOffset + opcodeAddr + 5);
-}
-
-bool Utils::GetLibraryDirectory(std::wstring &workingDir)
-{
-    workingDir.resize(MAX_PATH);
-    GetModuleFileNameW(
-        GetModuleHandleW(DEFAULT_LIBRARY_NAME), // TODO use module handle from DllMain here
-        workingDir.data(),
-        workingDir.capacity()
-    );
-
-    if (std::wcslen(workingDir.c_str()) > 1)
-    {
-        // remove file name
-        workingDir.assign(workingDir.c_str());
-        workingDir.erase(workingDir.find_last_of(L"/\\") + 1);
-        workingDir.shrink_to_fit();
-        return true;
-    }
-    else
-        return false;
-}
-
-void Utils::GetGameProcessName(std::string &processName)
-{
-    processName.resize(MAX_PATH);
-    GetModuleFileName(NULL, processName.data(), processName.capacity());
-    processName.assign(processName.c_str());
-    processName.erase(0, processName.find_last_of("/\\") + 1);
-    processName.shrink_to_fit();
-}
-
-HMODULE Utils::FindModuleByExport(HANDLE procHandle, const char *exportName)
-{
-    DWORD listSize;
-    size_t modulesCount;
-    std::vector<HMODULE> modulesList;
-
-    // retrieve modules count
-    listSize = 0;
-    EnumProcessModules(procHandle, NULL, 0, &listSize);
-    modulesCount = listSize / sizeof(HMODULE);
-
-    if (modulesCount > 0)
-        modulesList.resize(modulesCount);
-    else
-        return NULL;
-
-    if (!EnumProcessModules(procHandle, modulesList.data(), listSize, &listSize))
-        return NULL;
-
-    for (size_t i = 0; i < modulesCount; ++i)
-    {
-        uint8_t *moduleAddr;
-        uint32_t *nameOffsetList;
-        PIMAGE_DOS_HEADER dosHeader;
-        PIMAGE_NT_HEADERS peHeader;
-        PIMAGE_EXPORT_DIRECTORY dllExports;
-
-        moduleAddr  = (uint8_t*)modulesList[i];
-        dosHeader   = (PIMAGE_DOS_HEADER)moduleAddr;
-        peHeader    = (PIMAGE_NT_HEADERS)(moduleAddr + dosHeader->e_lfanew);
-        dllExports  = (PIMAGE_EXPORT_DIRECTORY)(moduleAddr +
-            peHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);
-
-        if (!dllExports->AddressOfNames)
-            continue;
-
-        nameOffsetList = (uint32_t*)(moduleAddr + dllExports->AddressOfNames);
-        for (size_t j = 0; j < dllExports->NumberOfNames; ++j)
-        {
-            const char *entryName = (const char *)(moduleAddr + nameOffsetList[j]);
-            if (strcmp(entryName, exportName) == 0)
-                return modulesList[i];
-        }
-    }
-    return NULL;
 }
 
 int Utils::GetStringWidth(const char *str)

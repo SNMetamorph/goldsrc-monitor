@@ -3,6 +3,7 @@
 #include "build_info.h"
 #include "build_info_entry.h"
 #include "exception.h"
+#include "sys_utils.h"
 #include "utils.h"
 
 enginefuncs_t *g_pServerEngfuncs;
@@ -16,9 +17,9 @@ CServerModule &CServerModule::GetInstance()
 
 bool CServerModule::FindHandle()
 {
-    HANDLE currProcess = GetCurrentProcess();
-    m_hModule = Utils::FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
-    Utils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
+    ProcessHandle currProcess = SysUtils::GetCurrentProcessHandle();
+    m_hModule = SysUtils::FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
+    SysUtils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
     return m_hModule != NULL;
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "module_info.h"
+#include "sys_utils.h"
 #include <windows.h>
 #include <stdint.h>
 
@@ -12,7 +12,7 @@ public:
     bool GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames);
     inline bool IsXashEngine() const        { return m_isXashEngine; }
     inline bool IsSoftwareRenderer() const  { return m_isSoftwareRenderer; };
-    inline HMODULE GetHandle() const        { return m_hModule; };
+    inline ModuleHandle GetHandle() const   { return m_hModule; };
     inline uint8_t* GetAddress() const      { return m_ModuleInfo.baseAddress; };
     inline size_t GetSize() const           { return m_ModuleInfo.imageSize; }
 
@@ -22,8 +22,8 @@ private:
     CEngineModule& operator=(const CEngineModule&) = delete;
     bool SetupModuleInfo();
 
-    HMODULE m_hModule = NULL;
-    ModuleInfo m_ModuleInfo;
+    ModuleHandle m_hModule = NULL;
+    SysUtils::ModuleInfo m_ModuleInfo;
     bool m_isXashEngine = false;
     bool m_isSoftwareRenderer = false;
 };

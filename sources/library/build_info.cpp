@@ -14,7 +14,7 @@ CBuildInfo::~CBuildInfo()
 {
 }
 
-void CBuildInfo::Initialize(const ModuleInfo &engineModule)
+void CBuildInfo::Initialize(const SysUtils::ModuleInfo &engineModule)
 {
     std::vector<uint8_t> fileContents;
     if (m_pImpl->LoadBuildInfoFile(fileContents)) {

@@ -35,8 +35,8 @@ void CApplication::Run()
     if (!g_ClientModule.FindHandle())
         EXCEPT("failed to get client module handle");
 
-    ModuleInfo engineDLL;
-    Utils::GetModuleInfo(GetCurrentProcess(), g_EngineModule.GetHandle(), engineDLL);
+    SysUtils::ModuleInfo engineDLL;
+    SysUtils::GetModuleInfo(SysUtils::GetCurrentProcessHandle(), g_EngineModule.GetHandle(), engineDLL);
     m_BuildInfo.Initialize(engineDLL);
 
     // find engine functions pointer arrays
@@ -71,7 +71,7 @@ void CApplication::HandleChangelevel()
     }
 }
 
-void CApplication::FindTimescaleConVar(const ModuleInfo &engineLib)
+void CApplication::FindTimescaleConVar(const SysUtils::ModuleInfo &engineLib)
 {
     uint8_t *probeAddr;
     uint8_t *stringAddr;
@@ -173,7 +173,7 @@ static void CommandTimescale()
     }
 }
 
-void CApplication::InitializeConVars(ModuleInfo &engineLib)
+void CApplication::InitializeConVars(const SysUtils::ModuleInfo &engineLib)
 {
     FindTimescaleConVar(engineLib);
     g_pClientEngfuncs->pfnAddCommand("gsm_timescale", &CommandTimescale);

@@ -86,9 +86,10 @@ const char *CBuildInfo::Impl::FindDateString(uint8_t *startAddr, int maxLen) con
 
 bool CBuildInfo::Impl::LoadBuildInfoFile(std::vector<uint8_t> &fileContents)
 {
-    std::wstring libraryDirPath;
-    Utils::GetLibraryDirectory(libraryDirPath);
-    std::ifstream file(std::filesystem::path(libraryDirPath + L"\\build_info.json"), std::ios::in | std::ios::binary);
+    std::string libraryDirPath;
+    SysUtils::GetModuleDirectory(SysUtils::GetCurrentLibraryHandle(), libraryDirPath);
+    std::ifstream file(std::filesystem::path(libraryDirPath + "\\build_info.json"), std::ios::in | std::ios::binary);
+
     fileContents.clear();
     if (file.is_open())
     {
@@ -187,7 +188,7 @@ void CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfo::Entry &destEntry, const r
     }
 }
 
-bool CBuildInfo::Impl::ApproxBuildNumber(const ModuleInfo &engineModule)
+bool CBuildInfo::Impl::ApproxBuildNumber(const SysUtils::ModuleInfo &engineModule)
 {
     CMemoryPattern datePattern("Jan", 4);
     uint8_t *moduleStartAddr = engineModule.baseAddress;
@@ -220,7 +221,7 @@ bool CBuildInfo::Impl::ApproxBuildNumber(const ModuleInfo &engineModule)
     }
 }
 
-bool CBuildInfo::Impl::FindBuildNumberFunc(const ModuleInfo &engineModule)
+bool CBuildInfo::Impl::FindBuildNumberFunc(const SysUtils::ModuleInfo &engineModule)
 {
     uint8_t *moduleStartAddr = engineModule.baseAddress;
     uint8_t *moduleEndAddr = moduleStartAddr + engineModule.imageSize;
@@ -251,7 +252,7 @@ int CBuildInfo::Impl::FindActualInfoEntry()
         int actualEntryIndex = lastEntryIndex;
         
         // first check among game-specific builds
-        Utils::GetGameProcessName(processName);
+        SysUtils::GetModuleFilename(SysUtils::GetCurrentProcessModule(), processName);
         for (size_t i = 0; i < m_InfoEntries.size(); ++i)
         {
             const CBuildInfo::Entry &buildInfo = m_InfoEntries[i];

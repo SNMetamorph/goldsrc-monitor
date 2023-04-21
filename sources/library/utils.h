@@ -1,5 +1,4 @@
 #pragma once
-#include "module_info.h"
 #include "string_stack.h"
 #include "memory_pattern.h"
 #include "bounding_box.h"
@@ -8,7 +7,6 @@
 #include "stdafx.h"
 #include <stdint.h>
 #include <string>
-#include <Windows.h>
 
 namespace Utils
 {
@@ -16,13 +14,11 @@ namespace Utils
     inline bool IsSymbolDigit(char symbol) { return (symbol >= '0' && symbol <= '9'); };
     inline bool IsSymbolSpace(char symbol) { return (symbol == ' '); };
 
-    bool GetLibraryDirectory(std::wstring &workingDir);
-    void GetGameProcessName(std::string &processName);
-    HMODULE FindModuleByExport(HANDLE procHandle, const char *exportName);
     void *FindMemoryPointer(void *startAddr, void *endAddr, void *scanValue);
     void *FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern);
     void *FindJmpFromAddress(void *startAddr, void *endAddr, void *targetAddress);
     uint8_t *UnwrapJmp(uint8_t *opcodeAddr);
+
     float GetCurrentSysTime();
     DisplayModeIndex GetCurrentDisplayMode();
 

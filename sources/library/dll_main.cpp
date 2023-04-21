@@ -2,6 +2,7 @@
 #include "application.h"
 #include "exception.h"
 #include "hooks.h"
+#include "sys_utils.h"
 
 #include <Windows.h>
 #include <stdint.h>
@@ -12,6 +13,7 @@ BOOLEAN WINAPI DllMain(HINSTANCE hDllHandle, DWORD nReason, LPVOID Reserved)
     {
         try 
         {
+            SysUtils::InitCurrentLibraryHandle(hDllHandle);
             g_Application.Run();
         }
         catch (const CException &ex)

@@ -17,8 +17,8 @@ public:
     bool LoadBuildInfoFile(std::vector<uint8_t> &fileContents);
     void ParseBuildInfo(std::vector<uint8_t> &fileContents);
     void ParseBuildInfoEntry(CBuildInfo::Entry &destEntry, const rapidjson::Value &jsonObject);
-    bool ApproxBuildNumber(const ModuleInfo &engineModule);
-    bool FindBuildNumberFunc(const ModuleInfo &engineModule);
+    bool ApproxBuildNumber(const SysUtils::ModuleInfo &engineModule);
+    bool FindBuildNumberFunc(const SysUtils::ModuleInfo &engineModule);
     int FindActualInfoEntry();
 
     int m_iBuildNumber = -1;

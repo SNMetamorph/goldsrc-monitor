@@ -51,7 +51,7 @@ bool CEngineModule::SetupModuleInfo()
 {
     if (m_hModule)
     {
-        if (Utils::GetModuleInfo(GetCurrentProcess(), m_hModule, m_ModuleInfo)) {
+        if (SysUtils::GetModuleInfo(GetCurrentProcess(), m_hModule, m_ModuleInfo)) {
             return true;
         }
     }

@@ -4,6 +4,7 @@
 #include "build_info_entry.h"
 #include "exception.h"
 #include "utils.h"
+#include "sys_utils.h"
 
 cl_enginefunc_t *g_pClientEngfuncs;
 CClientModule& g_ClientModule = CClientModule::GetInstance();
@@ -16,9 +17,9 @@ CClientModule& CClientModule::GetInstance()
 
 bool CClientModule::FindHandle()
 {
-    HANDLE currProcess = GetCurrentProcess();
-    m_hModule = Utils::FindModuleByExport(currProcess, "HUD_ProcessPlayerState");
-    Utils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
+    ProcessHandle currProcess = SysUtils::GetCurrentProcessHandle();
+    m_hModule = SysUtils::FindModuleByExport(currProcess, "HUD_ProcessPlayerState");
+    SysUtils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
     return m_hModule != NULL;
 }
 

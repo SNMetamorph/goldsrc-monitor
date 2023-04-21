@@ -1,5 +1,5 @@
 #pragma once
-#include "module_info.h"
+#include "sys_utils.h"
 #include <memory>
 
 class CBuildInfo
@@ -19,7 +19,7 @@ public:
 
     CBuildInfo();
     ~CBuildInfo();
-    void Initialize(const ModuleInfo &engineModule);
+    void Initialize(const SysUtils::ModuleInfo &engineModule);
     void *FindFunctionAddress(FunctionType funcType, void *startAddr, void *endAddr = nullptr) const;
     const Entry &GetInfoEntry() const;
 

@@ -7,7 +7,7 @@ include(SupportWinXP)
 add_library(${PROJECT_NAME} SHARED
 	"../../sources/exception.cpp"
 	"../../sources/string_stack.cpp"
-	"../../sources/module_info.cpp"
+	"../../sources/sys_utils.cpp"
 	"../../sources/library/application.cpp"
 	"../../sources/library/bounding_box.cpp"
 	"../../sources/library/bvh_tree.cpp"
