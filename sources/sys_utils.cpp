@@ -6,10 +6,18 @@
 #ifdef _WIN32
 #include <Psapi.h>
 #include <TlHelp32.h>
-#include <shlwapi.h>
 #endif
 
 static ModuleHandle g_CurrentModuleHandle = 0;
+
+void SysUtils::Sleep(size_t timeMsec)
+{
+#ifdef _WIN32
+    ::Sleep(timeMsec);
+#else
+#warning "Sleep() not implemented for this platform"
+#endif
+}
 
 void SysUtils::InitCurrentLibraryHandle(ModuleHandle handle)
 {

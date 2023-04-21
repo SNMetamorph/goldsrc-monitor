@@ -1,8 +1,9 @@
 #pragma once
 #include "app_info.h"
+#include "inject_strategy.h"
 #include <stdint.h>
 #include <string>
-#include <Windows.h>
+#include <memory>
 
 class CApplication
 {
@@ -17,15 +18,11 @@ private:
     void ParseParameters(int argc, char *argv[]);
     void StartMainLoop();
     void ReportError(const std::string &msg);
-    bool IsLibraryInjected(HANDLE procHandle);
-    bool IsGameLoaded(HWND windowHandle, int timeout);
-    HWND FindGameWindow(HANDLE procHandle);
-    HANDLE OpenGameProcess();
-    char *WritePathString(HANDLE procHandle, const std::string &libPath);
-    void InjectLibrary(HANDLE procHandle);
     void PrintTitleText();
+    void InitInjectStrategy();
 
     size_t m_iInjectDelay = 3000;
+    std::unique_ptr<IInjectStrategy> m_pInjectStrategy;
     std::string m_szProcessName = DEFAULT_PROCESS_NAME;
     std::string m_szLibraryName = DEFAULT_LIBRARY_NAME;
 };

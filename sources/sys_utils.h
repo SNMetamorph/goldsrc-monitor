@@ -22,6 +22,7 @@ namespace SysUtils
 		uint8_t *entryPointAddress;
 	};
 
+	void Sleep(size_t timeMsec);
 	void InitCurrentLibraryHandle(ModuleHandle handle);
 	ModuleHandle GetCurrentLibraryHandle();
 	ModuleHandle GetCurrentProcessModule();

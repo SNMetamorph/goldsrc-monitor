@@ -4,7 +4,7 @@ project(loader CXX)
 include(CompilerRuntime)
 include(SupportWinXP)
 
-add_executable(${PROJECT_NAME} 
+list(APPEND MAIN_SOURCES
 	"../../sources/sys_utils.cpp"
 	"../../sources/exception.cpp"
 	"../../sources/loader/main.cpp"
@@ -12,6 +12,14 @@ add_executable(${PROJECT_NAME}
 	"../../sources/loader/application.cpp"
 	"../../sources/loader/loader.rc"
 )
+
+if(WIN32)
+	list(APPEND MAIN_SOURCES
+		"../../sources/loader/win32_inject_strategy.cpp"
+	)
+endif()
+
+add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
 	"../../sources"
@@ -57,7 +65,7 @@ endif()
 set_compiler_runtime(${PROJECT_NAME} STATIC)
 
 # linking libraries
-if(MSVC)
+if(WIN32)
 	target_link_libraries(${PROJECT_NAME} PRIVATE 
 		"psapi" 
 		"shlwapi"
