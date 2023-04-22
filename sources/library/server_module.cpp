@@ -34,7 +34,7 @@ bool CServerModule::FindHandle()
     ProcessHandle currProcess = SysUtils::GetCurrentProcessHandle();
     m_hModule = SysUtils::FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
     SysUtils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
-    return m_hModule != NULL;
+    return m_hModule.Valid();
 }
 
 bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)

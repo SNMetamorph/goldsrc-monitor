@@ -24,13 +24,14 @@ GNU General Public License for more details.
 
 static ModuleHandle g_CurrentModuleHandle = 0;
 
-void SysUtils::Sleep(size_t timeMsec)
+bool ProcessHandle::Valid() const
 {
-#ifdef _WIN32
-    ::Sleep(timeMsec);
-#else
-#warning "Sleep() not implemented for this platform"
-#endif
+    return m_iHandle > 0;
+}
+
+bool ModuleHandle::Valid() const
+{
+    return m_iHandle > 0;
 }
 
 void SysUtils::InitCurrentLibraryHandle(ModuleHandle handle)
@@ -48,27 +49,44 @@ ModuleHandle SysUtils::GetCurrentLibraryHandle()
     return g_CurrentModuleHandle;
 }
 
+#ifdef _WIN32
+ProcessHandle::ProcessHandle(HANDLE handle)
+{
+    m_iHandle = reinterpret_cast<int64_t>(handle);
+}
+
+ProcessHandle::operator HANDLE() const
+{
+    return reinterpret_cast<HANDLE>(m_iHandle);
+}
+
+ModuleHandle::ModuleHandle(HMODULE handle)
+{
+    m_iHandle = reinterpret_cast<int64_t>(handle);
+}
+
+ModuleHandle::operator HMODULE() const
+{
+    return reinterpret_cast<HMODULE>(m_iHandle);
+}
+
+void SysUtils::Sleep(size_t timeMsec)
+{
+    ::Sleep(timeMsec);
+}
+
 ModuleHandle SysUtils::GetCurrentProcessModule()
 {
-#ifdef _WIN32
     return GetModuleHandle(NULL);
-#else
-    return -1;
-#endif
 }
 
 ProcessHandle SysUtils::GetCurrentProcessHandle()
 {
-#ifdef _WIN32
     return GetCurrentProcess();
-#else
-    return 0;
-#endif
 }
 
 bool SysUtils::GetModuleDirectory(ModuleHandle moduleHandle, std::string &workingDir)
 {
-#ifdef _WIN32
     workingDir.resize(MAX_PATH);
     GetModuleFileNameA(
         moduleHandle,
@@ -87,14 +105,10 @@ bool SysUtils::GetModuleDirectory(ModuleHandle moduleHandle, std::string &workin
     else {
         return false;
     }
-#else
-    return false;
-#endif
 }
 
 bool SysUtils::GetModuleFilename(ModuleHandle moduleHandle, std::string &fileName)
 {
-#ifdef _WIN32
     fileName.resize(MAX_PATH);
     if (GetModuleFileNameA(moduleHandle, fileName.data(), fileName.capacity())) 
     {
@@ -104,14 +118,10 @@ bool SysUtils::GetModuleFilename(ModuleHandle moduleHandle, std::string &fileNam
         return true;
     }
     return false;
-#else
-    return false;
-#endif
 }
 
 bool SysUtils::GetModuleInfo(ProcessHandle procHandle, ModuleHandle moduleHandle, SysUtils::ModuleInfo &moduleInfo)
 {
-#ifdef _WIN32
     MODULEINFO minfo;
     if (GetModuleInformation(procHandle, moduleHandle, &minfo, sizeof(minfo))) 
     {
@@ -121,14 +131,10 @@ bool SysUtils::GetModuleInfo(ProcessHandle procHandle, ModuleHandle moduleHandle
         return true;
     }
     return false;
-#else
-    return false;
-#endif
 }
 
 ModuleHandle SysUtils::FindModuleByExport(ProcessHandle procHandle, const char *exportName)
 {
-#ifdef _WIN32
     DWORD listSize;
     size_t modulesCount;
     std::vector<HMODULE> modulesList;
@@ -176,14 +182,10 @@ ModuleHandle SysUtils::FindModuleByExport(ProcessHandle procHandle, const char *
         }
     }
     return NULL;
-#else
-    return 0;
-#endif
 }
 
 ModuleHandle SysUtils::FindModuleInProcess(ProcessHandle procHandle, const std::string &moduleName)
 {
-#ifdef _WIN32
     size_t  modulesCount;
     HMODULE moduleHandle;
     std::string fileName;
@@ -236,14 +238,10 @@ ModuleHandle SysUtils::FindModuleInProcess(ProcessHandle procHandle, const std::
         }
     }
     return moduleHandle;
-#else
-    return 0;
-#endif
 }
 
 void SysUtils::FindProcessIdByName(const char *processName, std::vector<int32_t>& processIds)
 {
-#ifdef _WIN32
 #undef Process32First
 #undef Process32Next
 #undef PROCESSENTRY32
@@ -266,15 +264,10 @@ void SysUtils::FindProcessIdByName(const char *processName, std::vector<int32_t>
         }
         CloseHandle(processSnap);
     }
-#else
-#endif
 }
 
 void *SysUtils::GetModuleFunction(ModuleHandle moduleHandle, const char *funcName)
 {
-#ifdef _WIN32
     return GetProcAddress(moduleHandle, funcName);
-#else
-    return nullptr;
-#endif
 }
+#endif

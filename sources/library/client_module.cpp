@@ -34,7 +34,7 @@ bool CClientModule::FindHandle()
     ProcessHandle currProcess = SysUtils::GetCurrentProcessHandle();
     m_hModule = SysUtils::FindModuleByExport(currProcess, "HUD_ProcessPlayerState");
     SysUtils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
-    return m_hModule != NULL;
+    return m_hModule.Valid();
 }
 
 bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)

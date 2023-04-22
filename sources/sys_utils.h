@@ -20,12 +20,34 @@ GNU General Public License for more details.
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
-using ProcessHandle = HANDLE;
-using ModuleHandle = HMODULE;
-#else
-using ProcessHandle = int;
-using ModuleHandle = int;
 #endif
+
+class ProcessHandle
+{
+public:
+#ifdef _WIN32
+	ProcessHandle(HANDLE handle);
+	operator HANDLE() const;
+#endif
+	bool Valid() const;
+
+private:
+	int64_t m_iHandle = -1;
+};
+
+class ModuleHandle
+{
+public:
+#ifdef _WIN32
+	ModuleHandle(HMODULE handle);
+	operator HMODULE() const;
+#endif
+	ModuleHandle() {};
+	bool Valid() const;
+
+private:
+	int64_t m_iHandle = -1;
+};
 
 namespace SysUtils
 {
