@@ -2,13 +2,14 @@ name: nightly-builds
 on: push
 
 jobs:
-  build-windows:
-    runs-on: windows-2019
+  build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        conf: [Release]
-    env:
-      BUILD_TYPE: ${{ matrix.conf }}
+        include:
+          - os: windows-latest
+            cmake_preset: ci-windows-x86
+            build_conf: Debug
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -28,19 +29,18 @@ jobs:
         # Note the current convention is to use the -S and -B options here to specify source
         # and build directories, but this is only available with CMake 3.13 and higher.
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -G "Visual Studio 16 2019" -A win32
+        run: cmake $GITHUB_WORKSPACE --preset ${{ matrix.cmake_preset }} -DCMAKE_BUILD_TYPE=${{ matrix.build_conf }}
 
       - name: Build
         working-directory: ${{github.workspace}}/build
         shell: bash
-        # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build . --config $BUILD_TYPE
+        run: cmake --build . --config ${{ matrix.build_conf }}
 
       - name: Prepare artifacts
         run: |
           mkdir publish\
-          move build\${{env.BUILD_TYPE}}\bin\gsm-library.dll publish\gsm-library.dll
-          move build\${{env.BUILD_TYPE}}\bin\gsm-loader.exe publish\gsm-loader.exe
+          move build\${{matrix.build_conf}}\bin\gsm-library.dll publish\gsm-library.dll
+          move build\${{matrix.build_conf}}\bin\gsm-loader.exe publish\gsm-loader.exe
           move resources\program_dir\*.* publish\
 
       - name: Upload artifacts
@@ -53,7 +53,7 @@ jobs:
   release:
     name: release-builds
     runs-on: ubuntu-latest
-    needs: [build-windows]
+    needs: [build]
     if: ${{ github.ref == 'refs/heads/master' }}
     steps:
       - name: Fetch artifacts
