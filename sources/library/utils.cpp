@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #include "studio.h"
 #include "application.h"
 #include "matrix.h"
+#include "sys_utils.h"
 #include <stdint.h>
 #include <cstring>
 #include <vector>
@@ -507,20 +508,7 @@ void Utils::GetEntityBoundingBox(int entityIndex, CBoundingBox &bbox)
 
 float Utils::GetCurrentSysTime()
 {
-    static LARGE_INTEGER	perfFreq;
-    static LARGE_INTEGER	clockStart;
-    LARGE_INTEGER		    currentTime;
-    LONGLONG                timeDiff;
-
-    if (!perfFreq.QuadPart)
-    {
-        QueryPerformanceFrequency(&perfFreq);
-        QueryPerformanceCounter(&clockStart);
-    }
-
-    QueryPerformanceCounter(&currentTime);
-    timeDiff = currentTime.QuadPart - clockStart.QuadPart;
-    return (float)timeDiff / (float)perfFreq.QuadPart;
+    return SysUtils::GetCurrentSysTime();
 }
 
 DisplayModeIndex Utils::GetCurrentDisplayMode()

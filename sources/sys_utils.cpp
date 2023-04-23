@@ -75,6 +75,24 @@ void SysUtils::Sleep(size_t timeMsec)
     ::Sleep(timeMsec);
 }
 
+float SysUtils::GetCurrentSysTime()
+{
+    static LARGE_INTEGER	perfFreq;
+    static LARGE_INTEGER	clockStart;
+    LARGE_INTEGER		    currentTime;
+    LONGLONG                timeDiff;
+
+    if (!perfFreq.QuadPart)
+    {
+        QueryPerformanceFrequency(&perfFreq);
+        QueryPerformanceCounter(&clockStart);
+    }
+
+    QueryPerformanceCounter(&currentTime);
+    timeDiff = currentTime.QuadPart - clockStart.QuadPart;
+    return (float)timeDiff / (float)perfFreq.QuadPart;
+}
+
 ModuleHandle SysUtils::GetCurrentProcessModule()
 {
     return GetModuleHandle(NULL);
@@ -270,4 +288,6 @@ void *SysUtils::GetModuleFunction(ModuleHandle moduleHandle, const char *funcNam
 {
     return GetProcAddress(moduleHandle, funcName);
 }
+#else
+#pragma error "SysUtils functions not yet implemented for this platform!"
 #endif

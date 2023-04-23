@@ -59,6 +59,7 @@ namespace SysUtils
 	};
 
 	void Sleep(size_t timeMsec);
+	float GetCurrentSysTime();
 	void InitCurrentLibraryHandle(ModuleHandle handle);
 	ModuleHandle GetCurrentLibraryHandle();
 	ModuleHandle GetCurrentProcessModule();
