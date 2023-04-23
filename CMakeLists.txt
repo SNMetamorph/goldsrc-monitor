@@ -18,7 +18,11 @@ if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
 endif()
 
 set(VCPKG_OVERLAY_PORTS "${CMAKE_SOURCE_DIR}/vcpkg/overlay_ports")
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake")
+if(EXTERNAL_VCPKG_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE ${EXTERNAL_VCPKG_TOOLCHAIN_FILE})
+else()
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake")
+endif()
 project(goldsrc-monitor)
 
 # Build options
