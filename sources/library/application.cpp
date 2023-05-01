@@ -28,6 +28,7 @@ GNU General Public License for more details.
 #include "displaymode_entityreport.h"
 #include "displaymode_angletracking.h"
 #include "displaymode_facereport.h"
+#include "opengl_primitives_renderer.h"
 #include <stdint.h>
 
 //#define FILTER_AVG_EXPONENTIAL
@@ -76,6 +77,11 @@ void CApplication::InitializeDisplayModes()
     m_pDisplayModes.push_back(std::make_shared<CModeMeasurement>());
     m_pDisplayModes.push_back(std::make_shared<CModeFaceReport>());
     m_pDisplayModes.push_back(std::make_shared<CModeAngleTracking>());
+}
+
+void CApplication::InitializePrimitivesRenderer()
+{
+    m_pPrimitivesRenderer = std::make_shared<COpenGLPrimitivesRenderer>();
 }
 
 void CApplication::HandleChangelevel()

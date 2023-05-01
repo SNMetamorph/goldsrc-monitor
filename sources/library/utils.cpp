@@ -21,7 +21,6 @@ GNU General Public License for more details.
 #include <stdint.h>
 #include <cstring>
 #include <vector>
-#include <gl/GL.h>
 
 void *Utils::FindPatternAddress(void *startAddr, void *endAddr, const CMemoryPattern &pattern)
 {
@@ -163,13 +162,19 @@ void Utils::DrawStringStack(int marginRight, int marginUp, const CStringStack &s
 
 void Utils::DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const vec3_t &angles, const vec3_t &size, Color color)
 {
-    const bool drawFaces = false;
-    const bool drawEdges = true;
-    const vec3_t bboxMin = vec3_t(0, 0, 0) - size / 2;
-    Matrix4x4<vec_t> transformMat;
+    constexpr bool drawFaces = false;
+    constexpr bool drawEdges = true;
+    static std::vector<vec3_t> vertexBuffer;
+    static std::vector<Color> colorBuffer;
+    auto renderer = g_Application.GetRenderer();
+
+    // initialize buffers
     color.Normalize();
+    vertexBuffer.clear();
+    colorBuffer.clear();
 
     // assumed that point (0, 0, 0) located in center of bbox
+    const vec3_t bboxMin = vec3_t(0, 0, 0) - size / 2;
     vec3_t boxVertices[8] = {
         {bboxMin.x, bboxMin.y, bboxMin.z},
         {bboxMin.x + size.x, bboxMin.y, bboxMin.z},
@@ -182,7 +187,7 @@ void Utils::DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const v
     };
 
     // transform all vertices
-    transformMat = Matrix4x4<vec_t>::CreateTranslate(centerOffset.x, centerOffset.y, centerOffset.z);
+    Matrix4x4<vec_t> transformMat = Matrix4x4<vec_t>::CreateTranslate(centerOffset.x, centerOffset.y, centerOffset.z);
     if (angles.Length() >= 0.001f) // just little optimization
     {
         transformMat = Matrix4x4<vec_t>::CreateRotateX(angles[2]) * transformMat; // roll
@@ -195,13 +200,10 @@ void Utils::DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const v
         boxVertices[i] = transformMat.MultiplyVector(boxVertices[i]);
     }
 
-    g_pClientEngfuncs->pTriAPI->RenderMode(kRenderTransColor);
-    g_pClientEngfuncs->pTriAPI->CullFace(TRI_NONE);
-    glDisable(GL_TEXTURE_2D);
-
+    renderer->Begin();
     if (drawFaces)
     {
-        const int faceIndices[] = {
+        constexpr int faceIndices[] = {
             7, 2, 1, 0, // 1 face
             0, 5, 6, 7, // 2 face
             5, 4, 3, 6, // 3 face
@@ -209,33 +211,30 @@ void Utils::DrawCuboid(const vec3_t &origin, const vec3_t &centerOffset, const v
             7, 6, 3, 2, // 5 face
             1, 4, 5, 0  // 6 face
         };
-        glBegin(GL_QUADS);
-        glColor4f(color.Red(), color.Green(), color.Blue(), 0.3f);
-        for (int i = 0; i < sizeof(faceIndices) / sizeof(faceIndices[0]); ++i) {
-            glVertex3fv(boxVertices[faceIndices[i]]);
+        colorBuffer.emplace_back(color.Red(), color.Green(), color.Blue(), 0.3f);
+        for (size_t i = 0; i < sizeof(faceIndices) / sizeof(faceIndices[0]); ++i) {
+            vertexBuffer.push_back(boxVertices[faceIndices[i]]);
         }
-        glEnd();
+        renderer->RenderPrimitives(IPrimitivesRenderer::PrimitiveType::Quads, vertexBuffer, colorBuffer);
+        vertexBuffer.clear();
+        colorBuffer.clear();
     }
     
     if (drawEdges)
     {
-        const int edgeIndices[] = {
+        constexpr int edgeIndices[] = {
             0, 1, 2, 3, 4, 5, 6, 7,
             0, 7, 2, 1, 4, 3, 6, 5
         };
-        glDisable(GL_DEPTH_TEST);
-        glBegin(GL_LINE_LOOP);
-        glColor4f(color.Red(), color.Green(), color.Blue(), 1.0f);
-        for (int i = 0; i < sizeof(edgeIndices) / sizeof(edgeIndices[0]); ++i) {
-            glVertex3fv(boxVertices[edgeIndices[i]]);
+        colorBuffer.emplace_back(color.Red(), color.Green(), color.Blue(), 1.0f);
+        for (size_t i = 0; i < sizeof(edgeIndices) / sizeof(edgeIndices[0]); ++i) {
+            vertexBuffer.push_back(boxVertices[edgeIndices[i]]);
         }
-        glEnd();
-        glEnable(GL_DEPTH_TEST);
+        renderer->ToggleDepthTest(false);
+        renderer->RenderPrimitives(IPrimitivesRenderer::PrimitiveType::LineLoop, vertexBuffer, colorBuffer);
+        renderer->ToggleDepthTest(true);
     }
-
-    g_pClientEngfuncs->pTriAPI->RenderMode(kRenderNormal);
-    g_pClientEngfuncs->pTriAPI->CullFace(TRI_FRONT);
-    glEnable(GL_TEXTURE_2D);
+    renderer->End();
 }
 
 int Utils::DrawString3D(const vec3_t &origin, const char *text, int r, int g, int b)

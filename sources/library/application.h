@@ -21,6 +21,7 @@ GNU General Public License for more details.
 #include "exception.h"
 #include "build_info.h"
 #include "display_mode.h"
+#include "primitives_renderer.h"
 #include "string_stack.h"
 #include <vector>
 #include <memory>
@@ -36,14 +37,17 @@ public:
     void HandleChangelevel();
     bool KeyInput(int keyDown, int keyCode, const char *bindName);
     inline const SCREENINFO& GetScreenInfo() const { return m_ScreenInfo; };
+    inline auto GetRenderer() const { return m_pPrimitivesRenderer; };
 
 private:
     CApplication() {
         InitializeDisplayModes();
+        InitializePrimitivesRenderer();
     };
     ~CApplication() {};
 
     void InitializeDisplayModes();
+    void InitializePrimitivesRenderer();
     void FindTimescaleConVar(const SysUtils::ModuleInfo &engineLib);
     void PrintTitleText();
     void InitializeConVars(const SysUtils::ModuleInfo &engineLib);
@@ -59,6 +63,7 @@ private:
     SCREENINFO m_ScreenInfo = { 0 };
     CStringStack m_StringStack = CStringStack(128);
     std::shared_ptr<IDisplayMode> m_pCurrentDisplayMode = nullptr;
+    std::shared_ptr<IPrimitivesRenderer> m_pPrimitivesRenderer = nullptr;
     std::vector<std::shared_ptr<IDisplayMode>> m_pDisplayModes;
 };
 extern CApplication &g_Application;
