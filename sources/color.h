@@ -57,10 +57,10 @@ public:
                 maxValue = m_Components[i];
             }
         }
-        m_Components[0] /= maxValue;
-        m_Components[1] /= maxValue;
-        m_Components[2] /= maxValue;
-        m_Components[3] /= maxValue;
+        m_flRed /= maxValue;
+        m_flGreen /= maxValue;
+        m_flBlue /= maxValue;
+        m_flAlpha /= maxValue;
     }
     
     inline Color GetNormalized() const
@@ -72,22 +72,22 @@ public:
 
     inline uint32_t GetUint32() const
     {
-        uint8_t r = static_cast<uint8_t>(m_Components[0] * 255);
-        uint8_t g = static_cast<uint8_t>(m_Components[1] * 255);
-        uint8_t b = static_cast<uint8_t>(m_Components[2] * 255);
-        uint8_t a = static_cast<uint8_t>(m_Components[3] * 255);
+        uint8_t r = static_cast<uint8_t>(m_flRed * 255);
+        uint8_t g = static_cast<uint8_t>(m_flGreen * 255);
+        uint8_t b = static_cast<uint8_t>(m_flBlue * 255);
+        uint8_t a = static_cast<uint8_t>(m_flAlpha * 255);
         return (r << 24) | (g << 16) | (b << 8) | a;
     }
 
-    inline float Red() const    { return m_Components[0]; }
-    inline float Green() const  { return m_Components[1]; }
-    inline float Blue() const   { return m_Components[2]; }
-    inline float Alpha() const  { return m_Components[3]; }
+    inline float Red() const    { return m_flRed; }
+    inline float Green() const  { return m_flGreen; }
+    inline float Blue() const   { return m_flBlue; }
+    inline float Alpha() const  { return m_flAlpha; }
 
-    inline void SetRed(float v)     { m_Components[0] = v; }
-    inline void SetGreen(float v)   { m_Components[1] = v; }
-    inline void SetBlue(float v)    { m_Components[2] = v; }
-    inline void SetAlpha(float v)   { m_Components[3] = v; }
+    inline void SetRed(float v)     { m_flRed = v; }
+    inline void SetGreen(float v)   { m_flGreen = v; }
+    inline void SetBlue(float v)    { m_flBlue = v; }
+    inline void SetAlpha(float v)   { m_flAlpha = v; }
 
     static inline Color GetRandom(int seed, float minBound = 0.2f, float maxBound = 1.f)
     {
@@ -99,20 +99,29 @@ public:
 
     Color& operator=(const Color &operand)
     {
-        m_Components[0] = operand.Red();
-        m_Components[1] = operand.Green();
-        m_Components[2] = operand.Blue();
-        m_Components[3] = operand.Alpha();
+        m_flRed = operand.Red();
+        m_flGreen = operand.Green();
+        m_flBlue = operand.Blue();
+        m_flAlpha = operand.Alpha();
         return *this;
     }
 
 private:
     inline void Setup(float r, float g, float b, float a)
     {
-        m_Components[0] = r;
-        m_Components[1] = g;
-        m_Components[2] = b;
-        m_Components[3] = a;
+        m_flRed = r;
+        m_flGreen = g;
+        m_flBlue = b;
+        m_flAlpha = a;
     }
-    float m_Components[4];
+
+    union {
+        struct {
+            float m_flRed;
+            float m_flGreen;
+            float m_flBlue;
+            float m_flAlpha;
+        };
+        float m_Components[4];
+    };
 };
