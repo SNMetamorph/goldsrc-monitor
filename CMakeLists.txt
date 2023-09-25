@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
 if(POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
 endif()
@@ -17,12 +18,7 @@ if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-set(VCPKG_OVERLAY_PORTS "${CMAKE_SOURCE_DIR}/vcpkg/overlay_ports")
-if(EXTERNAL_VCPKG_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE ${EXTERNAL_VCPKG_TOOLCHAIN_FILE})
-else()
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake")
-endif()
+include(VcpkgIntegrate)
 project(goldsrc-monitor)
 
 # Build options
