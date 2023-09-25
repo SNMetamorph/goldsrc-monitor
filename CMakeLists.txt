@@ -40,11 +40,11 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 if(NOT BUILD_WRAPPER AND BUILD_LOADER)
-    add_subdirectory(cmake/loader)
+    add_subdirectory(sources/loader)
 endif()
 
 if(BUILD_LIBRARY)
-    add_subdirectory(cmake/library)
+    add_subdirectory(sources/library)
 endif()
 
 # set build output directory
