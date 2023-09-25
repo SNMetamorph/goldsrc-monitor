@@ -5,25 +5,25 @@ include(CompilerRuntime)
 include(SupportWinXP)
 
 list(APPEND MAIN_SOURCES
-	"../../sources/sys_utils.cpp"
-	"../../sources/exception.cpp"
-	"../../sources/loader/main.cpp"
-	"../../sources/loader/utils.cpp"
-	"../../sources/loader/application.cpp"
-	"../../sources/loader/loader.rc"
+	"../sys_utils.cpp"
+	"../exception.cpp"
+	"main.cpp"
+	"utils.cpp"
+	"application.cpp"
 )
 
 if(WIN32)
 	list(APPEND MAIN_SOURCES
-		"../../sources/loader/win32_inject_strategy.cpp"
+		"loader.rc"
+		"win32_inject_strategy.cpp"
 	)
 endif()
 
 add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-	"../../sources"
-	"../../sources/loader"
+	"."
+	"../"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 

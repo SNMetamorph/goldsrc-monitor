@@ -4,42 +4,48 @@ project(library CXX)
 include(CompilerRuntime)
 include(SupportWinXP)
 
-add_library(${PROJECT_NAME} SHARED
-	"../../sources/exception.cpp"
-	"../../sources/string_stack.cpp"
-	"../../sources/sys_utils.cpp"
-	"../../sources/library/application.cpp"
-	"../../sources/library/bounding_box.cpp"
-	"../../sources/library/bvh_tree.cpp"
-	"../../sources/library/bvh_tree_node.cpp"
-	"../../sources/library/local_player.cpp"
-	"../../sources/library/client_module.cpp"
-	"../../sources/library/server_module.cpp"
-	"../../sources/library/engine_module.cpp"
-	"../../sources/library/utils.cpp"
-	"../../sources/library/cvars.cpp"
-	"../../sources/library/build_info.cpp"
-	"../../sources/library/build_info_impl.cpp"
-	"../../sources/library/build_info_entry.cpp"
-	"../../sources/library/memory_pattern.cpp"
-	"../../sources/library/display_mode.h"
-	"../../sources/library/displaymode_angletracking.cpp"
-	"../../sources/library/displaymode_entityreport.cpp"
-	"../../sources/library/displaymode_facereport.cpp"
-	"../../sources/library/displaymode_full.cpp"
-	"../../sources/library/displaymode_measurement.cpp"
-	"../../sources/library/displaymode_speedometer.cpp"
-	"../../sources/library/opengl_primitives_renderer.cpp"
-	"../../sources/library/entity_dictionary.cpp"
-	"../../sources/library/entity_description.cpp"
-	"../../sources/library/dll_main.cpp"
-	"../../sources/library/hooks.cpp"
-	"../../sources/library/hooks_impl.cpp"
-	"../../sources/library/hooks_logger.cpp"
-	"../../sources/library/stdafx.cpp"
-	"../../sources/library/library.rc"
+list(APPEND MAIN_SOURCES
+	"../exception.cpp"
+	"../string_stack.cpp"
+	"../sys_utils.cpp"
+	"application.cpp"
+	"bounding_box.cpp"
+	"bvh_tree.cpp"
+	"bvh_tree_node.cpp"
+	"local_player.cpp"
+	"client_module.cpp"
+	"server_module.cpp"
+	"engine_module.cpp"
+	"utils.cpp"
+	"cvars.cpp"
+	"build_info.cpp"
+	"build_info_impl.cpp"
+	"build_info_entry.cpp"
+	"memory_pattern.cpp"
+	"display_mode.h"
+	"displaymode_angletracking.cpp"
+	"displaymode_entityreport.cpp"
+	"displaymode_facereport.cpp"
+	"displaymode_full.cpp"
+	"displaymode_measurement.cpp"
+	"displaymode_speedometer.cpp"
+	"opengl_primitives_renderer.cpp"
+	"entity_dictionary.cpp"
+	"entity_description.cpp"
+	"dll_main.cpp"
+	"hooks.cpp"
+	"hooks_impl.cpp"
+	"hooks_logger.cpp"
+	"stdafx.cpp"
 )
 
+if(WIN32)
+	list(APPEND MAIN_SOURCES
+		"library.rc"
+	)
+endif()
+
+add_library(${PROJECT_NAME} SHARED ${MAIN_SOURCES})
 find_path(HLSDK_DIRECTORY "cl_dll/GameStudioModelRenderer.h" PATH_SUFFIXES "hlsdk")
 target_include_directories(${PROJECT_NAME} PRIVATE
 	"${HLSDK_DIRECTORY}/common"
@@ -50,8 +56,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	"${HLSDK_DIRECTORY}/utils/vgui/include"
 	"${HLSDK_DIRECTORY}/public"
 	"${HLSDK_DIRECTORY}/cl_dll"
-	"../../sources"
-	"../../sources/library"
+	"."
+	"../"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
