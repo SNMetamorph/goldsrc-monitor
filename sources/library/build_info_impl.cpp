@@ -20,14 +20,14 @@ GNU General Public License for more details.
 #include <fstream>
 #include <filesystem>
 
-int CBuildInfo::Impl::GetBuildNumber() const
+std::optional<uint32_t> CBuildInfo::Impl::GetBuildNumber() const
 {
     if (m_pfnGetBuildNumber)
         return m_pfnGetBuildNumber();
     else if (m_iBuildNumber)
         return m_iBuildNumber;
     else
-        return 0;
+        return std::nullopt;
 }
 
 int CBuildInfo::Impl::DateToBuildNumber(const char *date) const
@@ -125,19 +125,19 @@ bool CBuildInfo::Impl::LoadBuildInfoFile(std::vector<uint8_t> &fileContents)
     }
 }
 
-void CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
+std::optional<std::string> CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
 {
     rapidjson::Document doc;
     doc.Parse(reinterpret_cast<const char *>(fileContents.data()));
 
     if (!doc.IsObject()) {
-        EXCEPT("JSON: build info document root is not object");
+        return "JSON: build info document root is not object";
     }
     if (!doc.HasMember("build_number_signatures")) {
-        EXCEPT("JSON: build info document hasn't member build_number_signatures");
+        return "JSON: build info document hasn't member build_number_signatures";
     }
     if (!doc.HasMember("engine_builds_info")) {
-        EXCEPT("JSON: build info document hasn't member engine_builds_info");
+        return "JSON: build info document hasn't member engine_builds_info";
     }
 
     const rapidjson::Value &buildSignatures = doc["build_number_signatures"];
@@ -149,8 +149,11 @@ void CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
     for (size_t i = 0; i < engineBuilds.Size(); ++i)
     {
         CBuildInfo::Entry infoEntry;
-        ParseBuildInfoEntry(infoEntry, engineBuilds[i]);
-        m_InfoEntries.push_back(infoEntry);
+        auto error = ParseBuildInfoEntry(infoEntry, engineBuilds[i]);
+        if (error.has_value()) {
+            return error;
+        }
+        m_EngineInfoEntries.push_back(infoEntry);
     }
 
     if (doc.HasMember("game_specific_builds_info"))
@@ -162,18 +165,22 @@ void CBuildInfo::Impl::ParseBuildInfo(std::vector<uint8_t> &fileContents)
             const rapidjson::Value &entryObject = gameSpecificBuilds[i];
             if (entryObject.HasMember("process_name")) 
             {
-                ParseBuildInfoEntry(infoEntry, entryObject);
+                auto error = ParseBuildInfoEntry(infoEntry, entryObject);
+                if (error.has_value()) {
+                    return error;
+                }
                 infoEntry.SetGameProcessName(entryObject["process_name"].GetString());
-                m_InfoEntries.push_back(infoEntry);
+                m_GameInfoEntries.push_back(infoEntry);
             }
             else {
-                EXCEPT("JSON: parsed game specific build info without process name");
+                return "JSON: parsed game specific build info without process name";
             }
         }
     }
+    return std::nullopt;
 }
 
-void CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfo::Entry &destEntry, const rapidjson::Value &jsonObject)
+std::optional<std::string> CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfo::Entry &destEntry, const rapidjson::Value &jsonObject)
 {
     if (jsonObject.HasMember("number")) {
         destEntry.SetBuildNumber(jsonObject["number"].GetInt());
@@ -198,8 +205,10 @@ void CBuildInfo::Impl::ParseBuildInfoEntry(CBuildInfo::Entry &destEntry, const r
     }
 
     if (!destEntry.Validate()) {
-        EXCEPT("JSON: parsed empty build info entry, check if signatures/offsets are set");
+        return "JSON: parsed empty build info entry, check if signatures/offsets are set";
     }
+    
+    return std::nullopt;
 }
 
 bool CBuildInfo::Impl::ApproxBuildNumber(const SysUtils::ModuleInfo &engineModule)
@@ -253,42 +262,46 @@ bool CBuildInfo::Impl::FindBuildNumberFunc(const SysUtils::ModuleInfo &engineMod
     return false;
 }
 
-int CBuildInfo::Impl::FindActualInfoEntry()
+std::optional<size_t> CBuildInfo::Impl::FindActualInfoEntry()
 {
-    if (m_InfoEntries.size() < 1) {
-        return -1;
+    auto buildNumberOpt = GetBuildNumber();
+    const size_t totalEntriesCount = m_EngineInfoEntries.size() + m_GameInfoEntries.size();
+    if (totalEntriesCount < 1 || !buildNumberOpt.has_value()) {
+        return std::nullopt;
     }
     else
     {
-        std::string processName;
-        int currBuildNumber = GetBuildNumber();
-        const int lastEntryIndex = m_InfoEntries.size() - 1;
-        int actualEntryIndex = lastEntryIndex;
-        
         // first check among game-specific builds
+        std::string processName;    
         SysUtils::GetModuleFilename(SysUtils::GetCurrentProcessModule(), processName);
-        for (size_t i = 0; i < m_InfoEntries.size(); ++i)
+        for (size_t i = 0; i < m_GameInfoEntries.size(); ++i)
         {
-            const CBuildInfo::Entry &buildInfo = m_InfoEntries[i];
+            const CBuildInfo::Entry &buildInfo = m_GameInfoEntries[i];
             const std::string &targetName = buildInfo.GetGameProcessName();
-            if (targetName.length() > 0 && targetName.compare(processName) == 0) {
+            if (targetName.compare(processName) == 0) {
+                m_infoEntryGameSpecific = true;
                 return i;
             }
         }
 
         // and then among engine builds
-        std::sort(m_InfoEntries.begin(), m_InfoEntries.end());
-        for (int i = 0; i < lastEntryIndex; ++i)
+        if (m_EngineInfoEntries.size() < 1) {
+            return std::nullopt;
+        }
+
+        uint32_t currBuildNumber = buildNumberOpt.value();
+        const size_t lastEntryIndex = m_EngineInfoEntries.size() - 1;
+        std::sort(m_EngineInfoEntries.begin(), m_EngineInfoEntries.end());
+
+        for (size_t i = 0; i < lastEntryIndex; ++i)
         {
-            const CBuildInfo::Entry &buildInfo = m_InfoEntries[i];
-            const CBuildInfo::Entry &nextBuildInfo = m_InfoEntries[i + 1];
-            const int nextBuildNumber = nextBuildInfo.GetBuildNumber();
-            if (nextBuildNumber > currBuildNumber) // valid only if build info entries sorted ascending
-            {
-                actualEntryIndex = i;
-                break;
+            const CBuildInfo::Entry &buildInfo = m_EngineInfoEntries[i];
+            const CBuildInfo::Entry &nextBuildInfo = m_EngineInfoEntries[i + 1];
+            const uint32_t nextBuildNumber = nextBuildInfo.GetBuildNumber();
+            if (nextBuildNumber > currBuildNumber) { // valid only if build info entries sorted ascending
+                return i;
             }
         }
-        return actualEntryIndex;
+        return lastEntryIndex; // if can't find something matching, then try just use latest available entry
     }
 }

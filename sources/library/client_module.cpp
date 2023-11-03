@@ -39,23 +39,25 @@ bool CClientModule::FindHandle()
 
 bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
 {
-    uint8_t *moduleEndAddr;
-    uint8_t *moduleAddr;
     uint8_t *pfnSPR_Load;
     uint8_t *pfnSPR_Frames;
-    const CBuildInfo::Entry &buildInfoEntry = buildInfo.GetInfoEntry();
-
-    moduleAddr = g_EngineModule.GetAddress();
-    moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
-    
-    // obtain address directly without searching
-    if (buildInfoEntry.HasClientEngfuncsOffset()) {
-        g_pClientEngfuncs = (cl_enginefunc_t *)(moduleAddr + buildInfoEntry.GetClientEngfuncsOffset());
-        return true;
-    }
+    uint8_t *moduleAddr = g_EngineModule.GetAddress();
+    uint8_t *moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    const CBuildInfo::Entry *buildInfoEntry = buildInfo.GetInfoEntry();
 
     if (!g_EngineModule.GetFunctionsFromAPI(&pfnSPR_Load, &pfnSPR_Frames))
     {
+        if (!buildInfoEntry) {
+            std::string errorMsg;
+            Utils::Snprintf(errorMsg, "build info parsing error: %s\n", buildInfo.GetInitErrorDescription().c_str());
+            EXCEPT(errorMsg);
+        }
+        // obtain address directly without searching
+        if (buildInfoEntry->HasClientEngfuncsOffset()) {
+            g_pClientEngfuncs = (cl_enginefunc_t *)(moduleAddr + buildInfoEntry->GetClientEngfuncsOffset());
+            return true;
+        }
+
         pfnSPR_Load = static_cast<uint8_t *>(buildInfo.FindFunctionAddress(
             CBuildInfo::FunctionType::SPR_Load, moduleAddr, moduleEndAddr
             ));

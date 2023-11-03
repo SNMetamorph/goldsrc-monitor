@@ -23,8 +23,8 @@ class CBuildInfo::Entry
 public:
     Entry() {};
     bool Validate() const;
-    inline int GetBuildNumber() const { return m_iBuildNumber; }
-    inline void SetBuildNumber(int value) { m_iBuildNumber = value; }
+    inline uint32_t GetBuildNumber() const { return m_iBuildNumber; }
+    inline void SetBuildNumber(uint32_t value) { m_iBuildNumber = value; }
     inline bool HasClientEngfuncsOffset() const { return m_iClientEngfuncsOffset != 0; }
     inline bool HasServerEngfuncsOffset() const { return m_iServerEngfuncsOffset != 0; }
     inline uint64_t GetClientEngfuncsOffset() const { return m_iClientEngfuncsOffset; }
@@ -44,7 +44,7 @@ public:
     }
 
 private:
-    int m_iBuildNumber = 0;
+    uint32_t m_iBuildNumber = 0;
     std::string m_szGameProcessName;
     uint64_t m_iClientEngfuncsOffset = 0x0;
     uint64_t m_iServerEngfuncsOffset = 0x0;

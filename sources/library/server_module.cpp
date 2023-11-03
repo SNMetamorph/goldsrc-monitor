@@ -44,16 +44,18 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
     uint8_t *probeAddr;
     uint8_t *coincidenceAddr;
     uint8_t *scanStartAddr;
-    uint8_t *moduleEndAddr;
-    uint8_t *moduleAddr;
 
     const size_t pointerSize = sizeof(void *);
-    moduleAddr = g_EngineModule.GetAddress();
-    moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    uint8_t *moduleAddr = g_EngineModule.GetAddress();
+    uint8_t *moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    const CBuildInfo::Entry *buildInfoEntry = buildInfo.GetInfoEntry();
 
-    const CBuildInfo::Entry &buildInfoEntry = buildInfo.GetInfoEntry();
-    if (buildInfoEntry.HasServerEngfuncsOffset()) {
-        g_pServerEngfuncs = (enginefuncs_t *)(moduleAddr + buildInfoEntry.GetServerEngfuncsOffset());
+    if (!buildInfoEntry) {
+        return false;
+    }
+
+    if (buildInfoEntry->HasServerEngfuncsOffset()) {
+        g_pServerEngfuncs = (enginefuncs_t *)(moduleAddr + buildInfoEntry->GetServerEngfuncsOffset());
         return true;
     }
 

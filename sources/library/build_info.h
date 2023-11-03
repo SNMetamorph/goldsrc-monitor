@@ -15,6 +15,7 @@ GNU General Public License for more details.
 #pragma once
 #include "sys_utils.h"
 #include <memory>
+#include <string>
 
 class CBuildInfo
 {
@@ -35,7 +36,8 @@ public:
     ~CBuildInfo();
     void Initialize(const SysUtils::ModuleInfo &engineModule);
     void *FindFunctionAddress(FunctionType funcType, void *startAddr, void *endAddr = nullptr) const;
-    const Entry &GetInfoEntry() const;
+    const std::string &GetInitErrorDescription() const;
+    const Entry *GetInfoEntry() const;
 
 private:
     class Impl;

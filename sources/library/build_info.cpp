@@ -31,27 +31,49 @@ CBuildInfo::~CBuildInfo()
 void CBuildInfo::Initialize(const SysUtils::ModuleInfo &engineModule)
 {
     std::vector<uint8_t> fileContents;
-    if (m_pImpl->LoadBuildInfoFile(fileContents)) {
-        m_pImpl->ParseBuildInfo(fileContents);
+    if (m_pImpl->LoadBuildInfoFile(fileContents)) 
+    {
+        auto error = m_pImpl->ParseBuildInfo(fileContents);
+        if (error.has_value()) {
+            m_pImpl->m_initErrorMessage = error.value();
+            return;
+        }
     }
     else {
-        EXCEPT("failed to load build info file");
+        m_pImpl->m_initErrorMessage = "failed to load build info file";
+        return;
     }
     if (!m_pImpl->FindBuildNumberFunc(engineModule))
     {
         if (!m_pImpl->ApproxBuildNumber(engineModule)) {
-            EXCEPT("failed to approximate engine build number");
+            m_pImpl->m_initErrorMessage = "failed to approximate engine build number";
+            return;
         }
     }
-    m_pImpl->m_iActualEntryIndex = m_pImpl->FindActualInfoEntry();
-    if (m_pImpl->m_iActualEntryIndex < 0) {
-        EXCEPT("no one build info entries parsed");
+
+    auto entryIndex = m_pImpl->FindActualInfoEntry();
+    if (!entryIndex.has_value()) {
+        m_pImpl->m_initErrorMessage = "not found matching build info entry";
+        return;
     }
+    m_pImpl->m_iActualEntryIndex = entryIndex;
 }
 
 void *CBuildInfo::FindFunctionAddress(CBuildInfo::FunctionType funcType, void *startAddr, void *endAddr) const
 {
-    CMemoryPattern funcPattern = m_pImpl->m_InfoEntries[m_pImpl->m_iActualEntryIndex].GetFunctionPattern(funcType);
+    if (!m_pImpl->m_iActualEntryIndex.has_value()) {
+        return nullptr;
+    }
+
+    const CBuildInfo::Entry *entry;
+    if (m_pImpl->m_infoEntryGameSpecific) {
+        entry = m_pImpl->m_GameInfoEntries.data() + m_pImpl->m_iActualEntryIndex.value();
+    }
+    else {
+        entry = m_pImpl->m_EngineInfoEntries.data() + m_pImpl->m_iActualEntryIndex.value();
+    }
+
+    CMemoryPattern funcPattern = entry->GetFunctionPattern(funcType);
     if (!endAddr)
         endAddr = (uint8_t *)startAddr + funcPattern.GetLength();
 
@@ -62,7 +84,20 @@ void *CBuildInfo::FindFunctionAddress(CBuildInfo::FunctionType funcType, void *s
     );
 }
 
-const CBuildInfo::Entry &CBuildInfo::GetInfoEntry() const
+const std::string &CBuildInfo::GetInitErrorDescription() const
 {
-    return m_pImpl->m_InfoEntries[m_pImpl->m_iActualEntryIndex];
+    return m_pImpl->m_initErrorMessage;
+}
+
+const CBuildInfo::Entry *CBuildInfo::GetInfoEntry() const
+{
+    if (!m_pImpl->m_iActualEntryIndex.has_value()) {
+        return nullptr;
+    }
+    if (m_pImpl->m_infoEntryGameSpecific) {
+        return m_pImpl->m_GameInfoEntries.data() + m_pImpl->m_iActualEntryIndex.value();
+    }
+    else {
+        return m_pImpl->m_EngineInfoEntries.data() + m_pImpl->m_iActualEntryIndex.value();
+    }
 }
