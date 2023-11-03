@@ -36,6 +36,8 @@ private:
     CClientModule(const CClientModule&) = delete;
     CClientModule& operator=(const CClientModule&) = delete;
 
+    cl_enginefunc_t* SearchEngfuncsTable(uint8_t *pfnSPR_Load, uint8_t *pfnSPR_Frames);
+
     ModuleHandle m_hModule = NULL;
     SysUtils::ModuleInfo m_ModuleInfo;
 };

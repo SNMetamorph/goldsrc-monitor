@@ -39,18 +39,13 @@ bool CClientModule::FindHandle()
 
 bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
 {
-    uint8_t *probeAddr;
-    uint8_t *coincidenceAddr;
-    uint8_t *scanStartAddr;
     uint8_t *moduleEndAddr;
     uint8_t *moduleAddr;
     uint8_t *pfnSPR_Load;
     uint8_t *pfnSPR_Frames;
     const CBuildInfo::Entry &buildInfoEntry = buildInfo.GetInfoEntry();
-    const size_t pointerSize = sizeof(void *);
 
     moduleAddr = g_EngineModule.GetAddress();
-    scanStartAddr = moduleAddr;
     moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
     
     // obtain address directly without searching
@@ -75,12 +70,29 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
             EXCEPT("SPR_Frames() address not found");
         }
     }
-    
+
+    cl_enginefunc_t *tableAddr = SearchEngfuncsTable(pfnSPR_Load, pfnSPR_Frames);
+    if (tableAddr) {
+        g_pClientEngfuncs = tableAddr;
+        return true;
+    }
+
+    EXCEPT("valid reference to SPR_Load() not found");
+    return false;
+}
+
+cl_enginefunc_t *CClientModule::SearchEngfuncsTable(uint8_t *pfnSPR_Load, uint8_t *pfnSPR_Frames)
+{
     bool fallbackMethod = false;
     uint8_t *targetAddr = pfnSPR_Load;
+    uint8_t *moduleAddr = g_EngineModule.GetAddress();
+    uint8_t *scanStartAddr = moduleAddr;
+    uint8_t *moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    constexpr size_t pointerSize = sizeof(void *);
+
     while (true)
     {
-        coincidenceAddr = (uint8_t *)Utils::FindMemoryPointer(
+        uint8_t *coincidenceAddr = (uint8_t *)Utils::FindMemoryPointer(
             scanStartAddr,
             moduleEndAddr,
             targetAddr
@@ -104,19 +116,16 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
         }
 
         // check for module range to avoid segfault
-        probeAddr = *(uint8_t **)(coincidenceAddr + pointerSize);
+        uint8_t *probeAddr = *(uint8_t **)(coincidenceAddr + pointerSize);
         if (probeAddr >= moduleAddr && probeAddr < moduleEndAddr)
         {
             if (probeAddr == pfnSPR_Frames || (fallbackMethod && Utils::UnwrapJmp(probeAddr) == pfnSPR_Frames))
             {
-                g_pClientEngfuncs = (cl_enginefunc_t *)coincidenceAddr;
-                return true; 
+                return reinterpret_cast<cl_enginefunc_t*>(coincidenceAddr);
             }
         }
     }
-
-    EXCEPT("valid reference to SPR_Load() not found");
-    return false;
+    return nullptr;
 }
 
 uint8_t* CClientModule::GetFuncAddress(const char *funcName)

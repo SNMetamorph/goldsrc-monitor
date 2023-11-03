@@ -52,9 +52,10 @@ void CApplication::Run()
 
     SysUtils::ModuleInfo engineDLL;
     SysUtils::GetModuleInfo(SysUtils::GetCurrentProcessHandle(), g_EngineModule.GetHandle(), engineDLL);
-    m_BuildInfo.Initialize(engineDLL);
+    
 
-    // find engine functions pointer arrays
+    // if can't obtain directly, find engine functions pointer arrays
+    m_BuildInfo.Initialize(engineDLL);
     g_ClientModule.FindEngfuncs(m_BuildInfo);
     g_ServerModule.FindEngfuncs(m_BuildInfo);
     g_ServerModule.FindHandle();
