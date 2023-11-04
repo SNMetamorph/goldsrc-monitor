@@ -26,16 +26,16 @@ public:
     void Push(const char *str);
     void PushPrintf(const char *format, ...);
     
-    inline int GetStringLength() const      { return m_iStringLen;  };
-    inline int GetStringCount() const       { return m_iStackIndex; };
-    inline int GetBufferSize() const        { return m_StringBuffer.capacity(); };
+    inline int GetStringLength() const      { return m_stringLen;  };
+    inline int GetStringCount() const       { return m_stackIndex; };
+    inline int GetBufferSize() const        { return m_stringBuffer.capacity(); };
     const char *StringAt(int index) const;
 
 private:
     void AllocString();
 
-    int m_iStackIndex = 0;
-    int m_iStringLen = 0;
-    std::vector<char> m_StringBuffer;
+    int m_stackIndex = 0;
+    int m_stringLen = 0;
+    std::vector<char> m_stringBuffer;
 };
 

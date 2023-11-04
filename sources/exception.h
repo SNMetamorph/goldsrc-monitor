@@ -41,10 +41,10 @@ public:
     };
 
 private:
-    int m_iLineNumber;
-    std::string m_szDescription;
-    std::string m_szFuncName;
-    std::string m_szFileName;
-    std::string m_szMessage;
+    int m_lineNumber;
+    std::string m_description;
+    std::string m_funcName;
+    std::string m_fileName;
+    std::string m_message;
 };
 

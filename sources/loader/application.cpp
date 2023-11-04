@@ -44,19 +44,19 @@ void CApplication::ParseParameters(int argc, char *argv[])
         if (parameter.compare("+process_name") == 0)
         {
             std::string argument = argv[++i];
-            m_szProcessName = argument;
+            m_processName = argument;
             continue;
         }
         else if (parameter.compare("+library_name") == 0)
         {
             std::string argument = argv[++i];
-            m_szLibraryName = argument;
+            m_libraryName = argument;
             continue;
         }
         else if (parameter.compare("+inject_delay") == 0)
         {
             std::string argument = argv[++i];
-            m_iInjectDelay = std::stoi(argument);
+            m_injectDelay = std::stoi(argument);
             continue;
         }
     }
@@ -69,7 +69,7 @@ void CApplication::StartMainLoop()
         PrintTitleText();
         try
         {
-            InjectStatus status = m_pInjectStrategy->Start(m_iInjectDelay, m_szProcessName, m_szLibraryName);
+            InjectStatus status = m_injectStrategy->Start(m_injectDelay, m_processName, m_libraryName);
             if (status == InjectStatus::Success || status == InjectStatus::AlreadyInjected) {
                 break;
             }
@@ -112,6 +112,6 @@ void CApplication::PrintTitleText()
 void CApplication::InitInjectStrategy()
 {
 #ifdef _WIN32
-    m_pInjectStrategy = std::make_unique<CWin32InjectStrategy>();
+    m_injectStrategy = std::make_unique<CWin32InjectStrategy>();
 #endif
 }

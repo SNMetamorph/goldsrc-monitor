@@ -25,37 +25,37 @@ CException::CException(
     int lineNumber
 )
 {
-    m_szFuncName = funcName;
-    m_szFileName = fileName;
-    m_szDescription = description;
-    m_iLineNumber = lineNumber;
-    m_szMessage.clear();
+    m_funcName = funcName;
+    m_fileName = fileName;
+    m_description = description;
+    m_lineNumber = lineNumber;
+    m_message.clear();
 }
 
 const std::string &CException::GetFormattedMessage()
 {
     std::stringstream exMessage;
-    exMessage << m_szFuncName << "() [" << m_szFileName << ":" << m_iLineNumber << "]: " << m_szDescription << "\n";
-    m_szMessage = exMessage.str();
-    return m_szMessage;
+    exMessage << m_funcName << "() [" << m_fileName << ":" << m_lineNumber << "]: " << m_description << "\n";
+    m_message = exMessage.str();
+    return m_message;
 }
 
 const std::string &CException::GetDescription() const
 {
-    return m_szDescription;
+    return m_description;
 }
 
 const std::string &CException::GetFunctionName() const
 {
-    return m_szFuncName;
+    return m_funcName;
 }
 
 const std::string &CException::GetFileName() const
 {
-    return m_szFileName;
+    return m_fileName;
 }
 
 int CException::GetLineNumber() const
 {
-    return m_iLineNumber;
+    return m_lineNumber;
 }

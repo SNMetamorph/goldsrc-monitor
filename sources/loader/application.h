@@ -35,8 +35,8 @@ private:
     void PrintTitleText();
     void InitInjectStrategy();
 
-    size_t m_iInjectDelay = 3000;
-    std::unique_ptr<IInjectStrategy> m_pInjectStrategy;
-    std::string m_szProcessName = DEFAULT_PROCESS_NAME;
-    std::string m_szLibraryName = DEFAULT_LIBRARY_NAME;
+    size_t m_injectDelay = 3000;
+    std::unique_ptr<IInjectStrategy> m_injectStrategy;
+    std::string m_processName = DEFAULT_PROCESS_NAME;
+    std::string m_libraryName = DEFAULT_LIBRARY_NAME;
 };

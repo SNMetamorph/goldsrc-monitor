@@ -18,53 +18,53 @@ GNU General Public License for more details.
 
 CStringStack::CStringStack(int stringLen)
 {
-    m_iStackIndex   = 0;
-    m_iStringLen    = stringLen;
-    m_StringBuffer.clear();
+    m_stackIndex   = 0;
+    m_stringLen    = stringLen;
+    m_stringBuffer.clear();
 }
 
 void CStringStack::Push(const char *str)
 {
     AllocString();
-    char *stringAddr = &m_StringBuffer[m_iStackIndex * m_iStringLen];
-    strncpy(stringAddr, str, m_iStringLen);
-    ++m_iStackIndex;
+    char *stringAddr = &m_stringBuffer[m_stackIndex * m_stringLen];
+    strncpy(stringAddr, str, m_stringLen);
+    ++m_stackIndex;
 }
 
 void CStringStack::PushPrintf(const char *format, ...)
 {
     va_list args;
     AllocString();
-    char *stringAddr = &m_StringBuffer[m_iStackIndex * m_iStringLen];
+    char *stringAddr = &m_stringBuffer[m_stackIndex * m_stringLen];
     va_start(args, format);
-    vsnprintf(stringAddr, m_iStringLen, format, args);
+    vsnprintf(stringAddr, m_stringLen, format, args);
     va_end(args);
-    ++m_iStackIndex;
+    ++m_stackIndex;
 }
 
 void CStringStack::Pop()
 {
-    if (m_iStackIndex > 0)
-        --m_iStackIndex;
+    if (m_stackIndex > 0)
+        --m_stackIndex;
 }
 
 void CStringStack::Clear()
 {
-    m_iStackIndex = 0;
+    m_stackIndex = 0;
 }
 
 const char *CStringStack::StringAt(int index) const
 {
-    if (index >= 0 && index < m_iStackIndex)
-        return &m_StringBuffer[index * m_iStringLen];
+    if (index >= 0 && index < m_stackIndex)
+        return &m_stringBuffer[index * m_stringLen];
     else
         return nullptr;
 }
 
 void CStringStack::AllocString()
 {
-    int currentSize = m_StringBuffer.size();
-    int desiredSize = m_iStackIndex * m_iStringLen + m_iStringLen;
+    int currentSize = m_stringBuffer.size();
+    int desiredSize = m_stackIndex * m_stringLen + m_stringLen;
     if (currentSize < desiredSize)
-        m_StringBuffer.resize(desiredSize);
+        m_stringBuffer.resize(desiredSize);
 }
