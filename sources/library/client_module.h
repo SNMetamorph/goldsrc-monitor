@@ -26,10 +26,10 @@ public:
     bool FindHandle();
     bool FindEngfuncs(const CBuildInfo &buildInfo);
     uint8_t *GetFuncAddress(const char *funcName);
-    inline ModuleHandle GetHandle() const   { return m_hModule;  }
-    inline uint8_t *GetBaseAddress() const  { return m_ModuleInfo.baseAddress; }
-    inline uint8_t *GetEntryPoint() const   { return m_ModuleInfo.entryPointAddress; }
-    inline size_t   GetSize() const         { return m_ModuleInfo.imageSize; }
+    ModuleHandle GetHandle() const   { return m_moduleHandle;  }
+    uint8_t *GetBaseAddress() const  { return m_moduleInfo.baseAddress; }
+    uint8_t *GetEntryPoint() const   { return m_moduleInfo.entryPointAddress; }
+    size_t   GetSize() const         { return m_moduleInfo.imageSize; }
 
 private:
     CClientModule();
@@ -38,8 +38,8 @@ private:
 
     cl_enginefunc_t* SearchEngfuncsTable(uint8_t *pfnSPR_Load, uint8_t *pfnSPR_Frames);
 
-    ModuleHandle m_hModule = NULL;
-    SysUtils::ModuleInfo m_ModuleInfo;
+    ModuleHandle m_moduleHandle = NULL;
+    SysUtils::ModuleInfo m_moduleInfo;
 };
 
 extern CClientModule& g_ClientModule;

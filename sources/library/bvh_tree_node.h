@@ -21,25 +21,25 @@ public:
     CBVHTreeNode();
     CBVHTreeNode(int index, const CBoundingBox &box);
     CBVHTreeNode(int index, const CBoundingBox &box, CBVHTreeNode &parent);
-    inline void SetParent(int index)                        { m_iParentNode = index; };
-    inline void SetLeftChild(int index)                     { m_iLeftChildNode = index; };
-    inline void SetRightChild(int index)                    { m_iRightChildNode = index; };
-    inline void SetBoundingBox(const CBoundingBox &box)     { m_BoundingBox = box; };
-    inline void SetDescriptionIndex(int value)              { m_iDescriptionIndex = value; };
-    inline int GetIndex() const                             { return m_iIndex; };
-    inline int GetParent() const                            { return m_iParentNode; }
-    inline int GetLeftChild() const                         { return m_iLeftChildNode; };
-    inline int GetRightChild() const                        { return m_iRightChildNode; };
-    inline int GetDescriptionIndex() const                  { return m_iDescriptionIndex; }
-    inline const CBoundingBox &GetBoundingBox() const       { return m_BoundingBox; };
-    inline const vec3_t &GetSize() const                    { return m_BoundingBox.GetSize(); };
-    inline bool IsLeaf() const                              { return m_iLeftChildNode < 0 && m_iRightChildNode < 0; };
+    void SetParent(int index)                        { m_parentNode = index; };
+    void SetLeftChild(int index)                     { m_leftChildNode = index; };
+    void SetRightChild(int index)                    { m_rightChildNode = index; };
+    void SetBoundingBox(const CBoundingBox &box)     { m_boundingBox = box; };
+    void SetDescriptionIndex(int value)              { m_descriptionIndex = value; };
+    int GetIndex() const                             { return m_index; };
+    int GetParent() const                            { return m_parentNode; }
+    int GetLeftChild() const                         { return m_leftChildNode; };
+    int GetRightChild() const                        { return m_rightChildNode; };
+    int GetDescriptionIndex() const                  { return m_descriptionIndex; }
+    const CBoundingBox &GetBoundingBox() const       { return m_boundingBox; };
+    const vec3_t &GetSize() const                    { return m_boundingBox.GetSize(); };
+    bool IsLeaf() const                              { return m_leftChildNode < 0 && m_rightChildNode < 0; };
 
 private:
-    int m_iIndex = 0;
-    int m_iParentNode = -1;
-    int m_iLeftChildNode = -1;
-    int m_iRightChildNode = -1;
-    int m_iDescriptionIndex = -1;
-    CBoundingBox m_BoundingBox;
+    int m_index = 0;
+    int m_parentNode = -1;
+    int m_leftChildNode = -1;
+    int m_rightChildNode = -1;
+    int m_descriptionIndex = -1;
+    CBoundingBox m_boundingBox;
 };

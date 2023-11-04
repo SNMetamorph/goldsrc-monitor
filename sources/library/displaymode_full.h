@@ -25,12 +25,12 @@ public:
     void Render3D() override {};
     bool KeyInput(bool, int, const char *) override { return true; };
     void HandleChangelevel() override {};
-    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_FULL; };
+    DisplayModeType GetModeIndex() override { return DisplayModeType::Full; };
 
 private:
     float GetSmoothSystemFrametime();
 
-    float m_flFrameTime;
-    float m_flLastFrameTime;
-    float m_flLastSysTime;
+    float m_frameTime;
+    float m_lastFrameTime;
+    float m_lastSysTime;
 };

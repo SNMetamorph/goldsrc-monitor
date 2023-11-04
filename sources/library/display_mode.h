@@ -15,14 +15,14 @@ GNU General Public License for more details.
 #pragma once
 #include "string_stack.h"
 
-enum DisplayModeIndex
+enum class DisplayModeType
 {
-    DISPLAYMODE_FULL,
-    DISPLAYMODE_SPEEDOMETER,
-    DISPLAYMODE_ENTITYREPORT,
-    DISPLAYMODE_MEASUREMENT,
-    DISPLAYMODE_FACEREPORT,
-    DISPLAYMODE_ANGLETRACKING
+    Full,
+    Speedometer,
+    EntityReport,
+    Measurement,
+    FaceReport,
+    AngleTracking
 };
 
 class IDisplayMode 
@@ -33,5 +33,5 @@ public:
     virtual void Render3D() = 0;
     virtual bool KeyInput(bool keyDown, int keyCode, const char *bindName) = 0;
     virtual void HandleChangelevel() = 0;
-    virtual DisplayModeIndex GetModeIndex() = 0;
+    virtual DisplayModeType GetModeIndex() = 0;
 };

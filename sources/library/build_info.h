@@ -31,6 +31,7 @@ public:
         PrecacheSound,
         Count, // keep this last
     };
+    static const size_t k_functionsCount = static_cast<size_t>(FunctionType::Count);
 
     CBuildInfo();
     ~CBuildInfo();

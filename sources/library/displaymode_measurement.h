@@ -19,14 +19,14 @@ GNU General Public License for more details.
 class CModeMeasurement : public IDisplayMode
 {
 public:
-    enum
+    enum class SnapMode
     {
-        SNAPMODE_FREE,
-        SNAPMODE_AXIS_X,
-        SNAPMODE_AXIS_Y,
-        SNAPMODE_AXIS_Z,
-        SNAPMODE_ALONGLINE,
-        SNAPMODE_MAX,
+        Free,
+        AxisX,
+        AxisY,
+        AxisZ,
+        AlongLine,
+        Count,
     };
 
 public:
@@ -37,7 +37,7 @@ public:
     void Render3D() override {};
     bool KeyInput(bool keyDown, int keyCode, const char *) override;
     void HandleChangelevel() override;
-    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_MEASUREMENT; };
+    DisplayModeType GetModeIndex() override { return DisplayModeType::Measurement; };
 
 private:
     const vec3_t &GetPointOriginA() const;
@@ -56,8 +56,8 @@ private:
     void DrawLineProjections(int screenWidth, int screenHeight, float lifeTime);
     void LoadLineSprite();
 
-    vec3_t       m_vecPointA;
-    vec3_t       m_vecPointB;
-    HLSPRITE     m_iLineSprite;
-    int          m_iSnapMode;
+    vec3_t       m_pointA;
+    vec3_t       m_pointB;
+    HLSPRITE     m_lineSprite;
+    SnapMode     m_snapMode;
 };

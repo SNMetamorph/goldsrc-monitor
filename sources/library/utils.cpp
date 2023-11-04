@@ -510,7 +510,7 @@ float Utils::GetCurrentSysTime()
     return SysUtils::GetCurrentSysTime();
 }
 
-DisplayModeIndex Utils::GetCurrentDisplayMode()
+DisplayModeType Utils::GetCurrentDisplayMode()
 {
-    return static_cast<DisplayModeIndex>(ConVars::gsm_mode->value);
+    return static_cast<DisplayModeType>(ConVars::gsm_mode->value);
 }

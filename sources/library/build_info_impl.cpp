@@ -24,8 +24,8 @@ std::optional<uint32_t> CBuildInfo::Impl::GetBuildNumber() const
 {
     if (m_pfnGetBuildNumber)
         return m_pfnGetBuildNumber();
-    else if (m_iBuildNumber)
-        return m_iBuildNumber;
+    else if (m_buildNumber)
+        return m_buildNumber;
     else
         return std::nullopt;
 }
@@ -230,7 +230,7 @@ bool CBuildInfo::Impl::ApproxBuildNumber(const SysUtils::ModuleInfo &engineModul
             const char *dateString = FindDateString(probeAddr, scanOffset);
             if (dateString)
             {
-                m_iBuildNumber = DateToBuildNumber(dateString);
+                m_buildNumber = DateToBuildNumber(dateString);
                 return true;
             }
             else

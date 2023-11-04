@@ -29,7 +29,7 @@ public:
     void Render3D() override;
     bool KeyInput(bool keyDown, int keyCode, const char *bindName) override;
     void HandleChangelevel() override;
-    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_FACEREPORT; };
+    DisplayModeType GetModeIndex() override { return DisplayModeType::FaceReport; };
 
 private:
     int TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect);
@@ -41,9 +41,9 @@ private:
     Engine::msurface_t *TraceSurface(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect);
     Engine::msurface_t *SurfaceAtPoint(model_t *pModel, Engine::mnode_t *node, vec3_t start, vec3_t end, vec3_t &intersect);
 
-    color24 m_ColorProbe;
-    model_t *m_pCurrentModel;
-    Engine::msurface_t *m_pCurrentFace;
-    CBoundingBox m_CurrentFaceBounds;
-    std::vector<vec3_t> m_BoundPoints;
+    color24 m_colorProbe;
+    model_t *m_currentModel;
+    Engine::msurface_t *m_currentFace;
+    CBoundingBox m_currentFaceBounds;
+    std::vector<vec3_t> m_boundPoints;
 };

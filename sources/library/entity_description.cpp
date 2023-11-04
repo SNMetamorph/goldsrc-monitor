@@ -65,7 +65,7 @@ void CEntityDescription::Reset()
     m_szClassname.clear();
     m_szTargetname.clear();
     m_szModelName.clear();
-    m_BoundingBox = CBoundingBox(vecNull);
+    m_boundingBox = CBoundingBox(vecNull);
     m_iAssociatedEntity = -1;
 }
 
@@ -82,8 +82,8 @@ void CEntityDescription::EstimateBoundingBox()
             vec3_t submodelMaxs = submodel->maxs;
             vec3_t submodelMins = submodel->mins;
             vec3_t hullSize = submodelMaxs - submodelMins;
-            m_BoundingBox = CBoundingBox(submodelMins, submodelMaxs);
-            m_vecOrigin = m_BoundingBox.GetCenterPoint();
+            m_boundingBox = CBoundingBox(submodelMins, submodelMaxs);
+            m_vecOrigin = m_boundingBox.GetCenterPoint();
         }
     }
     else if (m_vecOrigin.Length() > 0.01f) // is origin != (0, 0, 0)
@@ -98,8 +98,8 @@ void CEntityDescription::EstimateBoundingBox()
                 if (mdlHeader)
                 {
                     mstudioseqdesc_t *seqDesc = (mstudioseqdesc_t *)((char *)mdlHeader + mdlHeader->seqindex);
-                    m_BoundingBox = CBoundingBox(seqDesc[0].bbmin, seqDesc[0].bbmax);
-                    m_BoundingBox.SetCenterToPoint(m_vecOrigin);
+                    m_boundingBox = CBoundingBox(seqDesc[0].bbmin, seqDesc[0].bbmax);
+                    m_boundingBox.SetCenterToPoint(m_vecOrigin);
                     return;
                 }
             }
@@ -107,8 +107,8 @@ void CEntityDescription::EstimateBoundingBox()
         
         // otherwise just use fixed-size hull for point entities
         const vec3_t pointEntityHull = vec3_t(32, 32, 32);
-        m_BoundingBox = CBoundingBox(pointEntityHull);
-        m_BoundingBox.SetCenterToPoint(m_vecOrigin);
+        m_boundingBox = CBoundingBox(pointEntityHull);
+        m_boundingBox.SetCenterToPoint(m_vecOrigin);
     }
 }
 

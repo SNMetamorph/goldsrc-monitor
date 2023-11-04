@@ -31,14 +31,14 @@ public:
     bool Contains(const CBoundingBox &operand) const;
     bool ContainsPoint(const vec3_t &point) const;
 
-    inline const vec3_t &GetSize() const { return m_vecSize; };
-    inline const vec3_t &GetMins() const { return m_vecMins; };
-    inline const vec3_t &GetMaxs() const { return m_vecMaxs; };
+    const vec3_t &GetSize() const { return m_size; };
+    const vec3_t &GetMins() const { return m_mins; };
+    const vec3_t &GetMaxs() const { return m_maxs; };
 
 private:
     void Initialize(const vec3_t &vecMins, const vec3_t &vecMaxs);
 
-    vec3_t m_vecMins = vec3_t(0, 0, 0);
-    vec3_t m_vecMaxs = vec3_t(0, 0, 0);
-    vec3_t m_vecSize = vec3_t(0, 0, 0);
+    vec3_t m_mins = vec3_t(0, 0, 0);
+    vec3_t m_maxs = vec3_t(0, 0, 0);
+    vec3_t m_size = vec3_t(0, 0, 0);
 };

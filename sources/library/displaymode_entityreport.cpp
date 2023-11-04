@@ -26,10 +26,10 @@ GNU General Public License for more details.
 
 CModeEntityReport::CModeEntityReport()
 {
-    m_iEntityIndex = 0;
-    m_iLockedEntityIndex = 0;
-    m_EntityIndexList = {};
-    m_EntityDistanceList = {};
+    m_entityIndex = 0;
+    m_lockedEntityIndex = 0;
+    m_entityIndexList = {};
+    m_entityDistanceList = {};
 }
 
 void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
@@ -41,11 +41,11 @@ void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, C
             g_EntityDictionary.Initialize();
 
         screenText.Clear();
-        m_iEntityIndex = TraceEntity();
+        m_entityIndex = TraceEntity();
         if (!PrintEntityInfo(GetActualEntityIndex(), screenText))
         {
             // disable hull highlighting for this entity
-            m_iEntityIndex = 0;
+            m_entityIndex = 0;
         }
 
         if (debugMode == 2) {
@@ -90,22 +90,22 @@ void CModeEntityReport::Render3D()
 
 bool CModeEntityReport::KeyInput(bool keyDown, int keyCode, const char *bindName)
 {
-    if (Utils::GetCurrentDisplayMode() != DISPLAYMODE_ENTITYREPORT || !keyDown) {
+    if (Utils::GetCurrentDisplayMode() != DisplayModeType::EntityReport || !keyDown) {
         return true;
     }
 
     if (keyCode == 'v')
     {
-        if (m_iEntityIndex > 0) {
-            if (m_iEntityIndex == m_iLockedEntityIndex) {
-                m_iLockedEntityIndex = 0;
+        if (m_entityIndex > 0) {
+            if (m_entityIndex == m_lockedEntityIndex) {
+                m_lockedEntityIndex = 0;
             }
             else {
-                m_iLockedEntityIndex = m_iEntityIndex;
+                m_lockedEntityIndex = m_entityIndex;
             }
         }
         else {
-            m_iLockedEntityIndex = 0;
+            m_lockedEntityIndex = 0;
         }
         g_pClientEngfuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
         return false;
@@ -127,8 +127,8 @@ int CModeEntityReport::TraceEntity()
     float worldDistance = lineLen;
     int ignoredEnt = -1;
 
-    m_EntityIndexList.clear();
-    m_EntityDistanceList.clear();
+    m_entityIndexList.clear();
+    m_entityDistanceList.clear();
     viewOrigin = g_LocalPlayer.GetViewOrigin();
     viewDir = g_LocalPlayer.GetViewDirection();
 
@@ -161,21 +161,21 @@ int CModeEntityReport::TraceEntity()
         int physEntIndex = TracePhysEntList(physEntLists[i], physEntListsLen[i], viewOrigin, viewDir, lineLen);
         if (physEntIndex)
         {
-            m_EntityIndexList.push_back(physEntIndex);
-            m_EntityDistanceList.push_back(GetEntityDistance(physEntIndex));
+            m_entityIndexList.push_back(physEntIndex);
+            m_entityDistanceList.push_back(GetEntityDistance(physEntIndex));
         }
     }
 
     // get nearest entity from all lists
     // also add world for comparision
-    m_EntityIndexList.push_back(0);
-    m_EntityDistanceList.push_back(worldDistance);
-    auto &distanceList = m_EntityDistanceList;
+    m_entityIndexList.push_back(0);
+    m_entityDistanceList.push_back(worldDistance);
+    auto &distanceList = m_entityDistanceList;
     if (distanceList.size() > 1)
     {
         auto iterNearestEnt = std::min_element(std::begin(distanceList), std::end(distanceList));
         if (std::end(distanceList) != iterNearestEnt)
-            return m_EntityIndexList[std::distance(distanceList.begin(), iterNearestEnt)];
+            return m_entityIndexList[std::distance(distanceList.begin(), iterNearestEnt)];
     }
     return 0;
 }
@@ -307,7 +307,7 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
             screenText.Push("Entity properties not found");
         }
 
-        if (!m_iLockedEntityIndex) {
+        if (!m_lockedEntityIndex) {
             screenText.Push("Press V to hold on current entity");
         }
     }
@@ -351,10 +351,10 @@ void CModeEntityReport::PrintEntityCommonInfo(int entityIndex, CStringStack &scr
 
 int CModeEntityReport::GetActualEntityIndex()
 {
-    if (m_iLockedEntityIndex > 0) {
-        return m_iLockedEntityIndex;
+    if (m_lockedEntityIndex > 0) {
+        return m_lockedEntityIndex;
     }
     else {
-        return m_iEntityIndex;
+        return m_entityIndex;
     }
 }

@@ -29,11 +29,11 @@ public:
     double ComputeCost() const;
     bool FindLeaf(const CBoundingBox &box, int &nodeIndex, int &iterCount);
     void Visualize(bool textRendering);
-    inline const CBVHTreeNode &GetNode(int index) const { return m_Nodes[index]; }
+    const CBVHTreeNode &GetNode(int index) const { return m_nodes[index]; }
 
 private:
     typedef std::vector<int> ObjectList;
-    inline CBVHTreeNode &NodeAt(int index) { return m_Nodes[index]; }
+    CBVHTreeNode &NodeAt(int index) { return m_nodes[index]; }
 
     void PrintReport();
     void BuildTopDown();
@@ -45,9 +45,9 @@ private:
     std::string GetGraphvisDescription() const;
     std::vector<int> GetGameObjects();
 
-    int                       m_iRootNodeIndex = -1;
-    std::stack<int>           m_NodesStack;
-    std::stack<ObjectList>    m_ObjectListStack;
-    std::vector<CBVHTreeNode> m_Nodes;
-    const std::vector<CEntityDescription> *m_DescList;
+    int                       m_rootNodeIndex = -1;
+    std::stack<int>           m_nodesStack;
+    std::stack<ObjectList>    m_objectListStack;
+    std::vector<CBVHTreeNode> m_nodes;
+    const std::vector<CEntityDescription> *m_descList;
 };

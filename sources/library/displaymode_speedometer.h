@@ -26,13 +26,13 @@ public:
     void Render3D() override {};
     bool KeyInput(bool, int, const char *) override { return true; };
     void HandleChangelevel() override {};
-    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_SPEEDOMETER; };
+    DisplayModeType GetModeIndex() override { return DisplayModeType::Speedometer; };
 
 private:
     void CalculateVelocity(float frameTime);
     float GetEntityVelocityApprox(int entityIndex) const;
     void DrawVelocityBar(int scrWidth, int scrHeight, float velocity) const;
 
-    float m_flVelocity;
-    float m_flLastUpdateTime;
+    float m_velocity;
+    float m_lastUpdateTime;
 };

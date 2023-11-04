@@ -21,15 +21,15 @@ CBVHTreeNode::CBVHTreeNode()
 
 CBVHTreeNode::CBVHTreeNode(int index, const CBoundingBox &box)
 {
-    m_iIndex = index;
-    m_BoundingBox = box;
+    m_index = index;
+    m_boundingBox = box;
 }
 
 CBVHTreeNode::CBVHTreeNode(int index, const CBoundingBox &box, CBVHTreeNode &parent)
 {
-    m_iIndex = index;
-    m_BoundingBox = box;
-    m_iParentNode = parent.GetIndex();
+    m_index = index;
+    m_boundingBox = box;
+    m_parentNode = parent.GetIndex();
     if (parent.GetLeftChild() < 0) {
         parent.SetLeftChild(index);
     }

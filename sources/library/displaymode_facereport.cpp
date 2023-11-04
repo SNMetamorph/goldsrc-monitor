@@ -28,10 +28,10 @@ GNU General Public License for more details.
 
 CModeFaceReport::CModeFaceReport()
 {
-    m_ColorProbe = { 0 };
-    m_pCurrentModel = nullptr;
-    m_pCurrentFace = nullptr;
-    m_BoundPoints = {};
+    m_colorProbe = { 0 };
+    m_currentModel = nullptr;
+    m_currentFace = nullptr;
+    m_boundPoints = {};
 }
 
 void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
@@ -40,35 +40,35 @@ void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CSt
     vec3_t intersectPoint;
     vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
     vec3_t viewDir = g_LocalPlayer.GetViewDirection();
-    m_pCurrentFace = TraceSurface(viewOrigin, viewDir, lineLen, intersectPoint);
+    m_currentFace = TraceSurface(viewOrigin, viewDir, lineLen, intersectPoint);
 
     screenText.Clear();
-    if (m_pCurrentFace)
+    if (m_currentFace)
     {
-        const mplane_t *plane = m_pCurrentFace->plane;
-        const Engine::texture_t *texture = Engine::CastType(m_pCurrentFace->texinfo->texture);
+        const mplane_t *plane = m_currentFace->plane;
+        const Engine::texture_t *texture = Engine::CastType(m_currentFace->texinfo->texture);
         vec3_t planeCenter = plane->normal * plane->dist;
-        int32_t lightmapWidth = (m_pCurrentFace->extents[0] >> 4) + 1;
-        int32_t lightmapHeight = (m_pCurrentFace->extents[1] >> 4) + 1;
+        int32_t lightmapWidth = (m_currentFace->extents[0] >> 4) + 1;
+        int32_t lightmapHeight = (m_currentFace->extents[1] >> 4) + 1;
 
-        m_ColorProbe = { 0 };
-        GetSurfaceBoundingBox(m_pCurrentFace, m_CurrentFaceBounds);
-        const vec3_t &surfSize = m_CurrentFaceBounds.GetSize();
+        m_colorProbe = { 0 };
+        GetSurfaceBoundingBox(m_currentFace, m_currentFaceBounds);
+        const vec3_t &surfSize = m_currentFaceBounds.GetSize();
 
-        screenText.PushPrintf("Model Name: %s", m_pCurrentModel->name);
+        screenText.PushPrintf("Model Name: %s", m_currentModel->name);
         screenText.PushPrintf("Texture Name: %s", texture->name);
         screenText.PushPrintf("Texture Size: %d x %d", texture->width, texture->height);
         screenText.PushPrintf("Lightmap Size: %d x %d", lightmapWidth, lightmapHeight);
-        screenText.PushPrintf("Edges: %d", m_pCurrentFace->numedges);
-        screenText.PushPrintf("Surfaces: %d", m_pCurrentModel->nummodelsurfaces);
+        screenText.PushPrintf("Edges: %d", m_currentFace->numedges);
+        screenText.PushPrintf("Surfaces: %d", m_currentModel->nummodelsurfaces);
         screenText.PushPrintf("Bounds: (%.1f; %.1f; %.1f)", surfSize.x, surfSize.y, surfSize.z);
         screenText.PushPrintf("Normal: (%.1f; %.1f; %.1f)", plane->normal.x, plane->normal.y, plane->normal.z);
         screenText.PushPrintf("Intersect point: (%.1f; %.1f; %.1f)", intersectPoint.x, intersectPoint.y, intersectPoint.z);
 
-        if (GetLightmapProbe(m_pCurrentFace, intersectPoint, m_ColorProbe))
+        if (GetLightmapProbe(m_currentFace, intersectPoint, m_colorProbe))
         {
             screenText.PushPrintf("Lightmap Color: %d %d %d",
-                m_ColorProbe.r, m_ColorProbe.g, m_ColorProbe.b);
+                m_colorProbe.r, m_colorProbe.g, m_colorProbe.b);
             screenText.Push("Press V to print lightmap info");
         }
     }
@@ -85,13 +85,13 @@ void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CSt
 
 void CModeFaceReport::Render3D()
 {
-    if (m_pCurrentFace && m_pCurrentModel)
+    if (m_currentFace && m_currentModel)
     {
         g_pClientEngfuncs->pTriAPI->RenderMode(kRenderTransColor);
         g_pClientEngfuncs->pTriAPI->CullFace(TRI_NONE);
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_DEPTH_TEST);
-        DrawFaceOutline(m_pCurrentFace);
+        DrawFaceOutline(m_currentFace);
         //DrawSurfaceBounds(m_pCurrentFace);
         g_pClientEngfuncs->pTriAPI->RenderMode(kRenderNormal);
         g_pClientEngfuncs->pTriAPI->CullFace(TRI_FRONT);
@@ -104,11 +104,11 @@ bool CModeFaceReport::KeyInput(bool keyDown, int keyNum, const char *bindName)
 {
     if (keyDown && keyNum == 'v')
     {
-        if (m_pCurrentFace)
+        if (m_currentFace)
         {
-            const texture_t *texture = m_pCurrentFace->texinfo->texture;
+            const texture_t *texture = m_currentFace->texinfo->texture;
             g_pClientEngfuncs->Con_Printf("%s %d %d %d\n", 
-                texture->name, m_ColorProbe.r, m_ColorProbe.g, m_ColorProbe.b);
+                texture->name, m_colorProbe.r, m_colorProbe.g, m_colorProbe.b);
             g_pClientEngfuncs->pfnPlaySoundByName("buttons/blip1.wav", 0.8f);
             return false;
         }
@@ -118,8 +118,8 @@ bool CModeFaceReport::KeyInput(bool keyDown, int keyNum, const char *bindName)
 
 void CModeFaceReport::HandleChangelevel()
 {
-    m_pCurrentModel = nullptr;
-    m_pCurrentFace = nullptr;
+    m_currentModel = nullptr;
+    m_currentFace = nullptr;
 }
 
 int CModeFaceReport::TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3_t &intersect)
@@ -144,23 +144,23 @@ int CModeFaceReport::TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3
 void CModeFaceReport::GetSurfaceBoundingBox(Engine::msurface_t *surf, CBoundingBox &bbox)
 {
     bbox = CBoundingBox();
-    m_BoundPoints.reserve(surf->numedges * 2);
-    m_BoundPoints.clear();
+    m_boundPoints.reserve(surf->numedges * 2);
+    m_boundPoints.clear();
  
     for (int i = 0; i < surf->numedges; ++i)
     {
-        int edgeIndex = m_pCurrentModel->surfedges[surf->firstedge + i];
-        const medge_t *edge = m_pCurrentModel->edges + (edgeIndex >= 0 ? edgeIndex : -edgeIndex);
-        const mvertex_t *vertex = m_pCurrentModel->vertexes + (edgeIndex >= 0 ? edge->v[0] : edge->v[1]);
-        m_BoundPoints.push_back(vertex->position);
+        int edgeIndex = m_currentModel->surfedges[surf->firstedge + i];
+        const medge_t *edge = m_currentModel->edges + (edgeIndex >= 0 ? edgeIndex : -edgeIndex);
+        const mvertex_t *vertex = m_currentModel->vertexes + (edgeIndex >= 0 ? edge->v[0] : edge->v[1]);
+        m_boundPoints.push_back(vertex->position);
     }
 
-    if (m_BoundPoints.size() > 0)
+    if (m_boundPoints.size() > 0)
     {
-        bbox.SetCenterToPoint(m_BoundPoints[0]);
-        for (size_t i = 0; i < m_BoundPoints.size(); ++i)
+        bbox.SetCenterToPoint(m_boundPoints[0]);
+        for (size_t i = 0; i < m_boundPoints.size(); ++i)
         {
-            const vec3_t &vertex = m_BoundPoints[i];
+            const vec3_t &vertex = m_boundPoints[i];
             bbox.ExpandToPoint(vertex);
         }
     }
@@ -184,10 +184,10 @@ void CModeFaceReport::DrawFaceOutline(Engine::msurface_t *surf)
     g_pClientEngfuncs->pTriAPI->Color4f(lineColor.Red(), lineColor.Green(), lineColor.Blue(), lineColor.Alpha());
     for (int i = 0; i < surf->numedges; ++i)
     {
-        int edgeIndex = m_pCurrentModel->surfedges[surf->firstedge + i];
-        const medge_t *edge = m_pCurrentModel->edges + (edgeIndex >= 0 ? edgeIndex : -edgeIndex);
-        vec3_t &vertex1 = m_pCurrentModel->vertexes[edge->v[0]].position;
-        vec3_t &vertex2 = m_pCurrentModel->vertexes[edge->v[1]].position;
+        int edgeIndex = m_currentModel->surfedges[surf->firstedge + i];
+        const medge_t *edge = m_currentModel->edges + (edgeIndex >= 0 ? edgeIndex : -edgeIndex);
+        vec3_t &vertex1 = m_currentModel->vertexes[edge->v[0]].position;
+        vec3_t &vertex2 = m_currentModel->vertexes[edge->v[1]].position;
         g_pClientEngfuncs->pTriAPI->Vertex3fv(vertex1);
         g_pClientEngfuncs->pTriAPI->Vertex3fv(vertex2);
     }
@@ -261,23 +261,23 @@ Engine::msurface_t *CModeFaceReport::TraceSurface(vec3_t origin, vec3_t dir, flo
     if (entity)
     {
         if (entity->model->type != mod_brush) {
-            m_pCurrentModel = worldModel;
+            m_currentModel = worldModel;
         }
         else {
-            m_pCurrentModel = entity->model;
+            m_currentModel = entity->model;
         }
 
-        firstNode = Engine::CastType(m_pCurrentModel->nodes);
-        firstNode = m_pCurrentModel->hulls[0].firstclipnode + firstNode;
+        firstNode = Engine::CastType(m_currentModel->nodes);
+        firstNode = m_currentModel->hulls[0].firstclipnode + firstNode;
 
         vec3_t endPoint = origin + (dir * distance);
-        surf = SurfaceAtPoint(m_pCurrentModel, firstNode, origin, endPoint, intersect);
+        surf = SurfaceAtPoint(m_currentModel, firstNode, origin, endPoint, intersect);
         if (surf) {
             return surf;
         }
     }
 
-    m_pCurrentModel = nullptr;
+    m_currentModel = nullptr;
     return nullptr;
 }
 

@@ -17,13 +17,13 @@ GNU General Public License for more details.
 
 bool CBuildInfo::Entry::Validate() const
 {
-    if (m_iClientEngfuncsOffset > 0) {
+    if (m_clientEngfuncsOffset > 0) {
         return true;
     }
 
     for (size_t i = 0; i < static_cast<size_t>(FunctionType::PrecacheModel); ++i) // check only client-side functions
     {
-        const CMemoryPattern &pattern = m_FunctionPatterns[i];
+        const CMemoryPattern &pattern = m_functionPatterns[i];
         if (!pattern.IsInitialized()) {
             return false;
         }

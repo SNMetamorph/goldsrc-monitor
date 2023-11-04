@@ -34,14 +34,14 @@ void CEntityDictionary::Initialize()
 
 void CEntityDictionary::VisualizeTree(bool textRendering)
 {
-    m_EntityDescTree.Visualize(textRendering);
+    m_entityDescTree.Visualize(textRendering);
 }
 
 void CEntityDictionary::VisualizeDescriptions() const
 {
-    for (int i = 0; i < m_EntityDescList.size(); ++i)
+    for (int i = 0; i < m_entityDescList.size(); ++i)
     {
-        const CEntityDescription &description = m_EntityDescList[i];
+        const CEntityDescription &description = m_entityDescList[i];
         Utils::DrawCuboid(
             description.GetOrigin(), 
             vec3_t(0, 0, 0), 
@@ -54,8 +54,8 @@ void CEntityDictionary::VisualizeDescriptions() const
 
 void CEntityDictionary::Reset()
 {
-    m_EntityDescList.clear();
-    m_Associations.clear();
+    m_entityDescList.clear();
+    m_associations.clear();
 }
 
 bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &destDescription, int &iterCount)
@@ -63,18 +63,18 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
     int nodeIndex;
     CBoundingBox entityBoundingBox;
     Utils::GetEntityBoundingBox(entityIndex, entityBoundingBox);
-    if (m_Associations.count(entityIndex) > 0)
+    if (m_associations.count(entityIndex) > 0)
     {
-        int descIndex = m_Associations[entityIndex];
-        destDescription = m_EntityDescList[descIndex];
+        int descIndex = m_associations[entityIndex];
+        destDescription = m_entityDescList[descIndex];
         return true;
     }
-    else if (m_EntityDescTree.FindLeaf(entityBoundingBox, nodeIndex, iterCount))
+    else if (m_entityDescTree.FindLeaf(entityBoundingBox, nodeIndex, iterCount))
     {
-        const CBVHTreeNode &node = m_EntityDescTree.GetNode(nodeIndex);
+        const CBVHTreeNode &node = m_entityDescTree.GetNode(nodeIndex);
         int descIndex = node.GetDescriptionIndex();
         AssociateDescription(entityIndex, descIndex);
-        destDescription = m_EntityDescList[descIndex];
+        destDescription = m_entityDescList[descIndex];
         return true;
     }
     return false;
@@ -82,15 +82,15 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
 
 void CEntityDictionary::AssociateDescription(int entityIndex, int descIndex)
 {
-    CEntityDescription &entityDesc = m_EntityDescList[descIndex];
+    CEntityDescription &entityDesc = m_entityDescList[descIndex];
     entityDesc.AssociateEntity(entityIndex);
-    m_Associations.insert({ entityIndex, descIndex });
+    m_associations.insert({ entityIndex, descIndex });
 }
 
 void CEntityDictionary::BuildDescriptionsTree()
 {
-    m_EntityDescTree.Reset();
-    m_EntityDescTree.Build();
+    m_entityDescTree.Reset();
+    m_entityDescTree.Build();
 }
 
 void CEntityDictionary::ParseEntityData()
@@ -125,7 +125,7 @@ void CEntityDictionary::ParseEntityData()
                 if (strcmp(token.data(), "}") == 0)
                 {
                     entityDesc.Initialize();
-                    m_EntityDescList.push_back(entityDesc);
+                    m_entityDescList.push_back(entityDesc);
                     break;
                 }
                 else

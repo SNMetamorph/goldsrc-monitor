@@ -26,19 +26,19 @@ public:
     bool FindHandle();
     bool FindEngfuncs(const CBuildInfo &buildInfo);
     uint8_t *GetFuncAddress(const char *funcName);
-    inline ModuleHandle GetHandle() const   { return m_hModule; }
-    inline uint8_t *GetBaseAddress() const  { return m_ModuleInfo.baseAddress; }
-    inline uint8_t *GetEntryPoint() const   { return m_ModuleInfo.entryPointAddress; }
-    inline size_t   GetSize() const         { return m_ModuleInfo.imageSize; }
-    inline bool     IsInitialized() const   { return m_hModule != NULL; }
+    inline ModuleHandle GetHandle() const   { return m_module; }
+    inline uint8_t *GetBaseAddress() const  { return m_moduleInfo.baseAddress; }
+    inline uint8_t *GetEntryPoint() const   { return m_moduleInfo.entryPointAddress; }
+    inline size_t   GetSize() const         { return m_moduleInfo.imageSize; }
+    inline bool     IsInitialized() const   { return m_module != NULL; }
 
 private:
     CServerModule() {};
     CServerModule(const CServerModule&) = delete;
     CServerModule& operator=(const CServerModule&) = delete;
 
-    ModuleHandle m_hModule = NULL;
-    SysUtils::ModuleInfo m_ModuleInfo;
+    ModuleHandle m_module = NULL;
+    SysUtils::ModuleInfo m_moduleInfo;
 };
 
 extern CServerModule &g_ServerModule;

@@ -27,17 +27,17 @@ CBoundingBox::CBoundingBox(const vec3_t &vecMins, const vec3_t &vecMaxs)
 
 vec3_t CBoundingBox::GetCenterPoint() const
 {
-    return m_vecMins + m_vecSize / 2;
+    return m_mins + m_size / 2;
 }
 
 void CBoundingBox::SetCenterToPoint(const vec3_t &point)
 {
-    Initialize(point - m_vecSize / 2, point + m_vecSize / 2);
+    Initialize(point - m_size / 2, point + m_size / 2);
 }
 
 CBoundingBox CBoundingBox::GetUnion(const CBoundingBox &operand) const
 {
-    CBoundingBox currentBoxCopy(m_vecMins, m_vecMaxs);
+    CBoundingBox currentBoxCopy(m_mins, m_maxs);
     currentBoxCopy.CombineWith(operand);
     return currentBoxCopy;
 }
@@ -46,8 +46,8 @@ void CBoundingBox::CombineWith(const CBoundingBox &operand)
 {
     vec3_t unionMins;
     vec3_t unionMaxs;
-    const vec3_t &currMins = m_vecMins;
-    const vec3_t &currMaxs = m_vecMaxs;
+    const vec3_t &currMins = m_mins;
+    const vec3_t &currMaxs = m_maxs;
     const vec3_t &operandMins = operand.GetMins();
     const vec3_t &operandMaxs = operand.GetMaxs();
 
@@ -64,21 +64,21 @@ void CBoundingBox::CombineWith(const CBoundingBox &operand)
 
 void CBoundingBox::ExpandToPoint(const vec3_t &point)
 {
-    if (point.x < m_vecMins.x)
-        m_vecMins.x = point.x;
-    if (point.y < m_vecMins.y)
-        m_vecMins.y = point.y;
-    if (point.z < m_vecMins.z)
-        m_vecMins.z = point.z;
+    if (point.x < m_mins.x)
+        m_mins.x = point.x;
+    if (point.y < m_mins.y)
+        m_mins.y = point.y;
+    if (point.z < m_mins.z)
+        m_mins.z = point.z;
 
-    if (point.x > m_vecMaxs.x)
-        m_vecMaxs.x = point.x;
-    if (point.y > m_vecMaxs.y)
-        m_vecMaxs.y = point.y;
-    if (point.z > m_vecMaxs.z)
-        m_vecMaxs.z = point.z;
+    if (point.x > m_maxs.x)
+        m_maxs.x = point.x;
+    if (point.y > m_maxs.y)
+        m_maxs.y = point.y;
+    if (point.z > m_maxs.z)
+        m_maxs.z = point.z;
 
-    Initialize(m_vecMins, m_vecMaxs);
+    Initialize(m_mins, m_maxs);
 }
 
 bool CBoundingBox::Contains(const CBoundingBox &operand) const
@@ -86,18 +86,18 @@ bool CBoundingBox::Contains(const CBoundingBox &operand) const
     const vec3_t &mins = operand.GetMins();
     const vec3_t &maxs = operand.GetMaxs();
 
-    if (mins.x < m_vecMins.x || mins.x > m_vecMaxs.x)
+    if (mins.x < m_mins.x || mins.x > m_maxs.x)
         return false;
-    if (mins.y < m_vecMins.y || mins.y > m_vecMaxs.y)
+    if (mins.y < m_mins.y || mins.y > m_maxs.y)
         return false;
-    if (mins.z < m_vecMins.z || mins.z > m_vecMaxs.z)
+    if (mins.z < m_mins.z || mins.z > m_maxs.z)
         return false;
 
-    if (maxs.x < m_vecMins.x || maxs.x > m_vecMaxs.x)
+    if (maxs.x < m_mins.x || maxs.x > m_maxs.x)
         return false;
-    if (maxs.y < m_vecMins.y || maxs.y > m_vecMaxs.y)
+    if (maxs.y < m_mins.y || maxs.y > m_maxs.y)
         return false;
-    if (maxs.z < m_vecMins.z || maxs.z > m_vecMaxs.z)
+    if (maxs.z < m_mins.z || maxs.z > m_maxs.z)
         return false;
 
     return true;
@@ -105,23 +105,23 @@ bool CBoundingBox::Contains(const CBoundingBox &operand) const
 
 bool CBoundingBox::ContainsPoint(const vec3_t &point) const
 {
-    if (point.x < m_vecMins.x || point.x > m_vecMaxs.x)
+    if (point.x < m_mins.x || point.x > m_maxs.x)
         return false;
-    if (point.y < m_vecMins.y || point.y > m_vecMaxs.y)
+    if (point.y < m_mins.y || point.y > m_maxs.y)
         return false;
-    if (point.z < m_vecMins.z || point.z > m_vecMaxs.z)
+    if (point.z < m_mins.z || point.z > m_maxs.z)
         return false;
     return true;
 }
 
 double CBoundingBox::GetSurfaceArea() const
 {
-    return 2.0 * (m_vecSize.x * m_vecSize.y + m_vecSize.y * m_vecSize.z + m_vecSize.x * m_vecSize.z);
+    return 2.0 * (m_size.x * m_size.y + m_size.y * m_size.z + m_size.x * m_size.z);
 }
 
 void CBoundingBox::Initialize(const vec3_t &vecMins, const vec3_t &vecMaxs)
 {
-    m_vecMins = vecMins;
-    m_vecMaxs = vecMaxs;
-    m_vecSize = vecMaxs - vecMins;
+    m_mins = vecMins;
+    m_maxs = vecMaxs;
+    m_size = vecMaxs - vecMins;
 }

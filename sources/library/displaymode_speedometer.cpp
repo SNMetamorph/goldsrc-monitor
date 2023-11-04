@@ -25,16 +25,16 @@ void CModeSpeedometer::Render2D(float frameTime, int scrWidth, int scrHeight, CS
     const float speedUpdateInterval = 0.125f;
 
     float currentTime = Utils::GetCurrentSysTime();
-    float updateTimeDelta = currentTime - m_flLastUpdateTime;
+    float updateTimeDelta = currentTime - m_lastUpdateTime;
     if (updateTimeDelta >= speedUpdateInterval) 
     {
         CalculateVelocity(frameTime);
-        m_flLastUpdateTime = currentTime;
+        m_lastUpdateTime = currentTime;
     }
 
     //DrawVelocityBar(centerX, centerY, m_flVelocity);
     screenText.Clear();
-    screenText.PushPrintf("%3.1f", m_flVelocity);
+    screenText.PushPrintf("%3.1f", m_velocity);
 
     int stringWidth = Utils::GetStringWidth(screenText.StringAt(0));
     Utils::DrawStringStack(
@@ -61,10 +61,10 @@ void CModeSpeedometer::DrawVelocityBar(int centerX, int centerY, float velocity)
 void CModeSpeedometer::CalculateVelocity(float frameTime)
 {
     if (g_LocalPlayer.IsSpectate()) {
-        m_flVelocity = GetEntityVelocityApprox(g_LocalPlayer.GetSpectateTargetIndex());
+        m_velocity = GetEntityVelocityApprox(g_LocalPlayer.GetSpectateTargetIndex());
     }
     else {
-        m_flVelocity = (g_LocalPlayer.GetVelocity() + g_LocalPlayer.GetBaseVelocity()).Length2D();
+        m_velocity = (g_LocalPlayer.GetVelocity() + g_LocalPlayer.GetBaseVelocity()).Length2D();
     }
 }
 

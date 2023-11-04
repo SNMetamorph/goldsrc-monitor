@@ -28,17 +28,17 @@ public:
     void InitFromString(const std::string &pattern);
     bool IsInitialized() const;
 
-    inline int GetLength() const { return m_Signature.size(); };
-    inline uint8_t GetByteAt(int offset) const { return m_Signature[offset]; };
-    inline bool ShouldCheckByteAt(int offset) const { return m_Mask[offset]; };
+    inline int GetLength() const { return m_signature.size(); };
+    inline uint8_t GetByteAt(int offset) const { return m_signature[offset]; };
+    inline bool ShouldCheckByteAt(int offset) const { return m_mask[offset]; };
     // To provide an optimal way to finding pattern address
-    inline const int *GetMaskAddress() const { return m_Mask.data(); };
-    inline const uint8_t *GetSignatureAddress() const { return m_Signature.data(); };
+    inline const int *GetMaskAddress() const { return m_mask.data(); };
+    inline const uint8_t *GetSignatureAddress() const { return m_signature.data(); };
     
 private:
     void ReserveElements(size_t elemCount);
     void Reset();
 
-    std::vector<int> m_Mask;
-    std::vector<uint8_t> m_Signature;
+    std::vector<int> m_mask;
+    std::vector<uint8_t> m_signature;
 };

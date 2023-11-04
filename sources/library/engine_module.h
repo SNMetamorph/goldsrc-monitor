@@ -23,11 +23,11 @@ public:
 
     bool FindHandle();
     bool GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames);
-    inline bool IsXashEngine() const        { return m_isXashEngine; }
-    inline bool IsSoftwareRenderer() const  { return m_isSoftwareRenderer; };
-    inline ModuleHandle GetHandle() const   { return m_hModule; };
-    inline uint8_t* GetAddress() const      { return m_ModuleInfo.baseAddress; };
-    inline size_t GetSize() const           { return m_ModuleInfo.imageSize; }
+    bool IsXashEngine() const        { return m_isXashEngine; }
+    bool IsSoftwareRenderer() const  { return m_isSoftwareRenderer; };
+    ModuleHandle GetHandle() const   { return m_moduleHandle; };
+    uint8_t* GetAddress() const      { return m_moduleInfo.baseAddress; };
+    size_t GetSize() const           { return m_moduleInfo.imageSize; }
 
 private:
     CEngineModule() {};
@@ -35,8 +35,8 @@ private:
     CEngineModule& operator=(const CEngineModule&) = delete;
     bool SetupModuleInfo();
 
-    ModuleHandle m_hModule = NULL;
-    SysUtils::ModuleInfo m_ModuleInfo;
+    ModuleHandle m_moduleHandle = NULL;
+    SysUtils::ModuleInfo m_moduleInfo;
     bool m_isXashEngine = false;
     bool m_isSoftwareRenderer = false;
 };

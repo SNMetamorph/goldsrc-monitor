@@ -55,15 +55,15 @@ void CApplication::Run()
     
 
     // if can't obtain directly, find engine functions pointer arrays
-    m_BuildInfo.Initialize(engineDLL);
-    g_ClientModule.FindEngfuncs(m_BuildInfo);
-    g_ServerModule.FindEngfuncs(m_BuildInfo);
+    m_buildInfo.Initialize(engineDLL);
+    g_ClientModule.FindEngfuncs(m_buildInfo);
+    g_ServerModule.FindEngfuncs(m_buildInfo);
     g_ServerModule.FindHandle();
     
     InitializeConVars(engineDLL);
     SetCurrentDisplayMode();
     PrintTitleText();
-    m_Hooks.Apply();
+    m_hooks.Apply();
 
     // load configuration file
     g_pClientEngfuncs->pfnClientCmd("exec gsm_config.cfg");
@@ -71,23 +71,23 @@ void CApplication::Run()
 
 void CApplication::InitializeDisplayModes()
 {
-    m_pDisplayModes.clear();
-    m_pDisplayModes.push_back(std::make_shared<CModeFull>());
-    m_pDisplayModes.push_back(std::make_shared<CModeSpeedometer>());
-    m_pDisplayModes.push_back(std::make_shared<CModeEntityReport>());
-    m_pDisplayModes.push_back(std::make_shared<CModeMeasurement>());
-    m_pDisplayModes.push_back(std::make_shared<CModeFaceReport>());
-    m_pDisplayModes.push_back(std::make_shared<CModeAngleTracking>());
+    m_displayModes.clear();
+    m_displayModes.push_back(std::make_shared<CModeFull>());
+    m_displayModes.push_back(std::make_shared<CModeSpeedometer>());
+    m_displayModes.push_back(std::make_shared<CModeEntityReport>());
+    m_displayModes.push_back(std::make_shared<CModeMeasurement>());
+    m_displayModes.push_back(std::make_shared<CModeFaceReport>());
+    m_displayModes.push_back(std::make_shared<CModeAngleTracking>());
 }
 
 void CApplication::InitializePrimitivesRenderer()
 {
-    m_pPrimitivesRenderer = std::make_shared<COpenGLPrimitivesRenderer>();
+    m_primitivesRenderer = std::make_shared<COpenGLPrimitivesRenderer>();
 }
 
 void CApplication::HandleChangelevel()
 {
-    for (auto &mode : m_pDisplayModes) {
+    for (auto &mode : m_displayModes) {
         mode->HandleChangelevel();
     }
 }
@@ -211,22 +211,22 @@ void CApplication::InitializeConVars(const SysUtils::ModuleInfo &engineLib)
 
 void CApplication::SetCurrentDisplayMode()
 {
-    DisplayModeIndex displayMode = Utils::GetCurrentDisplayMode();
-    for (auto &mode : m_pDisplayModes) 
+    DisplayModeType displayMode = Utils::GetCurrentDisplayMode();
+    for (auto &mode : m_displayModes) 
     {
         if (mode->GetModeIndex() == displayMode) 
         {
-            m_pCurrentDisplayMode = mode;
+            m_currentDisplayMode = mode;
             return;
         }
     }
-    m_pCurrentDisplayMode = m_pDisplayModes[0];
+    m_currentDisplayMode = m_displayModes[0];
 }
 
 void CApplication::UpdateScreenInfo()
 {
-    m_ScreenInfo.iSize = sizeof(m_ScreenInfo);
-    g_pClientEngfuncs->pfnGetScreenInfo(&m_ScreenInfo);
+    m_screenInfo.iSize = sizeof(m_screenInfo);
+    g_pClientEngfuncs->pfnGetScreenInfo(&m_screenInfo);
 }
 
 // should be updated only once in frame
@@ -238,17 +238,17 @@ void CApplication::UpdateSmoothFrametime()
     const float k               = 0.24f;
     const float diffThreshold   = 0.13f;
     float currentTime           = g_pClientEngfuncs->GetClientTime();
-    float timeDelta             = currentTime - m_flLastClientTime;
+    float timeDelta             = currentTime - m_lastClientTime;
 
-    if ((timeDelta - m_flLastFrameTime) > diffThreshold)
-        timeDelta = m_flLastFrameTime;
+    if ((timeDelta - m_lastFrameTime) > diffThreshold)
+        timeDelta = m_lastFrameTime;
 
-    m_flFrameTime       += (timeDelta - m_flFrameTime) * k;
-    m_flLastFrameTime   = m_flFrameTime;
-    m_flLastClientTime  = currentTime;
+    m_frameTime       += (timeDelta - m_frameTime) * k;
+    m_lastFrameTime   = m_frameTime;
+    m_lastClientTime  = currentTime;
 #elif defined(FILTER_AVG_SIMPLE)
     float currentTime = g_pClientEngfuncs->GetClientTime();
-    float timeDelta = currentTime - m_flLastClientTime;
+    float timeDelta = currentTime - m_lastClientTime;
     static float buffer[FILTER_SIZE];
     double sum = 0.0;
 
@@ -261,13 +261,13 @@ void CApplication::UpdateSmoothFrametime()
         sum += buffer[i];
     }
 
-    m_flLastClientTime = currentTime;
-    m_flFrameTime = sum / (double)FILTER_SIZE;
+    m_lastClientTime = currentTime;
+    m_frameTime = sum / (double)FILTER_SIZE;
 #else
     float currentTime = g_pClientEngfuncs->GetClientTime();
-    float timeDelta = currentTime - m_flLastClientTime;
-    m_flFrameTime = timeDelta;
-    m_flLastClientTime = currentTime;
+    float timeDelta = currentTime - m_lastClientTime;
+    m_frameTime = timeDelta;
+    m_lastClientTime = currentTime;
 #endif
 }
 
@@ -276,16 +276,16 @@ void CApplication::DisplayModeRender2D()
     SetCurrentDisplayMode();
     UpdateSmoothFrametime();
     UpdateScreenInfo();
-    m_pCurrentDisplayMode->Render2D(m_flFrameTime, m_ScreenInfo.iWidth, m_ScreenInfo.iHeight, m_StringStack);
+    m_currentDisplayMode->Render2D(m_frameTime, m_screenInfo.iWidth, m_screenInfo.iHeight, m_stringStack);
 }
 
 void CApplication::DisplayModeRender3D()
 {
     SetCurrentDisplayMode();
-    m_pCurrentDisplayMode->Render3D();
+    m_currentDisplayMode->Render3D();
 }
 
 bool CApplication::KeyInput(int keyDown, int keyCode, const char *bindName)
 {
-    return m_pCurrentDisplayMode->KeyInput(keyDown != 0, keyCode, bindName);
+    return m_currentDisplayMode->KeyInput(keyDown != 0, keyCode, bindName);
 }

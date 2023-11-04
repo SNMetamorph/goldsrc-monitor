@@ -27,7 +27,7 @@ public:
     void Render3D() override;
     bool KeyInput(bool keyDown, int keyCode, const char *bindName) override;
     void HandleChangelevel() override;
-    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_ENTITYREPORT; };
+    DisplayModeType GetModeIndex() override { return DisplayModeType::EntityReport; };
 
 private:
     int TraceEntity();
@@ -38,8 +38,8 @@ private:
     void PrintEntityCommonInfo(int entityIndex, CStringStack &screenText);
     int GetActualEntityIndex();
 
-    int m_iEntityIndex;
-    int m_iLockedEntityIndex;
-    std::vector<int> m_EntityIndexList;
-    std::vector<float> m_EntityDistanceList;
+    int m_entityIndex;
+    int m_lockedEntityIndex;
+    std::vector<int> m_entityIndexList;
+    std::vector<float> m_entityDistanceList;
 };

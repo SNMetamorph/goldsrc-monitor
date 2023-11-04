@@ -34,7 +34,7 @@ namespace Utils
     uint8_t *UnwrapJmp(uint8_t *opcodeAddr);
 
     float GetCurrentSysTime();
-    DisplayModeIndex GetCurrentDisplayMode();
+    DisplayModeType GetCurrentDisplayMode();
 
     cvar_t *RegisterConVar(const char *name, const char *value, int flags);
     int GetStringWidth(const char *str);

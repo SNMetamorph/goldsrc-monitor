@@ -32,9 +32,9 @@ CServerModule &CServerModule::GetInstance()
 bool CServerModule::FindHandle()
 {
     ProcessHandle currProcess = SysUtils::GetCurrentProcessHandle();
-    m_hModule = SysUtils::FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
-    SysUtils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
-    return m_hModule.Valid();
+    m_module = SysUtils::FindModuleByExport(GetCurrentProcess(), "GetEntityAPI");
+    SysUtils::GetModuleInfo(currProcess, m_module, m_moduleInfo);
+    return m_module.Valid();
 }
 
 bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)

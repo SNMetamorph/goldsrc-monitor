@@ -32,9 +32,9 @@ CClientModule& CClientModule::GetInstance()
 bool CClientModule::FindHandle()
 {
     ProcessHandle currProcess = SysUtils::GetCurrentProcessHandle();
-    m_hModule = SysUtils::FindModuleByExport(currProcess, "HUD_ProcessPlayerState");
-    SysUtils::GetModuleInfo(currProcess, m_hModule, m_ModuleInfo);
-    return m_hModule.Valid();
+    m_moduleHandle = SysUtils::FindModuleByExport(currProcess, "HUD_ProcessPlayerState");
+    SysUtils::GetModuleInfo(currProcess, m_moduleHandle, m_moduleInfo);
+    return m_moduleHandle.Valid();
 }
 
 bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
@@ -137,7 +137,7 @@ uint8_t* CClientModule::GetFuncAddress(const char *funcName)
 
 CClientModule::CClientModule()
 {
-    m_ModuleInfo.baseAddress = nullptr;
-    m_ModuleInfo.entryPointAddress = nullptr;
-    m_ModuleInfo.imageSize = 0;
+    m_moduleInfo.baseAddress = nullptr;
+    m_moduleInfo.entryPointAddress = nullptr;
+    m_moduleInfo.imageSize = 0;
 }

@@ -23,30 +23,35 @@ class CBuildInfo::Entry
 public:
     Entry() {};
     bool Validate() const;
-    inline uint32_t GetBuildNumber() const { return m_iBuildNumber; }
-    inline void SetBuildNumber(uint32_t value) { m_iBuildNumber = value; }
-    inline bool HasClientEngfuncsOffset() const { return m_iClientEngfuncsOffset != 0; }
-    inline bool HasServerEngfuncsOffset() const { return m_iServerEngfuncsOffset != 0; }
-    inline uint64_t GetClientEngfuncsOffset() const { return m_iClientEngfuncsOffset; }
-    inline uint64_t GetServerEngfuncsOffset() const { return m_iServerEngfuncsOffset; }
-    inline void SetClientEngfuncsOffset(uint64_t offset) { m_iClientEngfuncsOffset = offset; }
-    inline void SetServerEngfuncsOffset(uint64_t offset) { m_iServerEngfuncsOffset = offset; }
-    inline const std::string &GetGameProcessName() const { return m_szGameProcessName; }
-    inline void SetGameProcessName(const char *value) { m_szGameProcessName.assign(value); }
-    inline void SetFunctionPattern(CBuildInfo::FunctionType type, CMemoryPattern pattern) { 
-        m_FunctionPatterns[static_cast<size_t>(type)] = pattern; 
+
+    uint32_t GetBuildNumber() const { return m_buildNumber; }
+    void SetBuildNumber(uint32_t value) { m_buildNumber = value; }
+
+    bool HasClientEngfuncsOffset() const { return m_clientEngfuncsOffset != 0; }
+    bool HasServerEngfuncsOffset() const { return m_serverEngfuncsOffset != 0; }
+    uint64_t GetClientEngfuncsOffset() const { return m_clientEngfuncsOffset; }
+    uint64_t GetServerEngfuncsOffset() const { return m_serverEngfuncsOffset; }
+    void SetClientEngfuncsOffset(uint64_t offset) { m_clientEngfuncsOffset = offset; }
+    void SetServerEngfuncsOffset(uint64_t offset) { m_serverEngfuncsOffset = offset; }
+
+    const std::string &GetGameProcessName() const { return m_gameProcessName; }
+    void SetGameProcessName(const char *value) { m_gameProcessName.assign(value); }
+
+    void SetFunctionPattern(CBuildInfo::FunctionType type, CMemoryPattern pattern) { 
+        m_functionPatterns[static_cast<size_t>(type)] = pattern; 
     }
-    inline const CMemoryPattern &GetFunctionPattern(CBuildInfo::FunctionType type) const {
-        return m_FunctionPatterns[static_cast<size_t>(type)];
+    const CMemoryPattern &GetFunctionPattern(CBuildInfo::FunctionType type) const {
+        return m_functionPatterns[static_cast<size_t>(type)];
     }
-    inline bool operator<(const Entry &operand) const {
-        return m_iBuildNumber < operand.GetBuildNumber();
+
+    bool operator<(const Entry &operand) const {
+        return m_buildNumber < operand.GetBuildNumber();
     }
 
 private:
-    uint32_t m_iBuildNumber = 0;
-    std::string m_szGameProcessName;
-    uint64_t m_iClientEngfuncsOffset = 0x0;
-    uint64_t m_iServerEngfuncsOffset = 0x0;
-    CMemoryPattern m_FunctionPatterns[4];
+    uint32_t m_buildNumber = 0;
+    std::string m_gameProcessName;
+    uint64_t m_clientEngfuncsOffset = 0x0;
+    uint64_t m_serverEngfuncsOffset = 0x0;
+    CMemoryPattern m_functionPatterns[CBuildInfo::k_functionsCount];
 };

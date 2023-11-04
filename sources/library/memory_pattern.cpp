@@ -30,20 +30,20 @@ CMemoryPattern::CMemoryPattern(const char *pattern, int byteCount, uint8_t wildm
 
 void CMemoryPattern::ReserveElements(size_t elemCount)
 {
-    m_Mask.reserve(elemCount);
-    m_Signature.reserve(elemCount);
+    m_mask.reserve(elemCount);
+    m_signature.reserve(elemCount);
 }
 
 void CMemoryPattern::Reset()
 {
-    m_Mask.clear();
-    m_Signature.clear();
+    m_mask.clear();
+    m_signature.clear();
 }
 
 void CMemoryPattern::AddByte(uint8_t value, bool shouldCheck)
 {
-    m_Mask.push_back(shouldCheck);
-    m_Signature.push_back(value);
+    m_mask.push_back(shouldCheck);
+    m_signature.push_back(value);
 }
 
 void CMemoryPattern::InitFromBytes(uint8_t *pattern, int byteCount, uint8_t wildmark)
@@ -56,13 +56,13 @@ void CMemoryPattern::InitFromBytes(uint8_t *pattern, int byteCount, uint8_t wild
         uint8_t *currentByte = pattern + i;
         if (currentByte[0] != wildmark)
         {
-            m_Signature.push_back(currentByte[0]);
-            m_Mask.push_back(true);
+            m_signature.push_back(currentByte[0]);
+            m_mask.push_back(true);
         }
         else 
         {
-            m_Signature.push_back(0x0);
-            m_Mask.push_back(false);
+            m_signature.push_back(0x0);
+            m_mask.push_back(false);
         }
     }
 }
@@ -91,8 +91,8 @@ void CMemoryPattern::InitFromString(const std::string &pattern)
             }
         }
 
-        m_Mask.shrink_to_fit();
-        m_Signature.shrink_to_fit();
+        m_mask.shrink_to_fit();
+        m_signature.shrink_to_fit();
     }
     catch (std::exception &ex)
     {
@@ -102,7 +102,7 @@ void CMemoryPattern::InitFromString(const std::string &pattern)
 
 bool CMemoryPattern::IsInitialized() const
 {
-    if (m_Mask.size() < 1 || m_Signature.size() < 1) {
+    if (m_mask.size() < 1 || m_signature.size() < 1) {
         return false;
     }
     return true;

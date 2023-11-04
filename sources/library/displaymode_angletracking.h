@@ -26,11 +26,11 @@ public:
     void Render3D() override {};
     bool KeyInput(bool, int, const char *) override { return true; };
     void HandleChangelevel() override {}; 
-    DisplayModeIndex GetModeIndex() override { return DISPLAYMODE_ANGLETRACKING; };
+    DisplayModeType GetModeIndex() override { return DisplayModeType::AngleTracking; };
 
 private:
-    vec3_t m_vecLastAngles;
-    float m_flTrackStartTime;
-    float m_flLastYawVelocity;
-    float m_flLastPitchVelocity;
+    vec3_t m_lastAngles;
+    float m_trackStartTime;
+    float m_lastYawVelocity;
+    float m_lastPitchVelocity;
 };

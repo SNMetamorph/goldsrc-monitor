@@ -20,9 +20,9 @@ GNU General Public License for more details.
 
 CModeFull::CModeFull()
 {
-    m_flFrameTime = 0.0f;
-    m_flLastFrameTime = 0.0f;
-    m_flLastSysTime = 0.0f;
+    m_frameTime = 0.0f;
+    m_lastFrameTime = 0.0f;
+    m_lastSysTime = 0.0f;
 }
 
 void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
@@ -90,13 +90,13 @@ float CModeFull::GetSmoothSystemFrametime()
     const float smoothFactor    = 0.24f;
     const float diffThreshold   = 0.13f;
     float currSysTime           = Utils::GetCurrentSysTime();
-    float timeDelta             = currSysTime - m_flLastSysTime;
+    float timeDelta             = currSysTime - m_lastSysTime;
 
-    if ((timeDelta - m_flLastFrameTime) > diffThreshold)
-        timeDelta = m_flLastFrameTime;
+    if ((timeDelta - m_lastFrameTime) > diffThreshold)
+        timeDelta = m_lastFrameTime;
 
-    m_flFrameTime       += (timeDelta - m_flFrameTime) * smoothFactor;
-    m_flLastFrameTime   = m_flFrameTime;
-    m_flLastSysTime     = currSysTime;
-    return m_flFrameTime;
+    m_frameTime       += (timeDelta - m_frameTime) * smoothFactor;
+    m_lastFrameTime   = m_frameTime;
+    m_lastSysTime     = currSysTime;
+    return m_frameTime;
 }

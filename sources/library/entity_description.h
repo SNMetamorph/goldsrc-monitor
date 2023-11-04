@@ -34,7 +34,7 @@ public:
     inline const std::string& GetModelName() const  { return m_szModelName; }
     inline const vec3_t &GetOrigin() const { return m_vecOrigin; }
     inline const vec3_t &GetAngles() const { return m_vecAngles; }
-    inline const CBoundingBox &GetBoundingBox() const { return m_BoundingBox; }
+    inline const CBoundingBox &GetBoundingBox() const { return m_boundingBox; }
 
 private:
     void Reset();
@@ -48,6 +48,6 @@ private:
     vec3_t m_vecAngles;
     vec3_t m_vecOrigin;
     int m_iAssociatedEntity;
-    CBoundingBox m_BoundingBox;
+    CBoundingBox m_boundingBox;
     std::map<std::string, std::string> m_EntityProps;
 };

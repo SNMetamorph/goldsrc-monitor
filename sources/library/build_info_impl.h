@@ -37,7 +37,7 @@ public:
     bool FindBuildNumberFunc(const SysUtils::ModuleInfo &engineModule);
     std::optional<size_t> FindActualInfoEntry();
 
-    uint32_t m_iBuildNumber = -1;
+    uint32_t m_buildNumber = -1;
     bool m_infoEntryGameSpecific = false;
     pfnGetBuildNumber_t m_pfnGetBuildNumber = nullptr;
     std::string m_initErrorMessage;

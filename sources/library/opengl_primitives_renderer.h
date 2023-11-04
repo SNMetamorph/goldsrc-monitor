@@ -18,12 +18,14 @@ GNU General Public License for more details.
 
 class COpenGLPrimitivesRenderer : public IPrimitivesRenderer
 {
-private:
+public:
 	virtual void Begin() override;
 	virtual void End() override;
 	virtual void ToggleDepthTest(bool state) override;
 	virtual void RenderPrimitives(PrimitiveType type, 
 		const std::vector<vec3_t>& verticesBuffer, 
 		const std::vector<Color>& colorBuffer) override;
+
+private:
 	uint32_t GetGlPrimitiveEnum(PrimitiveType pt) const;
 };

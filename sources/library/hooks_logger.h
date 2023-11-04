@@ -26,6 +26,6 @@ public:
 	void setLogLevel(PLH::ErrorLevel level);
 
 private:
-	std::string m_szOutputText;
-	PLH::ErrorLevel m_ErrorLevel = PLH::ErrorLevel::NONE;
+	std::string m_outputText;
+	PLH::ErrorLevel m_errorLevel = PLH::ErrorLevel::NONE;
 };

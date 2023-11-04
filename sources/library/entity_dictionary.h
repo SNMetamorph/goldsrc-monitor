@@ -29,8 +29,8 @@ public:
     void VisualizeDescriptions() const;
     bool FindDescription(int entityIndex, CEntityDescription &destDescription, int &iterCount);
 
-    inline int GetDescriptionsCount() const { return m_EntityDescList.size(); }
-    inline bool IsInitialized() const { return m_EntityDescList.size() > 0;  }
+    int GetDescriptionsCount() const { return m_entityDescList.size(); }
+    bool IsInitialized() const { return m_entityDescList.size() > 0;  }
     
 private:
     CEntityDictionary() {};
@@ -41,8 +41,8 @@ private:
     void BuildDescriptionsTree();
     void ParseEntityData();
 
-    std::map<int, int> m_Associations;
-    CBVHTree m_EntityDescTree = CBVHTree(&m_EntityDescList);
-    std::vector<CEntityDescription> m_EntityDescList;
+    std::map<int, int> m_associations;
+    CBVHTree m_entityDescTree = CBVHTree(&m_entityDescList);
+    std::vector<CEntityDescription> m_entityDescList;
 };
 extern CEntityDictionary &g_EntityDictionary;

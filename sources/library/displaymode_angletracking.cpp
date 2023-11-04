@@ -19,10 +19,10 @@ GNU General Public License for more details.
 
 CModeAngleTracking::CModeAngleTracking()
 {
-    m_vecLastAngles = Vector(0.0f, 0.0f, 0.0f);
-    m_flTrackStartTime = 0.0f;
-    m_flLastYawVelocity = 0.0f;
-    m_flLastPitchVelocity = 0.0f;
+    m_lastAngles = Vector(0.0f, 0.0f, 0.0f);
+    m_trackStartTime = 0.0f;
+    m_lastYawVelocity = 0.0f;
+    m_lastPitchVelocity = 0.0f;
 }
 
 void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
@@ -32,8 +32,8 @@ void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, 
 
     const float threshold = 0.001f;
     const vec3_t &currAngles = g_LocalPlayer.GetAngles();
-    float pitchVelocity = (currAngles.x - m_vecLastAngles.x) / frameTime;
-    float yawVelocity = (currAngles.y - m_vecLastAngles.y) / frameTime;
+    float pitchVelocity = (currAngles.x - m_lastAngles.x) / frameTime;
+    float yawVelocity = (currAngles.y - m_lastAngles.y) / frameTime;
 
     screenText.Clear();
     screenText.PushPrintf("   up : %.2f deg/s", -pitchVelocity);
@@ -48,23 +48,23 @@ void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, 
     );
 
     // check for start
-    if (fabs(m_flLastPitchVelocity) < threshold && fabs(pitchVelocity) > threshold) {
-        m_flTrackStartTime = g_pClientEngfuncs->GetClientTime();
+    if (fabs(m_lastPitchVelocity) < threshold && fabs(pitchVelocity) > threshold) {
+        m_trackStartTime = g_pClientEngfuncs->GetClientTime();
     }
 
     if (fabs(pitchVelocity) > threshold)
     {
         g_pClientEngfuncs->Con_Printf("(%.5f; %.2f)\n",
-            (g_pClientEngfuncs->GetClientTime() - m_flTrackStartTime), -pitchVelocity
+            (g_pClientEngfuncs->GetClientTime() - m_trackStartTime), -pitchVelocity
         );
     }
 
     // check for end
-    if (fabs(pitchVelocity) < threshold && fabs(m_flLastPitchVelocity) > threshold) {
+    if (fabs(pitchVelocity) < threshold && fabs(m_lastPitchVelocity) > threshold) {
         g_pClientEngfuncs->Con_Printf("\n");
     }
 
-    m_vecLastAngles = currAngles;
-    m_flLastPitchVelocity = pitchVelocity;
-    m_flLastYawVelocity = yawVelocity;
+    m_lastAngles = currAngles;
+    m_lastPitchVelocity = pitchVelocity;
+    m_lastYawVelocity = yawVelocity;
 }

@@ -36,8 +36,8 @@ public:
     void DisplayModeRender3D();
     void HandleChangelevel();
     bool KeyInput(int keyDown, int keyCode, const char *bindName);
-    inline const SCREENINFO& GetScreenInfo() const { return m_ScreenInfo; };
-    inline auto GetRenderer() const { return m_pPrimitivesRenderer; };
+    const SCREENINFO& GetScreenInfo() const { return m_screenInfo; };
+    auto GetRenderer() const { return m_primitivesRenderer; };
 
 private:
     CApplication() {
@@ -55,15 +55,15 @@ private:
     void UpdateScreenInfo();
     void UpdateSmoothFrametime();
 
-    float m_flFrameTime;
-    float m_flLastFrameTime;
-    float m_flLastClientTime;
-    CHooks m_Hooks;
-    CBuildInfo m_BuildInfo;
-    SCREENINFO m_ScreenInfo = { 0 };
-    CStringStack m_StringStack = CStringStack(128);
-    std::shared_ptr<IDisplayMode> m_pCurrentDisplayMode = nullptr;
-    std::shared_ptr<IPrimitivesRenderer> m_pPrimitivesRenderer = nullptr;
-    std::vector<std::shared_ptr<IDisplayMode>> m_pDisplayModes;
+    float m_frameTime;
+    float m_lastFrameTime;
+    float m_lastClientTime;
+    CHooks m_hooks;
+    CBuildInfo m_buildInfo;
+    SCREENINFO m_screenInfo = { 0 };
+    CStringStack m_stringStack = CStringStack(128);
+    std::shared_ptr<IDisplayMode> m_currentDisplayMode = nullptr;
+    std::shared_ptr<IPrimitivesRenderer> m_primitivesRenderer = nullptr;
+    std::vector<std::shared_ptr<IDisplayMode>> m_displayModes;
 };
 extern CApplication &g_Application;
