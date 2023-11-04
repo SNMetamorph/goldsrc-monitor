@@ -21,12 +21,13 @@ GNU General Public License for more details.
 #include "utils.h"
 
 enginefuncs_t *g_pServerEngfuncs;
-CServerModule &g_ServerModule = CServerModule::GetInstance();
 
-CServerModule &CServerModule::GetInstance()
+CServerModule::CServerModule(const CEngineModule &moduleRef)
+    : m_engineModule(moduleRef)
 {
-    static CServerModule instance;
-    return instance;
+    m_moduleInfo.baseAddress = nullptr;
+    m_moduleInfo.entryPointAddress = nullptr;
+    m_moduleInfo.imageSize = 0;
 }
 
 bool CServerModule::FindHandle()
@@ -46,8 +47,8 @@ bool CServerModule::FindEngfuncs(const CBuildInfo &buildInfo)
     uint8_t *scanStartAddr;
 
     const size_t pointerSize = sizeof(void *);
-    uint8_t *moduleAddr = g_EngineModule.GetAddress();
-    uint8_t *moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    uint8_t *moduleAddr = m_engineModule.GetAddress();
+    uint8_t *moduleEndAddr = moduleAddr + m_engineModule.GetSize();
     const CBuildInfo::Entry *buildInfoEntry = buildInfo.GetInfoEntry();
 
     if (!buildInfoEntry) {

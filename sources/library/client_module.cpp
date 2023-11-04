@@ -21,12 +21,13 @@ GNU General Public License for more details.
 #include "sys_utils.h"
 
 cl_enginefunc_t *g_pClientEngfuncs;
-CClientModule& g_ClientModule = CClientModule::GetInstance();
 
-CClientModule& CClientModule::GetInstance()
+CClientModule::CClientModule(const CEngineModule &moduleRef)
+    : m_engineModule(moduleRef)
 {
-    static CClientModule instance;
-    return instance;
+    m_moduleInfo.baseAddress = nullptr;
+    m_moduleInfo.entryPointAddress = nullptr;
+    m_moduleInfo.imageSize = 0;
 }
 
 bool CClientModule::FindHandle()
@@ -41,11 +42,11 @@ bool CClientModule::FindEngfuncs(const CBuildInfo &buildInfo)
 {
     uint8_t *pfnSPR_Load;
     uint8_t *pfnSPR_Frames;
-    uint8_t *moduleAddr = g_EngineModule.GetAddress();
-    uint8_t *moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    uint8_t *moduleAddr = m_engineModule.GetAddress();
+    uint8_t *moduleEndAddr = moduleAddr + m_engineModule.GetSize();
     const CBuildInfo::Entry *buildInfoEntry = buildInfo.GetInfoEntry();
 
-    if (!g_EngineModule.GetFunctionsFromAPI(&pfnSPR_Load, &pfnSPR_Frames))
+    if (!m_engineModule.GetFunctionsFromAPI(&pfnSPR_Load, &pfnSPR_Frames))
     {
         if (!buildInfoEntry) {
             std::string errorMsg;
@@ -87,9 +88,9 @@ cl_enginefunc_t *CClientModule::SearchEngfuncsTable(uint8_t *pfnSPR_Load, uint8_
 {
     bool fallbackMethod = false;
     uint8_t *targetAddr = pfnSPR_Load;
-    uint8_t *moduleAddr = g_EngineModule.GetAddress();
+    uint8_t *moduleAddr = m_engineModule.GetAddress();
     uint8_t *scanStartAddr = moduleAddr;
-    uint8_t *moduleEndAddr = moduleAddr + g_EngineModule.GetSize();
+    uint8_t *moduleEndAddr = moduleAddr + m_engineModule.GetSize();
     constexpr size_t pointerSize = sizeof(void *);
 
     while (true)
@@ -130,14 +131,7 @@ cl_enginefunc_t *CClientModule::SearchEngfuncsTable(uint8_t *pfnSPR_Load, uint8_
     return nullptr;
 }
 
-uint8_t* CClientModule::GetFuncAddress(const char *funcName)
+uint8_t* CClientModule::GetFuncAddress(const char *funcName) const
 {
     return reinterpret_cast<uint8_t*>(GetProcAddress(GetHandle(), funcName));
-}
-
-CClientModule::CClientModule()
-{
-    m_moduleInfo.baseAddress = nullptr;
-    m_moduleInfo.entryPointAddress = nullptr;
-    m_moduleInfo.imageSize = 0;
 }

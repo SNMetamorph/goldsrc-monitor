@@ -16,14 +16,6 @@ GNU General Public License for more details.
 #include "utils.h"
 #include "client_module.h"
 
-CEntityDictionary &g_EntityDictionary = CEntityDictionary::GetInstance();
-
-CEntityDictionary &CEntityDictionary::GetInstance()
-{
-    static CEntityDictionary instance;
-    return instance;
-}
-
 // Should be initialized after every map change
 void CEntityDictionary::Initialize()
 {
@@ -78,6 +70,11 @@ bool CEntityDictionary::FindDescription(int entityIndex, CEntityDescription &des
         return true;
     }
     return false;
+}
+
+CEntityDictionary::CEntityDictionary()
+    : m_entityDescTree(m_entityDescList)
+{
 }
 
 void CEntityDictionary::AssociateDescription(int entityIndex, int descIndex)

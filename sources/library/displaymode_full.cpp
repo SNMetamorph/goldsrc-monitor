@@ -18,7 +18,8 @@ GNU General Public License for more details.
 #include "utils.h"
 #include "local_player.h"
 
-CModeFull::CModeFull()
+CModeFull::CModeFull(const CLocalPlayer &playerRef)
+    : m_localPlayer(playerRef)
 {
     m_frameTime = 0.0f;
     m_lastFrameTime = 0.0f;
@@ -27,16 +28,16 @@ CModeFull::CModeFull()
 
 void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (g_LocalPlayer.PredictionDataValid())
+    if (m_localPlayer.PredictionDataValid())
     {
         float timeDelta = GetSmoothSystemFrametime();
-        float velocityNum = g_LocalPlayer.GetVelocity().Length2D();
-        const vec3_t &origin = g_LocalPlayer.GetOrigin();
-        const vec3_t &velocity = g_LocalPlayer.GetVelocity();
-        const vec3_t &angles = g_LocalPlayer.GetAngles();
-        const vec3_t &baseVelocity = g_LocalPlayer.GetBaseVelocity();
-        const vec3_t &punchAngle = g_LocalPlayer.GetPunchAngles();
-        const vec3_t &viewOffset = g_LocalPlayer.GetViewOffset();
+        float velocityNum = m_localPlayer.GetVelocity().Length2D();
+        const vec3_t &origin = m_localPlayer.GetOrigin();
+        const vec3_t &velocity = m_localPlayer.GetVelocity();
+        const vec3_t &angles = m_localPlayer.GetAngles();
+        const vec3_t &baseVelocity = m_localPlayer.GetBaseVelocity();
+        const vec3_t &punchAngle = m_localPlayer.GetPunchAngles();
+        const vec3_t &viewOffset = m_localPlayer.GetViewOffset();
 
         screenText.Clear();
         screenText.PushPrintf("FPS: %.1f", 1.f / timeDelta);
@@ -47,29 +48,29 @@ void CModeFull::Render2D(float frameTime, int scrWidth, int scrHeight, CStringSt
         screenText.PushPrintf("Origin: (%.2f, %.2f, %.2f)", origin.x, origin.y, origin.z);
         screenText.PushPrintf("Angles: (%.2f, %.2f, %.2f)", angles.x, angles.y, angles.z);
         screenText.PushPrintf("Base Velocity: (%.2f, %.2f, %.2f)", baseVelocity.x, baseVelocity.y, baseVelocity.z);
-        screenText.PushPrintf("Max Velocity: %.2f (client %.2f)", g_LocalPlayer.GetMaxSpeed(), g_LocalPlayer.GetClientMaxSpeed());
-        screenText.PushPrintf("Movetype: %s\n", Utils::GetMovetypeName(g_LocalPlayer.GetMovetype()));
+        screenText.PushPrintf("Max Velocity: %.2f (client %.2f)", m_localPlayer.GetMaxSpeed(), m_localPlayer.GetClientMaxSpeed());
+        screenText.PushPrintf("Movetype: %s\n", Utils::GetMovetypeName(m_localPlayer.GetMovetype()));
 
         screenText.PushPrintf("View Offset: (%.2f, %.2f, %.2f)", viewOffset.x, viewOffset.y, viewOffset.z);
         screenText.PushPrintf("Punch Angle: (%.2f, %.2f, %.2f)", punchAngle.x, punchAngle.y, punchAngle.z);
-        screenText.PushPrintf("Duck Time: %.2f", g_LocalPlayer.GetDuckTime());
-        screenText.PushPrintf("In Duck Process: %s", g_LocalPlayer.IsDucking() ? "yes" : "no");
-        screenText.PushPrintf("Player Flags: %d", g_LocalPlayer.GetFlags());
-        screenText.PushPrintf("Hull Type: %d", g_LocalPlayer.GetHullType());
-        screenText.PushPrintf("Gravity: %.2f", g_LocalPlayer.GetGravity());
-        screenText.PushPrintf("Friction: %.2f", g_LocalPlayer.GetFriction());
-        screenText.PushPrintf("On Ground: %s", g_LocalPlayer.OnGround() ? "yes" : "no");
+        screenText.PushPrintf("Duck Time: %.2f", m_localPlayer.GetDuckTime());
+        screenText.PushPrintf("In Duck Process: %s", m_localPlayer.IsDucking() ? "yes" : "no");
+        screenText.PushPrintf("Player Flags: %d", m_localPlayer.GetFlags());
+        screenText.PushPrintf("Hull Type: %d", m_localPlayer.GetHullType());
+        screenText.PushPrintf("Gravity: %.2f", m_localPlayer.GetGravity());
+        screenText.PushPrintf("Friction: %.2f", m_localPlayer.GetFriction());
+        screenText.PushPrintf("On Ground: %s", m_localPlayer.OnGround() ? "yes" : "no");
         screenText.PushPrintf("fuserX: %.2f / %.2f / %.2f / %.2f",
-            g_LocalPlayer.GetFloatUserVar(1),
-            g_LocalPlayer.GetFloatUserVar(2),
-            g_LocalPlayer.GetFloatUserVar(3),
-            g_LocalPlayer.GetFloatUserVar(4)
+            m_localPlayer.GetFloatUserVar(1),
+            m_localPlayer.GetFloatUserVar(2),
+            m_localPlayer.GetFloatUserVar(3),
+            m_localPlayer.GetFloatUserVar(4)
         );
         screenText.PushPrintf("iuserX: %d / %d / %d / %d",
-            g_LocalPlayer.GetIntUserVar(1),
-            g_LocalPlayer.GetIntUserVar(2),
-            g_LocalPlayer.GetIntUserVar(3),
-            g_LocalPlayer.GetIntUserVar(4)
+            m_localPlayer.GetIntUserVar(1),
+            m_localPlayer.GetIntUserVar(2),
+            m_localPlayer.GetIntUserVar(3),
+            m_localPlayer.GetIntUserVar(4)
         );
     }
     else

@@ -14,12 +14,13 @@ GNU General Public License for more details.
 
 #pragma once
 #include "display_mode.h"
+#include "local_player.h"
 #include "hlsdk.h"
 
 class CModeSpeedometer : public IDisplayMode
 {
 public: 
-    CModeSpeedometer() {};
+    CModeSpeedometer(const CLocalPlayer &playerRef);
     virtual ~CModeSpeedometer() {};
 
     void Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -35,4 +36,5 @@ private:
 
     float m_velocity;
     float m_lastUpdateTime;
+    const CLocalPlayer &m_localPlayer;
 };

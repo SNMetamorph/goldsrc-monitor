@@ -17,7 +17,8 @@ GNU General Public License for more details.
 #include "client_module.h"
 #include "local_player.h"
 
-CModeAngleTracking::CModeAngleTracking()
+CModeAngleTracking::CModeAngleTracking(const CLocalPlayer &playerRef)
+    : m_localPlayer(playerRef)
 {
     m_lastAngles = Vector(0.0f, 0.0f, 0.0f);
     m_trackStartTime = 0.0f;
@@ -27,11 +28,11 @@ CModeAngleTracking::CModeAngleTracking()
 
 void CModeAngleTracking::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (!g_LocalPlayer.PredictionDataValid())
+    if (!m_localPlayer.PredictionDataValid())
         return;
 
     const float threshold = 0.001f;
-    const vec3_t &currAngles = g_LocalPlayer.GetAngles();
+    const vec3_t &currAngles = m_localPlayer.GetAngles();
     float pitchVelocity = (currAngles.x - m_lastAngles.x) / frameTime;
     float yawVelocity = (currAngles.y - m_lastAngles.y) / frameTime;
 

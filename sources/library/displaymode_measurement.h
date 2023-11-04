@@ -15,6 +15,7 @@ GNU General Public License for more details.
 #pragma once
 #include "stdafx.h"
 #include "display_mode.h"
+#include "local_player.h"
 
 class CModeMeasurement : public IDisplayMode
 {
@@ -30,7 +31,7 @@ public:
     };
 
 public:
-    CModeMeasurement();
+    CModeMeasurement(const CLocalPlayer &playerRef);
     virtual ~CModeMeasurement() {};
 
     void Render2D(float frameTime, int screenWidth, int screenHeight, CStringStack &screenText) override;
@@ -60,4 +61,5 @@ private:
     vec3_t       m_pointB;
     HLSPRITE     m_lineSprite;
     SnapMode     m_snapMode;
+    const CLocalPlayer &m_localPlayer;
 };

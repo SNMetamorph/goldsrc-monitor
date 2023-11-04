@@ -14,12 +14,13 @@ GNU General Public License for more details.
 
 #pragma once
 #include "display_mode.h"
+#include "local_player.h"
 #include "hlsdk.h"
 
 class CModeAngleTracking : public IDisplayMode
 {
 public: 
-    CModeAngleTracking();
+    CModeAngleTracking(const CLocalPlayer &playerRef);
     virtual ~CModeAngleTracking() {};
 
     void Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -33,4 +34,5 @@ private:
     float m_trackStartTime;
     float m_lastYawVelocity;
     float m_lastPitchVelocity;
+    const CLocalPlayer &m_localPlayer;
 };

@@ -14,11 +14,12 @@ GNU General Public License for more details.
 
 #pragma once
 #include "display_mode.h"
+#include "local_player.h"
 
 class CModeFull : public IDisplayMode
 {
 public: 
-    CModeFull();
+    CModeFull(const CLocalPlayer &playerRef);
     virtual ~CModeFull() {};
 
     void Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -33,4 +34,5 @@ private:
     float m_frameTime;
     float m_lastFrameTime;
     float m_lastSysTime;
+    const CLocalPlayer &m_localPlayer;
 };

@@ -30,7 +30,8 @@ enum class SpectatingMode
 class CLocalPlayer
 {
 public:
-    static CLocalPlayer &GetInstance();
+    CLocalPlayer() {};
+    ~CLocalPlayer() = default;
     void UpdatePlayerMove(playermove_t *pmove);
     bool PredictionDataValid() const;
 
@@ -70,9 +71,6 @@ public:
     float GetThirdPersonCameraDist() const;
 
 private:
-    CLocalPlayer() {};
-    ~CLocalPlayer() {};
-
     playermove_t *m_pPlayerMove = nullptr;
 };
-extern CLocalPlayer &g_LocalPlayer;
+

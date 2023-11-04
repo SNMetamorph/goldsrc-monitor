@@ -18,13 +18,13 @@ GNU General Public License for more details.
 #include "client_module.h"
 #include "engine_module.h"
 #include "studio.h"
-#include "entity_dictionary.h"
 #include "local_player.h"
 #include "bounding_box.h"
 #include <algorithm>
 #include <iterator> 
 
-CModeEntityReport::CModeEntityReport()
+CModeEntityReport::CModeEntityReport(const CLocalPlayer &playerRef, const CEngineModule &moduleRef) 
+    : m_localPlayer(playerRef), m_engineModule(moduleRef)
 {
     m_entityIndex = 0;
     m_lockedEntityIndex = 0;
@@ -34,11 +34,11 @@ CModeEntityReport::CModeEntityReport()
 
 void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
-    if (g_LocalPlayer.PredictionDataValid())
+    if (m_localPlayer.PredictionDataValid())
     {
         int debugMode = ConVars::gsm_debug->value;
-        if (!g_EntityDictionary.IsInitialized())
-            g_EntityDictionary.Initialize();
+        if (!m_entityDictionary.IsInitialized())
+            m_entityDictionary.Initialize();
 
         screenText.Clear();
         m_entityIndex = TraceEntity();
@@ -49,7 +49,7 @@ void CModeEntityReport::Render2D(float frameTime, int scrWidth, int scrHeight, C
         }
 
         if (debugMode == 2) {
-            g_EntityDictionary.VisualizeTree(true);
+            m_entityDictionary.VisualizeTree(true);
         }
     }
     else
@@ -73,13 +73,13 @@ void CModeEntityReport::Render3D()
     const Color colorGreen = Color(0.f, 1.f, 0.f, 1.f);
 
     if (debugMode == 1) {
-        g_EntityDictionary.VisualizeDescriptions();
+        m_entityDictionary.VisualizeDescriptions();
     }
     else if (debugMode == 2) {
-        g_EntityDictionary.VisualizeTree(false);
+        m_entityDictionary.VisualizeTree(false);
     }
 
-    if (currentEntity > 0 && !g_EngineModule.IsSoftwareRenderer())
+    if (currentEntity > 0 && !m_engineModule.IsSoftwareRenderer())
     {
         cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(currentEntity);
         Utils::GetEntityBoundingBox(currentEntity, entityBbox);
@@ -115,7 +115,7 @@ bool CModeEntityReport::KeyInput(bool keyDown, int keyCode, const char *bindName
 
 void CModeEntityReport::HandleChangelevel()
 {
-    g_EntityDictionary.Reset();
+    m_entityDictionary.Reset();
 }
 
 int CModeEntityReport::TraceEntity()
@@ -129,11 +129,11 @@ int CModeEntityReport::TraceEntity()
 
     m_entityIndexList.clear();
     m_entityDistanceList.clear();
-    viewOrigin = g_LocalPlayer.GetViewOrigin();
-    viewDir = g_LocalPlayer.GetViewDirection();
+    viewOrigin = m_localPlayer.GetViewOrigin();
+    viewDir = m_localPlayer.GetViewDirection();
 
-    if (g_LocalPlayer.IsSpectate())
-        ignoredEnt = g_LocalPlayer.GetSpectateTargetIndex();  
+    if (m_localPlayer.IsSpectate())
+        ignoredEnt = m_localPlayer.GetSpectateTargetIndex();  
 
     Utils::TraceLine(viewOrigin, viewDir, lineLen, &traceData, ignoredEnt);
     if (traceData.fraction < 1.f)
@@ -146,14 +146,14 @@ int CModeEntityReport::TraceEntity()
 
     const int listCount = 3;
     const physent_t *physEntLists[listCount] = { 
-        g_LocalPlayer.GetVisents(), 
-        g_LocalPlayer.GetPhysents(), 
-        g_LocalPlayer.GetMoveents() 
+        m_localPlayer.GetVisents(), 
+        m_localPlayer.GetPhysents(), 
+        m_localPlayer.GetMoveents() 
     };
     int physEntListsLen[listCount] = { 
-        g_LocalPlayer.GetVisentsCount(), 
-        g_LocalPlayer.GetPhysentsCount(), 
-        g_LocalPlayer.GetMoveentsCount() 
+        m_localPlayer.GetVisentsCount(), 
+        m_localPlayer.GetPhysentsCount(), 
+        m_localPlayer.GetMoveentsCount() 
     };
 
     for (int i = 0; i < listCount; ++i)
@@ -224,7 +224,7 @@ float CModeEntityReport::GetEntityDistance(int entityIndex)
     if (entity)
     {
         model_t *entityModel = entity->model;
-        vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
+        vec3_t viewOrigin = m_localPlayer.GetViewOrigin();
 
         // get nearest bbox-to-player distance by point caged in bbox
         Utils::GetEntityBoundingBox(entityIndex, entityBbox);
@@ -246,9 +246,9 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
         std::string mapName = Utils::GetCurrentMapName();
         screenText.Push("Entity not found");
         screenText.PushPrintf("Map: %s", mapName.c_str());
-        screenText.PushPrintf("Entity descriptions: %d", g_EntityDictionary.GetDescriptionsCount());
+        screenText.PushPrintf("Entity descriptions: %d", m_entityDictionary.GetDescriptionsCount());
     }
-    else if (Utils::IsGameDirEquals("cstrike") && g_LocalPlayer.IsSpectate() && g_LocalPlayer.GetSpectatingMode() != SpectatingMode::Roaming)
+    else if (Utils::IsGameDirEquals("cstrike") && m_localPlayer.IsSpectate() && m_localPlayer.GetSpectatingMode() != SpectatingMode::Roaming)
     {
         // disable print in non free-look spectating modes
         screenText.Push("Print enabled only in free look mode");
@@ -259,7 +259,7 @@ bool CModeEntityReport::PrintEntityInfo(int entityIndex, CStringStack &screenTex
         int iterCount;
         CEntityDescription entityDesc;
         cl_entity_t *entity = g_pClientEngfuncs->GetEntityByIndex(entityIndex);
-        bool descFound = g_EntityDictionary.FindDescription(entityIndex, entityDesc, iterCount);
+        bool descFound = m_entityDictionary.FindDescription(entityIndex, entityDesc, iterCount);
 
         PrintEntityCommonInfo(entityIndex, screenText);
         if (descFound)

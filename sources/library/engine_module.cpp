@@ -15,14 +15,6 @@ GNU General Public License for more details.
 #include "engine_module.h"
 #include "hlsdk.h"
 
-CEngineModule& g_EngineModule = CEngineModule::GetInstance();
-
-CEngineModule& CEngineModule::GetInstance()
-{
-    static CEngineModule instance;
-    return instance;
-}
-
 bool CEngineModule::FindHandle()
 {
     m_moduleHandle = GetModuleHandle("hw.dll");
@@ -42,7 +34,7 @@ bool CEngineModule::FindHandle()
     return (m_moduleHandle != NULL) && SetupModuleInfo();
 }
 
-bool CEngineModule::GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames)
+bool CEngineModule::GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames) const
 {
     if (m_isXashEngine)
     {

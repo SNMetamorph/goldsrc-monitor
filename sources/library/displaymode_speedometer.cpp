@@ -17,6 +17,11 @@ GNU General Public License for more details.
 #include "utils.h"
 #include "local_player.h"
 
+CModeSpeedometer::CModeSpeedometer(const CLocalPlayer &playerRef)
+    : m_localPlayer(playerRef)
+{
+}
+
 void CModeSpeedometer::Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText)
 {
     const int centerX = scrWidth / 2;
@@ -60,11 +65,11 @@ void CModeSpeedometer::DrawVelocityBar(int centerX, int centerY, float velocity)
 
 void CModeSpeedometer::CalculateVelocity(float frameTime)
 {
-    if (g_LocalPlayer.IsSpectate()) {
-        m_velocity = GetEntityVelocityApprox(g_LocalPlayer.GetSpectateTargetIndex());
+    if (m_localPlayer.IsSpectate()) {
+        m_velocity = GetEntityVelocityApprox(m_localPlayer.GetSpectateTargetIndex());
     }
     else {
-        m_velocity = (g_LocalPlayer.GetVelocity() + g_LocalPlayer.GetBaseVelocity()).Length2D();
+        m_velocity = (m_localPlayer.GetVelocity() + m_localPlayer.GetBaseVelocity()).Length2D();
     }
 }
 

@@ -16,36 +16,28 @@ GNU General Public License for more details.
 #include "hlsdk.h"
 #include "sys_utils.h"
 #include "build_info.h"
+#include "engine_module.h"
 #include <stdint.h>
 
 class CClientModule 
 {
 public:
-    static CClientModule& GetInstance();
+    CClientModule(const CEngineModule &moduleRef);
 
     bool FindHandle();
     bool FindEngfuncs(const CBuildInfo &buildInfo);
-    uint8_t *GetFuncAddress(const char *funcName);
+    uint8_t *GetFuncAddress(const char *funcName) const;
     ModuleHandle GetHandle() const   { return m_moduleHandle;  }
     uint8_t *GetBaseAddress() const  { return m_moduleInfo.baseAddress; }
     uint8_t *GetEntryPoint() const   { return m_moduleInfo.entryPointAddress; }
     size_t   GetSize() const         { return m_moduleInfo.imageSize; }
 
 private:
-    CClientModule();
-    CClientModule(const CClientModule&) = delete;
-    CClientModule& operator=(const CClientModule&) = delete;
-
     cl_enginefunc_t* SearchEngfuncsTable(uint8_t *pfnSPR_Load, uint8_t *pfnSPR_Frames);
 
     ModuleHandle m_moduleHandle = NULL;
     SysUtils::ModuleInfo m_moduleInfo;
+    const CEngineModule &m_engineModule;
 };
 
-extern CClientModule& g_ClientModule;
 extern cl_enginefunc_t *g_pClientEngfuncs;
-
-inline uint8_t *GetAddrCL(uint32_t offset)
-{
-    return g_ClientModule.GetBaseAddress() + offset;
-}

@@ -23,7 +23,7 @@ GNU General Public License for more details.
 class CBVHTree
 {
 public:
-    CBVHTree(const std::vector<CEntityDescription> *descList);
+    CBVHTree(const std::vector<CEntityDescription> &descList);
     void Reset();
     void Build();
     double ComputeCost() const;
@@ -49,5 +49,5 @@ private:
     std::stack<int>           m_nodesStack;
     std::stack<ObjectList>    m_objectListStack;
     std::vector<CBVHTreeNode> m_nodes;
-    const std::vector<CEntityDescription> *m_descList;
+    const std::vector<CEntityDescription> &m_descList;
 };

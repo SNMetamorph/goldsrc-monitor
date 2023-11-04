@@ -17,13 +17,6 @@ GNU General Public License for more details.
 #include "client_module.h"
 #include <assert.h>
 
-CLocalPlayer &g_LocalPlayer = CLocalPlayer::GetInstance();
-CLocalPlayer &CLocalPlayer::GetInstance()
-{
-    static CLocalPlayer instance;
-    return instance;
-}
-
 void CLocalPlayer::UpdatePlayerMove(playermove_t *pmove)
 {
     m_pPlayerMove = pmove;

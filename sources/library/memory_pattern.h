@@ -28,12 +28,12 @@ public:
     void InitFromString(const std::string &pattern);
     bool IsInitialized() const;
 
-    inline int GetLength() const { return m_signature.size(); };
-    inline uint8_t GetByteAt(int offset) const { return m_signature[offset]; };
-    inline bool ShouldCheckByteAt(int offset) const { return m_mask[offset]; };
+    int GetLength() const { return m_signature.size(); };
+    uint8_t GetByteAt(int offset) const { return m_signature[offset]; };
+    bool ShouldCheckByteAt(int offset) const { return m_mask[offset]; };
     // To provide an optimal way to finding pattern address
-    inline const int *GetMaskAddress() const { return m_mask.data(); };
-    inline const uint8_t *GetSignatureAddress() const { return m_signature.data(); };
+    const int *GetMaskAddress() const { return m_mask.data(); };
+    const uint8_t *GetSignatureAddress() const { return m_signature.data(); };
     
 private:
     void ReserveElements(size_t elemCount);

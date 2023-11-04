@@ -15,12 +15,15 @@ GNU General Public License for more details.
 #pragma once
 #include "stdafx.h"
 #include "display_mode.h"
+#include "engine_module.h"
+#include "local_player.h"
+#include "entity_dictionary.h"
 #include <vector>
 
 class CModeEntityReport : public IDisplayMode
 {
 public: 
-    CModeEntityReport();
+    CModeEntityReport(const CLocalPlayer &playerRef, const CEngineModule &moduleRef);
     virtual ~CModeEntityReport() {};
 
     void Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -42,4 +45,7 @@ private:
     int m_lockedEntityIndex;
     std::vector<int> m_entityIndexList;
     std::vector<float> m_entityDistanceList;
+    CEntityDictionary m_entityDictionary;
+    const CLocalPlayer &m_localPlayer;
+    const CEngineModule &m_engineModule;
 };

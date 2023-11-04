@@ -19,10 +19,8 @@ GNU General Public License for more details.
 class CEngineModule 
 {
 public:
-    static CEngineModule& GetInstance();
-
     bool FindHandle();
-    bool GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames);
+    bool GetFunctionsFromAPI(uint8_t **pfnSPR_Load, uint8_t **pfnSPR_Frames) const;
     bool IsXashEngine() const        { return m_isXashEngine; }
     bool IsSoftwareRenderer() const  { return m_isSoftwareRenderer; };
     ModuleHandle GetHandle() const   { return m_moduleHandle; };
@@ -30,9 +28,6 @@ public:
     size_t GetSize() const           { return m_moduleInfo.imageSize; }
 
 private:
-    CEngineModule() {};
-    CEngineModule(const CEngineModule&) = delete;
-    CEngineModule& operator=(const CEngineModule&) = delete;
     bool SetupModuleInfo();
 
     ModuleHandle m_moduleHandle = NULL;
@@ -40,4 +35,3 @@ private:
     bool m_isXashEngine = false;
     bool m_isSoftwareRenderer = false;
 };
-extern CEngineModule& g_EngineModule;

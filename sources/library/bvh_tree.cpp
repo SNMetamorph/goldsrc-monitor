@@ -21,9 +21,9 @@ GNU General Public License for more details.
 #include <cfloat>
 #include <algorithm>
 
-CBVHTree::CBVHTree(const std::vector<CEntityDescription> *descList)
+CBVHTree::CBVHTree(const std::vector<CEntityDescription> &descList)
+    : m_descList(descList)
 {
-    m_descList = descList;
 }
 
 void CBVHTree::Reset()
@@ -174,7 +174,7 @@ void CBVHTree::BuildBottomUp()
     m_nodes.reserve(gameObjects.size());
     for (int i : gameObjects)
     {
-        const CEntityDescription &desc = m_descList->at(i);
+        const CEntityDescription &desc = m_descList.at(i);
         int newNode = AppendNode(desc.GetBoundingBox());
         NodeAt(newNode).SetDescriptionIndex(i);
         inputNodes.push_back(newNode);
@@ -299,7 +299,7 @@ void CBVHTree::SplitNode(CBVHTreeNode &node, ObjectList nodeObjects)
 
     for (int i : nodeObjects)
     {
-        const CEntityDescription &desc = m_descList->at(i);
+        const CEntityDescription &desc = m_descList.at(i);
         vec3_t objectCenter = desc.GetBoundingBox().GetCenterPoint();
         for (int j = 0; j < 3; ++j) 
         {
@@ -370,7 +370,7 @@ CBoundingBox CBVHTree::CalcNodeBoundingBox(ObjectList nodeObjects, float epsilon
     const vec3_t fudge = vec3_t(epsilon, epsilon, epsilon);
     for (int i : nodeObjects)
     {
-        const CEntityDescription &desc = m_descList->at(i);
+        const CEntityDescription &desc = m_descList.at(i);
         nodeBounds.CombineWith(desc.GetBoundingBox());
     }
     return CBoundingBox(nodeBounds.GetMins() - fudge, nodeBounds.GetMaxs() + fudge);
@@ -380,7 +380,7 @@ std::vector<int> CBVHTree::GetGameObjects()
 {
     // skip worldspawn here
     std::vector<int> objectList;
-    for (size_t i = 1; i < m_descList->size(); ++i) {
+    for (size_t i = 1; i < m_descList.size(); ++i) {
         objectList.push_back(i);
     }
     return objectList;

@@ -16,30 +16,27 @@ GNU General Public License for more details.
 #include "hlsdk.h"
 #include "sys_utils.h"
 #include "build_info.h"
+#include "engine_module.h"
 #include <stdint.h>
 
 class CServerModule 
 {
 public:
-    static CServerModule& GetInstance();
+    CServerModule(const CEngineModule &moduleRef);
 
     bool FindHandle();
     bool FindEngfuncs(const CBuildInfo &buildInfo);
     uint8_t *GetFuncAddress(const char *funcName);
-    inline ModuleHandle GetHandle() const   { return m_module; }
-    inline uint8_t *GetBaseAddress() const  { return m_moduleInfo.baseAddress; }
-    inline uint8_t *GetEntryPoint() const   { return m_moduleInfo.entryPointAddress; }
-    inline size_t   GetSize() const         { return m_moduleInfo.imageSize; }
-    inline bool     IsInitialized() const   { return m_module != NULL; }
+    ModuleHandle GetHandle() const   { return m_module; }
+    uint8_t *GetBaseAddress() const  { return m_moduleInfo.baseAddress; }
+    uint8_t *GetEntryPoint() const   { return m_moduleInfo.entryPointAddress; }
+    size_t   GetSize() const         { return m_moduleInfo.imageSize; }
+    bool     IsInitialized() const   { return m_module != NULL; }
 
 private:
-    CServerModule() {};
-    CServerModule(const CServerModule&) = delete;
-    CServerModule& operator=(const CServerModule&) = delete;
-
     ModuleHandle m_module = NULL;
     SysUtils::ModuleInfo m_moduleInfo;
+    const CEngineModule &m_engineModule;
 };
 
-extern CServerModule &g_ServerModule;
 extern enginefuncs_t *g_pServerEngfuncs;

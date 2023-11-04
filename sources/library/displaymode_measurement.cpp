@@ -21,7 +21,8 @@ GNU General Public License for more details.
 // HLSDK
 #include "keydefs.h"
 
-CModeMeasurement::CModeMeasurement()
+CModeMeasurement::CModeMeasurement(const CLocalPlayer &playerRef)
+    : m_localPlayer(playerRef)
 {
     const vec3_t zeroVector = { 0.0f, 0.0f, 0.0f };
     m_pointA = zeroVector;
@@ -121,7 +122,7 @@ bool CModeMeasurement::KeyInput(bool keyDown, int keyCode, const char *)
         g_pClientEngfuncs->pfnPlaySoundByName("buttons/lightswitch2.wav", 1.0f);
         g_pClientEngfuncs->GetViewAngles(viewAngles);
         g_pClientEngfuncs->pfnAngleVectors(viewAngles, viewDir, nullptr, nullptr);
-        viewOrigin = g_LocalPlayer.GetViewOrigin();
+        viewOrigin = m_localPlayer.GetViewOrigin();
         Utils::TraceLine(viewOrigin, viewDir, traceLen, &traceData);
 
         if (keyCode == K_MOUSE1)
@@ -286,7 +287,7 @@ void CModeMeasurement::LoadLineSprite()
 
 void CModeMeasurement::Render2D(float frameTime, int screenWidth, int screenHeight, CStringStack &screenText)
 {
-    if (g_LocalPlayer.PredictionDataValid())
+    if (m_localPlayer.PredictionDataValid())
     {
         const vec3_t &originPointA = GetPointOriginA();
         const vec3_t &originPointB = GetPointOriginB();

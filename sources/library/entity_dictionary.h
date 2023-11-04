@@ -22,7 +22,8 @@ GNU General Public License for more details.
 class CEntityDictionary
 {
 public:
-    static CEntityDictionary &GetInstance();
+    CEntityDictionary();
+
     void Reset();
     void Initialize();
     void VisualizeTree(bool textRendering);
@@ -33,16 +34,11 @@ public:
     bool IsInitialized() const { return m_entityDescList.size() > 0;  }
     
 private:
-    CEntityDictionary() {};
-    CEntityDictionary(const CEntityDictionary &) = delete;
-    CEntityDictionary &operator=(const CEntityDictionary &) = delete;
-
     void AssociateDescription(int entityIndex, int descIndex);
     void BuildDescriptionsTree();
     void ParseEntityData();
 
     std::map<int, int> m_associations;
-    CBVHTree m_entityDescTree = CBVHTree(&m_entityDescList);
     std::vector<CEntityDescription> m_entityDescList;
+    CBVHTree m_entityDescTree;
 };
-extern CEntityDictionary &g_EntityDictionary;

@@ -26,7 +26,8 @@ GNU General Public License for more details.
 #define SURF_DRAWTILED		0x20
 #define SURF_DRAWBACKGROUND	0x40
 
-CModeFaceReport::CModeFaceReport()
+CModeFaceReport::CModeFaceReport(const CLocalPlayer &playerRef)
+    : m_localPlayer(playerRef)
 {
     m_colorProbe = { 0 };
     m_currentModel = nullptr;
@@ -38,8 +39,8 @@ void CModeFaceReport::Render2D(float frameTime, int scrWidth, int scrHeight, CSt
 {
     const float lineLen = 11590.0f;
     vec3_t intersectPoint;
-    vec3_t viewOrigin = g_LocalPlayer.GetViewOrigin();
-    vec3_t viewDir = g_LocalPlayer.GetViewDirection();
+    vec3_t viewOrigin = m_localPlayer.GetViewOrigin();
+    vec3_t viewDir = m_localPlayer.GetViewDirection();
     m_currentFace = TraceSurface(viewOrigin, viewDir, lineLen, intersectPoint);
 
     screenText.Clear();
@@ -127,8 +128,8 @@ int CModeFaceReport::TraceEntity(vec3_t origin, vec3_t dir, float distance, vec3
     pmtrace_t traceData;
     int ignoredEnt = -1;
 
-    if (g_LocalPlayer.IsSpectate()) {
-        ignoredEnt = g_LocalPlayer.GetSpectateTargetIndex();
+    if (m_localPlayer.IsSpectate()) {
+        ignoredEnt = m_localPlayer.GetSpectateTargetIndex();
     }
 
     Utils::TraceLine(origin, dir, distance, &traceData, ignoredEnt);

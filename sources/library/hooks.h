@@ -13,6 +13,7 @@ GNU General Public License for more details.
 */
 
 #pragma once
+#include "client_module.h"
 #include <memory>
 
 class CHooks
@@ -21,11 +22,12 @@ public:
     class Impl;
     class Logger;
 
-    CHooks();
+    CHooks(const CClientModule &moduleRef);
     ~CHooks();
     void Apply();
     void Remove();
 
 private:
+    const CClientModule &m_clientModule;
     std::unique_ptr<Impl> m_pImpl;
 };

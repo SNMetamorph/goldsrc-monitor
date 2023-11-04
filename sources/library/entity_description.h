@@ -27,14 +27,14 @@ public:
     void GetPropertyString(int index, std::string &buffer) const;
     void AssociateEntity(int entityIndex);
 
-    inline int GetPropertiesCount() const { return m_EntityProps.size(); }
-    inline int GetAssocEntityIndex() const { return m_iAssociatedEntity; }
-    inline const std::string& GetClassname() const  { return m_szClassname; }
-    inline const std::string& GetTargetname() const { return m_szTargetname; }
-    inline const std::string& GetModelName() const  { return m_szModelName; }
-    inline const vec3_t &GetOrigin() const { return m_vecOrigin; }
-    inline const vec3_t &GetAngles() const { return m_vecAngles; }
-    inline const CBoundingBox &GetBoundingBox() const { return m_boundingBox; }
+    int GetPropertiesCount() const { return m_EntityProps.size(); }
+    int GetAssocEntityIndex() const { return m_iAssociatedEntity; }
+    const std::string& GetClassname() const  { return m_szClassname; }
+    const std::string& GetTargetname() const { return m_szTargetname; }
+    const std::string& GetModelName() const  { return m_szModelName; }
+    const vec3_t &GetOrigin() const { return m_vecOrigin; }
+    const vec3_t &GetAngles() const { return m_vecAngles; }
+    const CBoundingBox &GetBoundingBox() const { return m_boundingBox; }
 
 private:
     void Reset();

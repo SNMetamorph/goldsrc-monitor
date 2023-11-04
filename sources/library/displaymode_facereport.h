@@ -17,12 +17,13 @@ GNU General Public License for more details.
 #include "hlsdk.h"
 #include "engine_types.h"
 #include "bounding_box.h"
+#include "local_player.h"
 #include <vector>
 
 class CModeFaceReport : public IDisplayMode
 {
 public: 
-    CModeFaceReport();
+    CModeFaceReport(const CLocalPlayer &playerRef);
     virtual ~CModeFaceReport() {};
 
     void Render2D(float frameTime, int scrWidth, int scrHeight, CStringStack &screenText) override;
@@ -46,4 +47,5 @@ private:
     Engine::msurface_t *m_currentFace;
     CBoundingBox m_currentFaceBounds;
     std::vector<vec3_t> m_boundPoints;
+    const CLocalPlayer &m_localPlayer;
 };

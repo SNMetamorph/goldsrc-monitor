@@ -42,23 +42,31 @@ CApplication &CApplication::GetInstance()
     return instance;
 }
 
+CApplication::CApplication()
+    : m_clientModule(m_engineModule),
+      m_serverModule(m_engineModule),
+      m_hooks(m_clientModule),
+      m_stringStack(128)
+{
+    InitializeDisplayModes();
+    InitializePrimitivesRenderer();
+};
+
 void CApplication::Run()
 {
-    if (!g_EngineModule.FindHandle())
+    if (!m_engineModule.FindHandle())
         EXCEPT("failed to get engine module handle");
 
-    if (!g_ClientModule.FindHandle())
+    if (!m_clientModule.FindHandle())
         EXCEPT("failed to get client module handle");
 
     SysUtils::ModuleInfo engineDLL;
-    SysUtils::GetModuleInfo(SysUtils::GetCurrentProcessHandle(), g_EngineModule.GetHandle(), engineDLL);
+    SysUtils::GetModuleInfo(SysUtils::GetCurrentProcessHandle(), m_engineModule.GetHandle(), engineDLL);
     
-
-    // if can't obtain directly, find engine functions pointer arrays
     m_buildInfo.Initialize(engineDLL);
-    g_ClientModule.FindEngfuncs(m_buildInfo);
-    g_ServerModule.FindEngfuncs(m_buildInfo);
-    g_ServerModule.FindHandle();
+    m_clientModule.FindEngfuncs(m_buildInfo);
+    m_serverModule.FindEngfuncs(m_buildInfo);
+    m_serverModule.FindHandle();
     
     InitializeConVars(engineDLL);
     SetCurrentDisplayMode();
@@ -72,12 +80,12 @@ void CApplication::Run()
 void CApplication::InitializeDisplayModes()
 {
     m_displayModes.clear();
-    m_displayModes.push_back(std::make_shared<CModeFull>());
-    m_displayModes.push_back(std::make_shared<CModeSpeedometer>());
-    m_displayModes.push_back(std::make_shared<CModeEntityReport>());
-    m_displayModes.push_back(std::make_shared<CModeMeasurement>());
-    m_displayModes.push_back(std::make_shared<CModeFaceReport>());
-    m_displayModes.push_back(std::make_shared<CModeAngleTracking>());
+    m_displayModes.push_back(std::make_shared<CModeFull>(m_localPlayer));
+    m_displayModes.push_back(std::make_shared<CModeSpeedometer>(m_localPlayer));
+    m_displayModes.push_back(std::make_shared<CModeEntityReport>(m_localPlayer, m_engineModule));
+    m_displayModes.push_back(std::make_shared<CModeMeasurement>(m_localPlayer));
+    m_displayModes.push_back(std::make_shared<CModeFaceReport>(m_localPlayer));
+    m_displayModes.push_back(std::make_shared<CModeAngleTracking>(m_localPlayer));
 }
 
 void CApplication::InitializePrimitivesRenderer()
@@ -163,13 +171,14 @@ void CApplication::PrintTitleText()
 
 static void CommandTimescale()
 {
+    auto &serverModule = g_Application.GetServerModule();
     if (!ConVars::sys_timescale)
     {
         g_pClientEngfuncs->Con_Printf("sys_timescale address not found");
         return;
     }
 
-    if (g_ServerModule.IsInitialized() || g_ServerModule.FindHandle())
+    if (serverModule.IsInitialized() || serverModule.FindHandle())
     {
         if (g_pClientEngfuncs->Cmd_Argc() > 1)
         {

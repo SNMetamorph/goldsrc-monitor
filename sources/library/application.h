@@ -20,6 +20,10 @@ GNU General Public License for more details.
 #include "app_info.h"
 #include "exception.h"
 #include "build_info.h"
+#include "engine_module.h"
+#include "client_module.h"
+#include "server_module.h"
+#include "local_player.h"
 #include "display_mode.h"
 #include "primitives_renderer.h"
 #include "string_stack.h"
@@ -38,12 +42,11 @@ public:
     bool KeyInput(int keyDown, int keyCode, const char *bindName);
     const SCREENINFO& GetScreenInfo() const { return m_screenInfo; };
     auto GetRenderer() const { return m_primitivesRenderer; };
+    auto &GetServerModule() { return m_serverModule; }
+    auto &GetLocalPlayer() { return m_localPlayer; }
 
 private:
-    CApplication() {
-        InitializeDisplayModes();
-        InitializePrimitivesRenderer();
-    };
+    CApplication();
     ~CApplication() {};
 
     void InitializeDisplayModes();
@@ -58,12 +61,17 @@ private:
     float m_frameTime;
     float m_lastFrameTime;
     float m_lastClientTime;
-    CHooks m_hooks;
     CBuildInfo m_buildInfo;
+    CEngineModule m_engineModule;
+    CClientModule m_clientModule;
+    CServerModule m_serverModule;
+    CHooks m_hooks;
     SCREENINFO m_screenInfo = { 0 };
-    CStringStack m_stringStack = CStringStack(128);
+    CStringStack m_stringStack;
+    CLocalPlayer m_localPlayer;
     std::shared_ptr<IDisplayMode> m_currentDisplayMode = nullptr;
     std::shared_ptr<IPrimitivesRenderer> m_primitivesRenderer = nullptr;
     std::vector<std::shared_ptr<IDisplayMode>> m_displayModes;
 };
+
 extern CApplication &g_Application;
