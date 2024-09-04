@@ -8,8 +8,9 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            cmake_preset: ci-windows-x86
+            cmake_preset: windows-x86-debug
             build_conf: Debug
+            devenv_arch: amd64_x86
 
     env:
       # Indicates the location of the vcpkg as a Git submodule of the project repository.
@@ -40,6 +41,14 @@ jobs:
         # We'll use this as our working directory for all subsequent commands
         run: cmake -E make_directory ${{github.workspace}}/build
 
+      - uses: ilammy/msvc-dev-cmd@v1.12.1
+        if: runner.os == 'Windows'
+        with:
+          arch: ${{ matrix.devenv_arch }}
+
+      - name: Install ninja-build tool
+        uses: seanmiddleditch/gha-setup-ninja@v4
+
       - name: "Create directory '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}'"
         shell: bash
         run: mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
@@ -63,33 +72,37 @@ jobs:
             ${{ hashFiles( '.git/modules/external/vcpkg/HEAD' )}}
 
       - name: Configure CMake
-        # Use a bash shell so we can use the same syntax for environment variable
-        # access regardless of the host operating system
-        shell: bash
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{ github.workspace }}/build
         # Note the current convention is to use the -S and -B options here to specify source
         # and build directories, but this is only available with CMake 3.13 and higher.
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE --preset ${{ matrix.cmake_preset }} -DCMAKE_BUILD_TYPE=${{ matrix.build_conf }}
+        run: cmake "${{ github.workspace }}" --preset ${{ matrix.cmake_preset }}
 
       - name: Build
         working-directory: ${{github.workspace}}/build
-        shell: bash
-        run: cmake --build . --config ${{ matrix.build_conf }}
+        run: cmake --build . --parallel 4
 
       - name: Prepare artifacts
+        shell: bash
         run: |
-          mkdir publish\
-          move build\${{matrix.build_conf}}\bin\gsm-library.dll publish\gsm-library.dll
-          move build\${{matrix.build_conf}}\bin\gsm-loader.exe publish\gsm-loader.exe
-          move resources\program_dir\*.* publish\
+          ls -l build/
+          mkdir publish/
+          mkdir artifacts/
+          cp build/${{ matrix.build_conf }}/bin/gsm-library.dll publish/gsm-library.dll
+          cp build/${{ matrix.build_conf }}/bin/gsm-loader.exe publish/gsm-loader.exe
+          cp -r resources/program_dir/* publish
+
+      # we forced to do this split because Git on Windows can't use zip, bruh
+      - name: Pack artifact files to archive (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Compress-Archive -Path publish\* -Destination artifacts\goldsrc-monitor_${{ matrix.cmake_preset }}.zip
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.4.0
         with:
-          name: Windows
-          path: |
-            publish/*
+          name: artifact-${{ matrix.cmake_preset }}
+          path: artifacts/*
 
   release:
     name: release-builds
@@ -99,6 +112,8 @@ jobs:
     steps:
       - name: Fetch artifacts
         uses: actions/download-artifact@v4.1.7
+        with:
+          path: artifacts/
 
       - name: Remove old release
         uses: dev-drprasad/delete-tag-and-release@v0.2.1
@@ -109,16 +124,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Repackage binaries and allow GitHub to process removed release for few seconds
+        shell: bash
+        continue-on-error: true
         run: |
-          cd Windows
-          zip -r ../goldsrc-monitor-win32.zip *
+          cd artifacts/
+          for i in artifact-*; do
+            mv "$i"/* .
+            rm -rf "$i"
+          done
+          ls -R .
+          cd ../
           sleep 20s
 
       - name: Upload new release
         uses: softprops/action-gh-release@v0.1.15
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: goldsrc-monitor*
+          files: artifacts/*
           tag_name: continuous
           draft: false
           prerelease: true

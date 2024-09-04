@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "windows-x86-debug",
-      "displayName": "Windows x86 Debug",
+      "displayName": "Windows / x86 / Debug",
       "description": " ",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
@@ -19,7 +19,7 @@
     },
     {
       "name": "windows-x86-release",
-      "displayName": "Windows x86 Release",
+      "displayName": "Windows / x86 / Release",
       "description": " ",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
@@ -35,7 +35,7 @@
     },
     {
       "name": "windows-x64-debug",
-      "displayName": "Windows x64 Debug",
+      "displayName": "Windows / x64 / Debug",
       "description": " ",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
@@ -51,7 +51,7 @@
     },
     {
       "name": "windows-x64-release",
-      "displayName": "Windows x64 Release",
+      "displayName": "Windows / x64 / Release",
       "description": " ",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
@@ -62,25 +62,6 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "VCPKG_TARGET_TRIPLET": "x64-windows-static"
-      },
-      "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Windows" ] } }
-    },
-    {
-      "name": "ci-windows-x86",
-      "displayName": "CI Windows x86",
-      "description": " ",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/build",
-      "architecture": {
-        "value": "win32",
-        "strategy": "set"
-      },
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x86-windows-static",
-        "EXTERNAL_VCPKG_TOOLCHAIN_FILE": {
-          "type": "FILEPATH",
-          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-        }
       },
       "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Windows" ] } }
     }
